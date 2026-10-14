@@ -1,0 +1,756 @@
+﻿@using AIVehicleWorkshopSystem.Models
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+
+    var recentAppointments =
+        ViewBag.RecentAppointments as List<Appointment>
+        ?? new List<Appointment>();
+
+    var recentRepairs =
+        ViewBag.RecentRepairs as List<Repair>
+        ?? new List<Repair>();
+
+    var customerNames =
+        ViewBag.CustomerNames as Dictionary<string, string>
+        ?? new Dictionary<string, string>();
+
+    var mechanicNames =
+        ViewBag.MechanicNames as Dictionary<string, string>
+        ?? new Dictionary<string, string>();
+
+    int totalAppointments = ViewBag.TotalAppointments ?? 0;
+    int pendingAppointments = ViewBag.PendingAppointments ?? 0;
+    int approvedAppointments = ViewBag.ApprovedAppointments ?? 0;
+
+    int totalRepairs = ViewBag.TotalRepairs ?? 0;
+    int activeRepairs = ViewBag.ActiveRepairs ?? 0;
+    int completedRepairs = ViewBag.CompletedRepairs ?? 0;
+
+    int pendingAIDiagnostics = ViewBag.PendingAIDiagnostics ?? 0;
+
+    int totalInvoices = ViewBag.TotalInvoices ?? 0;
+    int unpaidInvoices = ViewBag.UnpaidInvoices ?? 0;
+
+    decimal outstandingBalance = ViewBag.OutstandingBalance ?? 0m;
+
+    int totalUsers = ViewBag.TotalUsers ?? 0;
+    int activeUsers = ViewBag.ActiveUsers ?? 0;
+}
+
+<div class="admin-dashboard">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+    <div class="admin-dashboard-header">
+
+        <div>
+            <div class="admin-dashboard-eyebrow">
+                <i class="bi bi-shield-check"></i>
+                ADMIN WORKSPACE
+            </div>
+
+            <h1>Admin Dashboard</h1>
+
+            <p>
+                Monitor workshop operations, manage service activities
+                and review the latest system updates.
+            </p>
+        </div>
+
+        <div class="admin-dashboard-date">
+
+            <div class="admin-dashboard-date-icon">
+                <i class="bi bi-calendar3"></i>
+            </div>
+
+            <div>
+                <span>Current Date</span>
+
+                <strong>
+                    @DateTime.Now.ToString("dd MMMM yyyy")
+                </strong>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PRIMARY STATISTICS
+         ===================================================== -->
+    <div class="admin-stat-grid">
+
+        <!-- APPOINTMENTS -->
+        <a asp-controller="Admin"
+           asp-action="Appointments"
+           class="admin-stat-card">
+
+            <div class="admin-stat-icon appointments">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+
+            <div class="admin-stat-content">
+
+                <span class="admin-stat-label">
+                    Total Appointments
+                </span>
+
+                <strong>
+                    @totalAppointments
+                </strong>
+
+                <div class="admin-stat-meta">
+
+                    <span class="warning">
+                        @pendingAppointments Pending
+                    </span>
+
+                    <span class="dot">•</span>
+
+                    <span class="success">
+                        @approvedAppointments Approved
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="admin-stat-arrow">
+                <i class="bi bi-arrow-up-right"></i>
+            </div>
+
+        </a>
+
+
+        <!-- REPAIRS -->
+        <a asp-controller="Admin"
+           asp-action="Repairs"
+           class="admin-stat-card">
+
+            <div class="admin-stat-icon repairs">
+                <i class="bi bi-tools"></i>
+            </div>
+
+            <div class="admin-stat-content">
+
+                <span class="admin-stat-label">
+                    Total Repairs
+                </span>
+
+                <strong>
+                    @totalRepairs
+                </strong>
+
+                <div class="admin-stat-meta">
+
+                    <span class="primary">
+                        @activeRepairs Active
+                    </span>
+
+                    <span class="dot">•</span>
+
+                    <span class="success">
+                        @completedRepairs Completed
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="admin-stat-arrow">
+                <i class="bi bi-arrow-up-right"></i>
+            </div>
+
+        </a>
+
+
+        <!-- AI DIAGNOSTICS -->
+        <a asp-controller="Admin"
+           asp-action="AIDiagnostics"
+           class="admin-stat-card">
+
+            <div class="admin-stat-icon diagnostic">
+                <i class="bi bi-stars"></i>
+            </div>
+
+            <div class="admin-stat-content">
+
+                <span class="admin-stat-label">
+                    AI Diagnostics
+                </span>
+
+                <strong>
+                    @pendingAIDiagnostics
+                </strong>
+
+                <div class="admin-stat-meta">
+                    <span>
+                        Awaiting action or review
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="admin-stat-arrow">
+                <i class="bi bi-arrow-up-right"></i>
+            </div>
+
+        </a>
+
+
+        <!-- OUTSTANDING -->
+        <a asp-controller="Admin"
+           asp-action="Invoices"
+           class="admin-stat-card">
+
+            <div class="admin-stat-icon invoices">
+                <i class="bi bi-receipt"></i>
+            </div>
+
+            <div class="admin-stat-content">
+
+                <span class="admin-stat-label">
+                    Outstanding Balance
+                </span>
+
+                <strong class="admin-stat-money">
+                    RM @outstandingBalance.ToString("N2")
+                </strong>
+
+                <div class="admin-stat-meta">
+
+                    <span>
+                        @totalInvoices Invoices
+                    </span>
+
+                    <span class="dot">•</span>
+
+                    <span class="danger">
+                        @unpaidInvoices Outstanding
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="admin-stat-arrow">
+                <i class="bi bi-arrow-up-right"></i>
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         SECONDARY OVERVIEW
+         ===================================================== -->
+    <div class="admin-overview-grid">
+
+        <!-- USERS -->
+        <a asp-controller="Admin"
+           asp-action="Users"
+           class="admin-overview-card">
+
+            <div class="admin-overview-icon users">
+                <i class="bi bi-people"></i>
+            </div>
+
+            <div class="admin-overview-content">
+
+                <span>Registered Users</span>
+
+                <strong>@totalUsers</strong>
+
+                <small>
+                    <i class="bi bi-check-circle-fill"></i>
+                    @activeUsers active accounts
+                </small>
+
+            </div>
+
+            <i class="bi bi-chevron-right admin-overview-arrow"></i>
+
+        </a>
+
+
+        <!-- ACTIVE REPAIRS -->
+        <a asp-controller="Admin"
+           asp-action="Repairs"
+           class="admin-overview-card">
+
+            <div class="admin-overview-icon activity">
+                <i class="bi bi-activity"></i>
+            </div>
+
+            <div class="admin-overview-content">
+
+                <span>Workshop Activity</span>
+
+                <strong>@activeRepairs</strong>
+
+                <small>
+                    Active repairs currently being managed
+                </small>
+
+            </div>
+
+            <i class="bi bi-chevron-right admin-overview-arrow"></i>
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         MANAGEMENT TOOLS
+         ===================================================== -->
+    <div class="admin-dashboard-section">
+
+        <div class="admin-section-header">
+
+            <div>
+                <h5>Management Tools</h5>
+
+                <p>
+                    Quickly access workshop administration functions.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="admin-management-grid">
+
+            <!-- APPOINTMENTS -->
+            <a asp-controller="Admin"
+               asp-action="Appointments"
+               class="admin-management-item">
+
+                <div class="admin-management-icon appointments">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+
+                <div>
+                    <strong>Appointments</strong>
+
+                    <span>
+                        Review and manage customer bookings
+                    </span>
+
+                    @if (pendingAppointments > 0)
+                    {
+                        <small class="warning">
+                            @pendingAppointments pending
+                        </small>
+                    }
+                </div>
+
+            </a>
+
+
+            <!-- REPAIRS -->
+            <a asp-controller="Admin"
+               asp-action="Repairs"
+               class="admin-management-item">
+
+                <div class="admin-management-icon repairs">
+                    <i class="bi bi-tools"></i>
+                </div>
+
+                <div>
+                    <strong>Repairs</strong>
+
+                    <span>
+                        Assign mechanics and monitor repair work
+                    </span>
+
+                    @if (activeRepairs > 0)
+                    {
+                        <small class="primary">
+                            @activeRepairs active
+                        </small>
+                    }
+                </div>
+
+            </a>
+
+
+            <!-- AI -->
+            <a asp-controller="Admin"
+               asp-action="AIDiagnostics"
+               class="admin-management-item">
+
+                <div class="admin-management-icon diagnostic">
+                    <i class="bi bi-stars"></i>
+                </div>
+
+                <div>
+                    <strong>AI Diagnostics</strong>
+
+                    <span>
+                        Assign and monitor diagnostic reviews
+                    </span>
+
+                    @if (pendingAIDiagnostics > 0)
+                    {
+                        <small class="warning">
+                            @pendingAIDiagnostics pending
+                        </small>
+                    }
+                </div>
+
+            </a>
+
+
+            <!-- INVOICES -->
+            <a asp-controller="Admin"
+               asp-action="Invoices"
+               class="admin-management-item">
+
+                <div class="admin-management-icon invoices">
+                    <i class="bi bi-receipt"></i>
+                </div>
+
+                <div>
+                    <strong>Invoices</strong>
+
+                    <span>
+                        Manage billing and customer payments
+                    </span>
+
+                    @if (unpaidInvoices > 0)
+                    {
+                        <small class="danger">
+                            @unpaidInvoices outstanding
+                        </small>
+                    }
+                </div>
+
+            </a>
+
+
+            <!-- USERS -->
+            <a asp-controller="Admin"
+               asp-action="Users"
+               class="admin-management-item">
+
+                <div class="admin-management-icon users">
+                    <i class="bi bi-people"></i>
+                </div>
+
+                <div>
+                    <strong>Users</strong>
+
+                    <span>
+                        Manage customer and mechanic accounts
+                    </span>
+
+                    <small>
+                        @activeUsers active
+                    </small>
+                </div>
+
+            </a>
+
+
+            <!-- SERVICE HISTORY -->
+            <a asp-controller="Admin"
+               asp-action="ServiceHistory"
+               class="admin-management-item">
+
+                <div class="admin-management-icon history">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+
+                <div>
+                    <strong>Service History</strong>
+
+                    <span>
+                        Search previous vehicle service records
+                    </span>
+
+                    <small>
+                        Search by vehicle
+                    </small>
+                </div>
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         RECENT ACTIVITY
+         ===================================================== -->
+    <div class="admin-recent-grid">
+
+        <!-- =================================================
+             RECENT APPOINTMENTS
+             ================================================= -->
+        <div class="admin-recent-card">
+
+            <div class="admin-recent-header">
+
+                <div>
+                    <h5>Recent Appointments</h5>
+
+                    <p>
+                        Latest customer service bookings.
+                    </p>
+                </div>
+
+                <a asp-controller="Admin"
+                   asp-action="Appointments">
+                    View All
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+
+            </div>
+
+
+            @if (!recentAppointments.Any())
+            {
+                <div class="admin-recent-empty">
+
+                    <i class="bi bi-calendar-x"></i>
+
+                    <span>No appointments found.</span>
+
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+
+                    <table class="table admin-dashboard-table mb-0">
+
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Vehicle</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var appointment in recentAppointments)
+                            {
+                                var customerName =
+                                customerNames.ContainsKey(
+                                appointment.CustomerId)
+                                ? customerNames[
+                                appointment.CustomerId]
+                                : "Unknown Customer";
+
+                                <tr>
+
+                                    <td>
+                                        <a asp-controller="Admin"
+                                           asp-action="AppointmentDetails"
+                                           asp-route-id="@appointment.AppointmentId"
+                                           class="admin-table-link">
+
+                                            @customerName
+
+                                        </a>
+                                    </td>
+
+                                    <td>
+                                        @if (appointment.Vehicle != null)
+                                        {
+                                            <div class="admin-vehicle-cell">
+
+                                                <strong>
+                                                    @appointment.Vehicle.Brand
+                                                    @appointment.Vehicle.Model
+                                                </strong>
+
+                                                <span>
+                                                    @appointment.Vehicle.PlateNumber
+                                                </span>
+
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+
+                                    <td class="admin-table-date">
+                                        @appointment.AppointmentDate.ToString(
+                                        "dd MMM yyyy")
+                            </td>
+
+                            <td>
+
+                                @{
+                                            var appointmentStatusClass =
+                                            appointment.AppointmentStatus switch
+                                            {
+                                                "Pending" => "pending",
+                                                "Approved" => "approved",
+                                                "Rejected" => "rejected",
+                                                "Cancelled" => "cancelled",
+                                                _ => "default"
+                                            };
+                                        }
+
+                                        <span class="admin-status-badge @appointmentStatusClass">
+                                            @appointment.AppointmentStatus
+                                        </span>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+
+        <!-- =================================================
+             RECENT REPAIRS
+             ================================================= -->
+        <div class="admin-recent-card">
+
+            <div class="admin-recent-header">
+
+                <div>
+                    <h5>Recent Repairs</h5>
+
+                    <p>
+                        Latest workshop repair activity.
+                    </p>
+                </div>
+
+                <a asp-controller="Admin"
+                   asp-action="Repairs">
+                    View All
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+
+            </div>
+
+
+            @if (!recentRepairs.Any())
+            {
+                <div class="admin-recent-empty">
+
+                    <i class="bi bi-tools"></i>
+
+                    <span>No repair records found.</span>
+
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+
+                    <table class="table admin-dashboard-table mb-0">
+
+                        <thead>
+                            <tr>
+                                <th>Repair</th>
+                                <th>Vehicle</th>
+                                <th>Mechanic</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var repair in recentRepairs)
+                            {
+                                var vehicle =
+                                repair.Appointment?.Vehicle;
+
+                                var mechanicName =
+                                mechanicNames.ContainsKey(
+                                repair.MechanicId)
+                                ? mechanicNames[
+                                repair.MechanicId]
+                                : "Unknown Mechanic";
+
+                                <tr>
+
+                                    <td>
+                                        <strong>
+                                            #@repair.RepairId
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        @if (vehicle != null)
+                                        {
+                                            <div class="admin-vehicle-cell">
+
+                                                <strong>
+                                                    @vehicle.Brand
+                                                    @vehicle.Model
+                                                </strong>
+
+                                                <span>
+                                                    @vehicle.PlateNumber
+                                                </span>
+
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @mechanicName
+                                    </td>
+
+                                    <td>
+
+                                        @{
+                                            var repairStatusClass =
+                                            repair.RepairStatus switch
+                                            {
+                                                "Completed" => "completed",
+                                                "In Progress" => "in-progress",
+                                                "Assigned" => "assigned",
+                                                _ => "default"
+                                            };
+                                        }
+
+                                        <span class="admin-status-badge @repairStatusClass">
+                                            @repair.RepairStatus
+                                        </span>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

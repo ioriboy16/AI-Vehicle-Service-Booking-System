@@ -1,0 +1,755 @@
+﻿@model AIVehicleWorkshopSystem.Models.Appointment
+
+@{
+    ViewData["Title"] = "Appointment Details";
+
+    var statusClass = Model.AppointmentStatus switch
+    {
+        "Pending" => "status-pending",
+        "Approved" => "status-approved",
+        "Cancelled" => "status-cancelled",
+        _ => "status-default"
+    };
+}
+
+<style>
+    /* =========================================================
+       APPOINTMENT DETAILS
+       ========================================================= */
+
+    .appointment-details-page {
+        min-height: 100%;
+        padding: 24px 28px;
+        background: #f6f8fb;
+    }
+
+    .appointment-details-container {
+        width: 100%;
+        max-width: 1080px;
+        margin: 0 auto;
+    }
+
+    /* =========================
+       PAGE HEADER
+       ========================= */
+
+    .appointment-details-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 18px;
+    }
+
+    .appointment-details-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 5px;
+        color: #3b82f6;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .7px;
+        text-transform: uppercase;
+    }
+
+    .appointment-details-header h1 {
+        margin: 0 0 4px;
+        font-size: clamp(27px, 3vw, 36px);
+        font-weight: 800;
+        letter-spacing: -.7px;
+    }
+
+    .appointment-details-header p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+    .appointment-back-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 38px;
+        padding: 8px 15px;
+        flex-shrink: 0;
+        border: 1px solid #d1d5db;
+        border-radius: 9px;
+        background: transparent;
+        color: #4b5563;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+        transition: .15s ease;
+    }
+
+    .appointment-back-button:hover {
+        border-color: #3b82f6;
+        color: #2563eb;
+        background: rgba(59, 130, 246, .05);
+    }
+
+    /* =========================
+       MAIN CARD
+       ========================= */
+
+    .appointment-details-card {
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        background: #ffffff;
+        box-shadow: 0 8px 25px rgba(15, 23, 42, .05);
+    }
+
+    /* =========================
+       VEHICLE HEADER
+       ========================= */
+
+    .appointment-vehicle-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 18px 22px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .vehicle-heading {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        min-width: 0;
+    }
+
+    .vehicle-heading-icon {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 42px;
+        border-radius: 11px;
+        background: rgba(59, 130, 246, .1);
+        color: #3b82f6;
+        font-size: 19px;
+    }
+
+    .appointment-number {
+        display: block;
+        margin-bottom: 1px;
+        color: #6b7280;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    .vehicle-heading h2 {
+        margin: 0;
+        font-size: 19px;
+        font-weight: 800;
+    }
+
+    .vehicle-heading p {
+        margin: 2px 0 0;
+        color: #6b7280;
+        font-size: 12px;
+    }
+
+    /* =========================
+       STATUS
+       ========================= */
+
+    .appointment-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .appointment-status::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .status-approved {
+        background: rgba(16, 185, 129, .12);
+        color: #059669;
+    }
+
+    .status-pending {
+        background: rgba(245, 158, 11, .14);
+        color: #d97706;
+    }
+
+    .status-cancelled {
+        background: rgba(239, 68, 68, .11);
+        color: #dc2626;
+    }
+
+    .status-default {
+        background: rgba(100, 116, 139, .12);
+        color: #64748b;
+    }
+
+    /* =========================
+       INFORMATION GRID
+       ========================= */
+
+    .appointment-content {
+        padding: 18px 22px;
+    }
+
+    .appointment-info-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .appointment-info-item {
+        min-width: 0;
+        padding: 12px 13px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #fafafa;
+    }
+
+    .info-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 4px;
+        color: #6b7280;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    .info-label i {
+        color: #3b82f6;
+        font-size: 11px;
+    }
+
+    .info-value {
+        display: block;
+        overflow: hidden;
+        color: #111827;
+        font-size: 12px;
+        font-weight: 700;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* =========================
+       LOWER GRID
+       ========================= */
+
+    .appointment-lower-grid {
+        display: grid;
+        grid-template-columns: 1.35fr 1fr;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .appointment-section-box {
+        padding: 12px 14px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+    }
+
+    .appointment-section-title {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 7px;
+        color: #374151;
+        font-size: 11px;
+        font-weight: 750;
+    }
+
+    .appointment-section-title i {
+        color: #3b82f6;
+    }
+
+    .appointment-complaint {
+        margin: 0;
+        color: #4b5563;
+        font-size: 12px;
+        line-height: 1.45;
+    }
+
+    .vehicle-mini-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .vehicle-mini-item span {
+        display: block;
+        margin-bottom: 2px;
+        color: #6b7280;
+        font-size: 9px;
+        font-weight: 600;
+    }
+
+    .vehicle-mini-item strong {
+        display: block;
+        overflow: hidden;
+        color: #111827;
+        font-size: 11px;
+        font-weight: 700;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* =========================
+       FOOTER
+       ========================= */
+
+    .appointment-details-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 22px;
+        border-top: 1px solid #e5e7eb;
+        background: #fafafa;
+    }
+
+    .appointment-submitted {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        color: #6b7280;
+        font-size: 10px;
+    }
+
+    .appointment-submitted i {
+        color: #3b82f6;
+    }
+
+    .appointment-submitted strong {
+        color: #374151;
+        font-weight: 700;
+    }
+
+    .appointment-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .appointment-actions .btn {
+        padding: 6px 13px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 650;
+    }
+
+    /* =========================================================
+       DARK MODE
+       ========================================================= */
+
+    html[data-bs-theme="dark"] .appointment-details-page {
+        background: #121212;
+    }
+
+    html[data-bs-theme="dark"] .appointment-details-header p,
+    html[data-bs-theme="dark"] .appointment-number,
+    html[data-bs-theme="dark"] .vehicle-heading p,
+    html[data-bs-theme="dark"] .info-label,
+    html[data-bs-theme="dark"] .vehicle-mini-item span,
+    html[data-bs-theme="dark"] .appointment-submitted {
+        color: #a7a7a7;
+    }
+
+    html[data-bs-theme="dark"] .appointment-back-button {
+        border-color: #3a3a3a;
+        color: #c7c7c7;
+    }
+
+    html[data-bs-theme="dark"] .appointment-back-button:hover {
+        border-color: #3b82f6;
+        background: rgba(59, 130, 246, .08);
+        color: #60a5fa;
+    }
+
+    html[data-bs-theme="dark"] .appointment-details-card {
+        border-color: #292929;
+        background: #181818;
+        box-shadow: none;
+    }
+
+    html[data-bs-theme="dark"] .appointment-vehicle-header,
+    html[data-bs-theme="dark"] .appointment-details-footer {
+        border-color: #2c2c2c;
+    }
+
+    html[data-bs-theme="dark"] .appointment-info-item,
+    html[data-bs-theme="dark"] .appointment-section-box {
+        border-color: #303030;
+        background: #1c1c1c;
+    }
+
+    html[data-bs-theme="dark"] .info-value,
+    html[data-bs-theme="dark"] .vehicle-mini-item strong {
+        color: #f3f4f6;
+    }
+
+    html[data-bs-theme="dark"] .appointment-section-title {
+        color: #e5e7eb;
+    }
+
+    html[data-bs-theme="dark"] .appointment-complaint {
+        color: #c4c4c4;
+    }
+
+    html[data-bs-theme="dark"] .appointment-details-footer {
+        background: #161616;
+    }
+
+    html[data-bs-theme="dark"] .appointment-submitted strong {
+        color: #d4d4d4;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @@media (max-width: 991px) {
+        .appointment-info-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .appointment-lower-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 767px) {
+        .appointment-details-page {
+            padding: 18px 14px;
+        }
+
+        .appointment-details-header {
+            align-items: stretch;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .appointment-back-button {
+            width: 100%;
+        }
+
+        .appointment-vehicle-header {
+            align-items: flex-start;
+            padding: 16px;
+        }
+
+        .appointment-content {
+            padding: 14px 16px;
+        }
+
+        .appointment-details-footer {
+            align-items: stretch;
+            flex-direction: column;
+            padding: 13px 16px;
+        }
+
+        .appointment-actions {
+            width: 100%;
+        }
+
+        .appointment-actions .btn,
+        .appointment-actions form {
+            flex: 1;
+        }
+
+        .appointment-actions form .btn {
+            width: 100%;
+        }
+    }
+
+    @@media (max-width: 520px) {
+        .appointment-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .vehicle-mini-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .appointment-vehicle-header {
+            flex-direction: column;
+        }
+    }
+</style>
+
+
+<section class="appointment-details-page">
+    <div class="appointment-details-container">
+
+        <!-- PAGE HEADER -->
+        <div class="appointment-details-header">
+
+            <div>
+                <div class="appointment-details-eyebrow">
+                    <i class="bi bi-calendar-check-fill"></i>
+                    Service Appointment
+                </div>
+
+                <h1>Appointment Details</h1>
+
+                <p>
+                    View your submitted service appointment information.
+                </p>
+            </div>
+
+            <a asp-controller="Appointment"
+               asp-action="Index"
+               class="appointment-back-button">
+
+                <i class="bi bi-arrow-left"></i>
+                Back to My Appointments
+
+            </a>
+
+        </div>
+
+
+        <!-- MAIN CARD -->
+        <div class="appointment-details-card">
+
+            <!-- VEHICLE / STATUS HEADER -->
+            <div class="appointment-vehicle-header">
+
+                <div class="vehicle-heading">
+
+                    <div class="vehicle-heading-icon">
+                        <i class="bi bi-car-front-fill"></i>
+                    </div>
+
+                    <div>
+                        <span class="appointment-number">
+                            Appointment #@Model.AppointmentId
+                        </span>
+
+                        @if (Model.Vehicle != null)
+                        {
+                            <h2>
+                                @Model.Vehicle.Brand @Model.Vehicle.Model
+                            </h2>
+
+                            <p>
+                                @Model.Vehicle.PlateNumber
+                            </p>
+                        }
+                        else
+                        {
+                            <h2>Vehicle Information</h2>
+                        }
+                    </div>
+
+                </div>
+
+                <span class="appointment-status @statusClass">
+                    @Model.AppointmentStatus
+                </span>
+
+            </div>
+
+
+            <!-- DETAILS -->
+            <div class="appointment-content">
+
+                <div class="appointment-info-grid">
+
+                    <!-- DATE -->
+                    <div class="appointment-info-item">
+
+                        <span class="info-label">
+                            <i class="bi bi-calendar3"></i>
+                            Appointment Date
+                        </span>
+
+                        <span class="info-value">
+                            @Model.AppointmentDate.ToString("dd MMM yyyy")
+                        </span>
+
+                    </div>
+
+
+                    <!-- TIME -->
+                    <div class="appointment-info-item">
+
+                        <span class="info-label">
+                            <i class="bi bi-clock"></i>
+                            Appointment Time
+                        </span>
+
+                        <span class="info-value">
+                            @(DateTime.Today
+                                                        .Add(Model.AppointmentTime)
+                                                        .ToString("hh:mm tt"))
+                        </span>
+
+                    </div>
+
+
+                    <!-- SERVICE -->
+                    <div class="appointment-info-item">
+
+                        <span class="info-label">
+                            <i class="bi bi-wrench-adjustable"></i>
+                            Service Type
+                        </span>
+
+                        <span class="info-value">
+                            @Model.ServiceType
+                        </span>
+
+                    </div>
+
+
+                    <!-- STATUS -->
+                    <div class="appointment-info-item">
+
+                        <span class="info-label">
+                            <i class="bi bi-check2-circle"></i>
+                            Status
+                        </span>
+
+                        <span class="info-value">
+                            @Model.AppointmentStatus
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- LOWER SECTION -->
+                <div class="appointment-lower-grid">
+
+                    <!-- COMPLAINT -->
+                    <div class="appointment-section-box">
+
+                        <div class="appointment-section-title">
+                            <i class="bi bi-chat-left-text"></i>
+                            Vehicle Problem / Complaint
+                        </div>
+
+                        <p class="appointment-complaint">
+                            @(string.IsNullOrWhiteSpace(Model.CustomerComplaint)
+                                                        ? "No additional complaint was provided."
+                                                        : Model.CustomerComplaint)
+                        </p>
+
+                    </div>
+
+
+                    <!-- VEHICLE -->
+                    @if (Model.Vehicle != null)
+                    {
+                        <div class="appointment-section-box">
+
+                            <div class="appointment-section-title">
+                                <i class="bi bi-car-front"></i>
+                                Vehicle Information
+                            </div>
+
+                            <div class="vehicle-mini-grid">
+
+                                <div class="vehicle-mini-item">
+                                    <span>Plate Number</span>
+                                    <strong>@Model.Vehicle.PlateNumber</strong>
+                                </div>
+
+                                <div class="vehicle-mini-item">
+                                    <span>Vehicle</span>
+                                    <strong>
+                                        @Model.Vehicle.Brand @Model.Vehicle.Model
+                                    </strong>
+                                </div>
+
+                                <div class="vehicle-mini-item">
+                                    <span>Year</span>
+                                    <strong>
+                                        @Model.Vehicle.ManufacturingYear
+                                    </strong>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+
+            <!-- FOOTER -->
+            <div class="appointment-details-footer">
+
+                <div class="appointment-submitted">
+
+                    <i class="bi bi-clock-history"></i>
+
+                    <span>
+                        Submitted
+                        <strong>
+                            @Model.CreatedAt.ToString("dd MMM yyyy, hh:mm tt")
+                        </strong>
+                    </span>
+
+                </div>
+
+
+                @if (Model.AppointmentStatus == "Pending")
+                {
+                    <div class="appointment-actions">
+
+                        <a asp-controller="Appointment"
+                           asp-action="Edit"
+                           asp-route-id="@Model.AppointmentId"
+                           class="btn btn-primary">
+
+                            <i class="bi bi-pencil-square me-1"></i>
+                            Edit
+
+                        </a>
+
+                        <form asp-controller="Appointment"
+                              asp-action="Cancel"
+                              asp-route-id="@Model.AppointmentId"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-outline-danger"
+                                    onclick="return confirm('Are you sure you want to cancel this appointment?');">
+
+                                <i class="bi bi-x-circle me-1"></i>
+                                Cancel
+
+                            </button>
+
+                        </form>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+</section>

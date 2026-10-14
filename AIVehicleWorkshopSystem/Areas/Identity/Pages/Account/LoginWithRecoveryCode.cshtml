@@ -1,0 +1,163 @@
+﻿@page
+@model LoginWithRecoveryCodeModel
+
+@{
+    ViewData["Title"] = "Recovery Code Verification";
+}
+
+
+<section class="twofa-login-page">
+
+    <div class="twofa-login-container">
+
+        <div class="twofa-login-card">
+
+
+            <!-- ICON -->
+
+            <div class="twofa-login-icon">
+                <i class="bi bi-life-preserver"></i>
+            </div>
+
+
+            <!-- HEADER -->
+
+            <div class="twofa-login-header">
+
+                <span class="twofa-login-eyebrow">
+                    ACCOUNT RECOVERY
+                </span>
+
+                <h1>
+                    Use Recovery Code
+                </h1>
+
+                <p>
+                    Enter one of the recovery codes generated when
+                    two-factor authentication was enabled.
+                </p>
+
+            </div>
+
+
+            <!-- INFO -->
+
+            <div class="recovery-login-notice">
+
+                <i class="bi bi-info-circle"></i>
+
+                <div>
+
+                    <strong>
+                        Recovery codes are for backup access
+                    </strong>
+
+                    <p>
+                        Use a recovery code when you cannot access
+                        your authenticator app. Each recovery code
+                        can only be used once.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- FORM -->
+
+            <form method="post"
+                  asp-route-returnUrl="@Model.ReturnUrl"
+                  class="twofa-login-form">
+
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger py-2 small"
+                     role="alert">
+                </div>
+
+
+                <div class="twofa-form-group">
+
+                    <label asp-for="Input.RecoveryCode"
+                           class="twofa-form-label">
+
+                        Recovery Code
+
+                    </label>
+
+
+                    <div class="twofa-code-wrapper">
+
+                        <i class="bi bi-key"></i>
+
+                        <input asp-for="Input.RecoveryCode"
+                               class="form-control recovery-code-input"
+                               autocomplete="off"
+                               spellcheck="false"
+                               autofocus
+                               placeholder="Enter your recovery code" />
+
+                    </div>
+
+
+                    <span asp-validation-for="Input.RecoveryCode"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
+
+                <button type="submit"
+                        class="btn btn-primary twofa-login-button">
+
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+
+                    Continue with Recovery Code
+
+                </button>
+
+            </form>
+
+
+            <!-- BACK TO AUTHENTICATOR -->
+
+            <div class="recovery-back">
+
+                <span>
+                    Have access to your authenticator?
+                </span>
+
+                <a asp-page="./LoginWith2fa"
+                   asp-route-returnUrl="@Model.ReturnUrl">
+
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Use authenticator code
+
+                </a>
+
+            </div>
+
+
+            <!-- SECURITY FOOTER -->
+
+            <div class="twofa-security-footer">
+
+                <i class="bi bi-shield-lock-fill"></i>
+
+                <span>
+                    Protected by Serish AutoCare account security
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+}

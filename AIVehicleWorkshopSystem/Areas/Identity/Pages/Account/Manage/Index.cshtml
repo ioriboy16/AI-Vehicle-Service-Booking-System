@@ -1,0 +1,188 @@
+﻿@page
+
+@model IndexModel
+
+@{
+    ViewData["Title"] = "Profile";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+
+<div class="account-page-header">
+
+    <div class="account-page-icon">
+        <i class="bi bi-person-circle"></i>
+    </div>
+
+    <div>
+
+        <p class="account-eyebrow mb-1">
+            ACCOUNT SETTINGS
+        </p>
+
+        <h2 class="fw-bold mb-1">
+            Profile Information
+        </h2>
+
+        <p class="text-muted mb-0">
+            Manage your personal information and contact details.
+        </p>
+
+    </div>
+
+</div>
+
+
+<partial name="_StatusMessage"
+         for="StatusMessage" />
+
+
+<form id="profile-form"
+      method="post">
+
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger mb-3"
+         role="alert">
+    </div>
+
+
+    <!-- FULL NAME -->
+
+    <div class="account-field">
+
+        <label asp-for="Input.FullName"
+               class="account-field-label">
+        </label>
+
+        <div class="account-input-wrapper">
+
+            <i class="bi bi-person"></i>
+
+            <input asp-for="Input.FullName"
+                   class="form-control account-input"
+                   placeholder="Enter your full name" />
+
+        </div>
+
+        <span asp-validation-for="Input.FullName"
+              class="text-danger small">
+        </span>
+
+    </div>
+
+
+    <!-- USERNAME -->
+
+    <div class="account-field">
+
+        <label asp-for="Username"
+               class="account-field-label">
+            Username
+        </label>
+
+        <div class="account-input-wrapper">
+
+            <i class="bi bi-at"></i>
+
+            <input asp-for="Username"
+                   class="form-control account-input"
+                   disabled />
+
+        </div>
+
+        <div class="account-field-help">
+            Your username cannot be changed.
+        </div>
+
+    </div>
+
+
+    <!-- EMAIL -->
+
+    <div class="account-field">
+
+        <label class="account-field-label">
+            Email Address
+        </label>
+
+        <div class="account-input-wrapper">
+
+            <i class="bi bi-envelope"></i>
+
+            <input value="@Model.Email"
+                   class="form-control account-input"
+                   disabled />
+
+        </div>
+
+        <div class="account-field-help">
+            Email settings can be managed from the Email section.
+        </div>
+
+    </div>
+
+
+    <!-- PHONE -->
+
+    <div class="account-field mb-0">
+
+        <label asp-for="Input.PhoneNumber"
+               class="account-field-label">
+        </label>
+
+        <div class="account-input-wrapper">
+
+            <i class="bi bi-telephone"></i>
+
+            <input asp-for="Input.PhoneNumber"
+                   class="form-control account-input"
+                   placeholder="e.g. 0123456789" />
+
+        </div>
+
+        <span asp-validation-for="Input.PhoneNumber"
+              class="text-danger small">
+        </span>
+
+        <div class="account-field-help">
+            Your phone number is stored securely.
+        </div>
+
+    </div>
+
+
+    <!-- FOOTER -->
+
+    <div class="account-form-footer">
+
+        <div class="account-save-info">
+
+            <i class="bi bi-shield-check"></i>
+
+            <span>
+                Changes will be applied to your Serish AutoCare account.
+            </span>
+
+        </div>
+
+
+        <button id="update-profile-button"
+                type="submit"
+                class="btn btn-primary px-4">
+
+            <i class="bi bi-check-lg me-1"></i>
+
+            Save Changes
+
+        </button>
+
+    </div>
+
+</form>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+}

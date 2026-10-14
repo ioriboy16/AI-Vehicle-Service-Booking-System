@@ -1,0 +1,190 @@
+﻿@page
+@model LoginWith2faModel
+
+@{
+    ViewData["Title"] = "Two-Factor Authentication";
+}
+
+
+<section class="twofa-login-page">
+
+    <div class="twofa-login-container">
+
+        <div class="twofa-login-card">
+
+
+            <!-- ICON -->
+
+            <div class="twofa-login-icon">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+
+
+            <!-- HEADER -->
+
+            <div class="twofa-login-header">
+
+                <span class="twofa-login-eyebrow">
+                    SECURE SIGN IN
+                </span>
+
+                <h1>
+                    Verify Your Identity
+                </h1>
+
+                <p>
+                    Your account is protected with two-factor authentication.
+                    Enter the 6-digit code from your authenticator app to continue.
+                </p>
+
+            </div>
+
+
+            <!-- FORM -->
+
+            <form method="post"
+                  asp-route-returnUrl="@Model.ReturnUrl"
+                  class="twofa-login-form">
+
+                <input asp-for="RememberMe"
+                       type="hidden" />
+
+
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger py-2 small"
+                     role="alert">
+                </div>
+
+
+                <!-- AUTHENTICATOR CODE -->
+
+                <div class="twofa-form-group">
+
+                    <label asp-for="Input.TwoFactorCode"
+                           class="twofa-form-label">
+
+                        Authenticator Code
+
+                    </label>
+
+
+                    <div class="twofa-code-wrapper">
+
+                        <i class="bi bi-key"></i>
+
+                        <input asp-for="Input.TwoFactorCode"
+                               class="form-control twofa-code-input"
+                               autocomplete="one-time-code"
+                               inputmode="numeric"
+                               maxlength="7"
+                               autofocus
+                               placeholder="000000" />
+
+                    </div>
+
+
+                    <span asp-validation-for="Input.TwoFactorCode"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
+
+                <!-- REMEMBER DEVICE -->
+
+                <div class="twofa-remember">
+
+                    <div class="form-check">
+
+                        <input asp-for="Input.RememberMachine"
+                               class="form-check-input" />
+
+                        <label asp-for="Input.RememberMachine"
+                               class="form-check-label">
+
+                            Remember this device
+
+                        </label>
+
+                    </div>
+
+
+                    <span>
+                        Skip the verification code on this browser next time.
+                    </span>
+
+                </div>
+
+
+                <!-- SUBMIT -->
+
+                <button type="submit"
+                        class="btn btn-primary twofa-login-button">
+
+                    <i class="bi bi-shield-check me-2"></i>
+
+                    Verify & Continue
+
+                </button>
+
+            </form>
+
+
+            <!-- RECOVERY -->
+
+            <div class="twofa-recovery">
+
+                <div class="twofa-recovery-icon">
+                    <i class="bi bi-life-preserver"></i>
+                </div>
+
+                <div>
+
+                    <strong>
+                        Can't access your authenticator?
+                    </strong>
+
+                    <p>
+                        You can still access your account using one of
+                        your recovery codes.
+                    </p>
+
+                    <a id="recovery-code-login"
+                       asp-page="./LoginWithRecoveryCode"
+                       asp-route-returnUrl="@Model.ReturnUrl">
+
+                        Use a recovery code
+
+                        <i class="bi bi-arrow-right"></i>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- SECURITY FOOTER -->
+
+            <div class="twofa-security-footer">
+
+                <i class="bi bi-lock-fill"></i>
+
+                <span>
+                    Protected by Serish AutoCare account security
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+}

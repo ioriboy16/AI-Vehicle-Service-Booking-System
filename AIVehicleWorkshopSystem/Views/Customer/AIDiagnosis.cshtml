@@ -1,0 +1,2653 @@
+﻿@model AIVehicleWorkshopSystem.ViewModels.AIDiagnosticViewModel
+@using AIVehicleWorkshopSystem.Models
+
+@{
+    ViewData["Title"] = "AI Diagnosis";
+
+    var diagnosticHistory =
+        ViewBag.DiagnosticHistory as List<AIDiagnostic>
+        ?? new List<AIDiagnostic>();
+}
+
+<div class="ai-page">
+
+    <div class="container py-4 py-lg-5">
+
+        <!-- =====================================================
+             PAGE HEADER
+        ====================================================== -->
+        <div class="ai-header mb-4">
+
+            <div class="d-flex align-items-start gap-3">
+
+                <div class="header-icon">
+                    <i class="bi bi-stars"></i>
+                </div>
+
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        AI Vehicle Diagnosis
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        Describe the symptoms you notice and receive an
+                        AI-assisted preliminary diagnostic recommendation.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             SUCCESS MESSAGE
+        ====================================================== -->
+        @if (TempData["AIDiagnosticSuccess"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show
+                                border-0 shadow-sm rounded-3 mb-4"
+                 role="alert">
+
+                <i class="bi bi-check-circle-fill me-2"></i>
+
+                @TempData["AIDiagnosticSuccess"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+
+            </div>
+        }
+
+
+        <!-- =====================================================
+             PROCESS STEPS
+        ====================================================== -->
+        <div class="process-card mb-4">
+
+            <div class="process-step">
+
+                <div class="step-number">
+                    1
+                </div>
+
+                <div>
+                    <strong>Select Vehicle</strong>
+                    <span>Choose the vehicle experiencing the problem.</span>
+                </div>
+
+            </div>
+
+            <div class="step-line"></div>
+
+            <div class="process-step">
+
+                <div class="step-number">
+                    2
+                </div>
+
+                <div>
+                    <strong>Describe Symptoms</strong>
+                    <span>Tell us what you notice about your vehicle.</span>
+                </div>
+
+            </div>
+
+            <div class="step-line"></div>
+
+            <div class="process-step">
+
+                <div class="step-number">
+                    3
+                </div>
+
+                <div>
+                    <strong>Get Recommendation</strong>
+                    <span>Receive an AI-assisted preliminary assessment.</span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             MAIN CONTENT
+        ====================================================== -->
+        <div class="row g-4">
+
+            <!-- =================================================
+                 LEFT - FORM
+            ================================================== -->
+            <div class="col-lg-8">
+
+                <div class="card ai-form-card border-0 shadow-sm">
+
+                    <div class="card-body p-4 p-xl-5">
+
+                        <!-- FORM HEADER -->
+                        <div class="form-section-header mb-4">
+
+                            <div class="form-section-icon">
+                                <i class="bi bi-car-front-fill"></i>
+                            </div>
+
+                            <div>
+                                <h4 class="fw-bold mb-1">
+                                    Vehicle Symptom Analysis
+                                </h4>
+
+                                <p class="text-muted mb-0">
+                                    Provide as much information as possible
+                                    to help the AI understand the problem.
+                                </p>
+                            </div>
+
+                        </div>
+
+
+                        <!-- AI DISCLAIMER -->
+                        <div class="ai-notice mb-4">
+
+                            <div class="notice-icon">
+                                <i class="bi bi-info-circle-fill"></i>
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    AI-Assisted Preliminary Recommendation
+                                </strong>
+
+                                <p class="mb-0">
+                                    This feature helps identify possible
+                                    vehicle issues based on the symptoms you
+                                    describe. It does not replace a physical
+                                    inspection or final diagnosis by a
+                                    qualified mechanic.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- FORM -->
+                        <form asp-controller="Customer"
+                              asp-action="AIDiagnosis"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+
+                            <!-- VALIDATION -->
+                            <div asp-validation-summary="ModelOnly"
+                                 class="alert alert-danger validation-summary"
+                                 role="alert">
+                            </div>
+
+
+                            <!-- =========================================
+                                 VEHICLE
+                            ========================================== -->
+                            <div class="form-block">
+
+                                <div class="form-number">
+                                    1
+                                </div>
+
+                                <div class="form-block-content">
+
+                                    <label asp-for="VehicleId"
+                                           class="form-label fw-bold mb-1">
+                                        Select Your Vehicle
+                                    </label>
+
+                                    <p class="form-help">
+                                        Choose the vehicle that is currently
+                                        experiencing the problem.
+                                    </p>
+
+                                    @if (Model.Vehicles.Any())
+                                    {
+                                        <div class="input-icon-wrapper">
+
+                                            <i class="bi bi-car-front"></i>
+
+                                            <select asp-for="VehicleId"
+                                                    asp-items="Model.Vehicles"
+                                                    class="form-select ai-input">
+
+                                                <option value="">
+                                                    -- Select your vehicle --
+                                                </option>
+
+                                            </select>
+
+                                        </div>
+
+                                        <span asp-validation-for="VehicleId"
+                                              class="text-danger validation-text">
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <div class="no-vehicle-box">
+
+                                            <i class="bi bi-exclamation-triangle-fill"></i>
+
+                                            <div>
+
+                                                <strong>
+                                                    No vehicle registered
+                                                </strong>
+
+                                                <p class="mb-2">
+                                                    You need to register a
+                                                    vehicle before using AI
+                                                    Diagnosis.
+                                                </p>
+
+                                                <a asp-controller="Vehicle"
+                                                   asp-action="Create">
+                                                    Register a Vehicle
+                                                    <i class="bi bi-arrow-right ms-1"></i>
+                                                </a>
+
+                                            </div>
+
+                                        </div>
+                                    }
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="form-divider"></div>
+
+
+                            <!-- =========================================
+                                 SYMPTOMS
+                            ========================================== -->
+                            <div class="form-block">
+
+                                <div class="form-number">
+                                    2
+                                </div>
+
+                                <div class="form-block-content">
+
+                                    <label asp-for="Symptoms"
+                                           class="form-label fw-bold mb-1">
+                                        Describe the Symptoms
+                                    </label>
+
+                                    <p class="form-help mb-3">
+                                        Explain what you notice about your
+                                        vehicle. You do not need to know the
+                                        technical name of the problem.
+                                    </p>
+
+
+                                    <!-- SYMPTOM GUIDE -->
+                                    <div class="symptom-guide mb-4">
+
+                                        <div class="guide-header">
+
+                                            <div class="guide-header-icon">
+                                                <i class="bi bi-lightbulb-fill"></i>
+                                            </div>
+
+                                            <div>
+                                                <strong>
+                                                    Not sure what to write?
+                                                </strong>
+
+                                                <span>
+                                                    Try answering these questions.
+                                                </span>
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="guide-grid">
+
+                                            <div class="guide-item">
+
+                                                <div class="guide-icon">
+                                                    <i class="bi bi-question-circle"></i>
+                                                </div>
+
+                                                <div>
+                                                    <strong>
+                                                        What is happening?
+                                                    </strong>
+
+                                                    <span>
+                                                        Describe the main problem
+                                                        you are experiencing.
+                                                    </span>
+                                                </div>
+
+                                            </div>
+
+
+                                            <div class="guide-item">
+
+                                                <div class="guide-icon">
+                                                    <i class="bi bi-clock"></i>
+                                                </div>
+
+                                                <div>
+                                                    <strong>
+                                                        When does it happen?
+                                                    </strong>
+
+                                                    <span>
+                                                        During startup,
+                                                        acceleration, braking,
+                                                        turning or after driving.
+                                                    </span>
+                                                </div>
+
+                                            </div>
+
+
+                                            <div class="guide-item">
+
+                                                <div class="guide-icon">
+                                                    <i class="bi bi-eye"></i>
+                                                </div>
+
+                                                <div>
+                                                    <strong>
+                                                        What do you notice?
+                                                    </strong>
+
+                                                    <span>
+                                                        Mention unusual sounds,
+                                                        vibration, smell, smoke
+                                                        or warning lights.
+                                                    </span>
+                                                </div>
+
+                                            </div>
+
+
+                                            <div class="guide-item">
+
+                                                <div class="guide-icon">
+                                                    <i class="bi bi-geo-alt"></i>
+                                                </div>
+
+                                                <div>
+                                                    <strong>
+                                                        Where is it coming from?
+                                                    </strong>
+
+                                                    <span>
+                                                        Engine, wheels, brakes,
+                                                        steering or underneath
+                                                        the vehicle.
+                                                    </span>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <!-- EXAMPLE -->
+                                    <div class="example-box mb-3">
+
+                                        <div class="example-title">
+
+                                            <i class="bi bi-chat-left-text"></i>
+
+                                            Example of a helpful description
+
+                                        </div>
+
+                                        <p class="mb-0">
+                                            “When I press the brake at low
+                                            speed, I hear a squeaking sound
+                                            from the front wheels. It happens
+                                            more often after driving for about
+                                            20 minutes, but no warning light
+                                            appears on the dashboard.”
+                                        </p>
+
+                                    </div>
+
+
+                                    <!-- TEXTAREA -->
+                                    <div class="symptom-textarea-wrapper">
+
+                                        <textarea asp-for="Symptoms"
+                                                  id="symptomsInput"
+                                                  class="form-control symptom-textarea"
+                                                  rows="8"
+                                                  maxlength="2000"
+                                                  placeholder="Describe what is happening with your vehicle..."></textarea>
+
+                                    </div>
+
+
+                                    <div class="d-flex justify-content-between
+                                                align-items-start mt-2 gap-3">
+
+                                        <span asp-validation-for="Symptoms"
+                                              class="text-danger validation-text">
+                                        </span>
+
+                                        <small class="character-counter text-muted">
+                                            <span id="characterCount">0</span>/2000
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- =========================================
+                                 SUBMIT
+                            ========================================== -->
+                            <div class="analyse-section mt-4">
+
+                                <div class="analyse-security">
+
+                                    <i class="bi bi-shield-check"></i>
+
+                                    <span>
+                                        Your diagnostic request will be saved
+                                        to your account for future reference.
+                                    </span>
+
+                                </div>
+
+
+                                <button type="submit"
+                                        class="btn-analyse"
+                                        @(Model.Vehicles.Any()
+                                                                                ? null
+                                                                                : "disabled")>
+
+                                    <i class="bi bi-stars"></i>
+
+                                    Analyse Vehicle Symptoms
+
+                                    <i class="bi bi-arrow-right"></i>
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 RIGHT - CUSTOMER GUIDE
+            ================================================== -->
+            <div class="col-lg-4">
+
+                <div class="side-card mb-4">
+
+                    <div class="side-card-icon blue">
+                        <i class="bi bi-clipboard2-pulse"></i>
+                    </div>
+
+                    <h5>
+                        Better Description,
+                        Better Recommendation
+                    </h5>
+
+                    <p>
+                        You don't need automotive knowledge.
+                        Simply describe what you can see, hear
+                        or feel while using the vehicle.
+                    </p>
+
+                    <div class="side-checklist">
+
+                        <div>
+                            <i class="bi bi-check-circle-fill"></i>
+                            Mention unusual sounds
+                        </div>
+
+                        <div>
+                            <i class="bi bi-check-circle-fill"></i>
+                            Mention dashboard warning lights
+                        </div>
+
+                        <div>
+                            <i class="bi bi-check-circle-fill"></i>
+                            Explain when the problem happens
+                        </div>
+
+                        <div>
+                            <i class="bi bi-check-circle-fill"></i>
+                            Mention changes in performance
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SAFETY CARD -->
+                <div class="side-card safety-card">
+
+                    <div class="side-card-icon orange">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+
+                    <h5>
+                        Important
+                    </h5>
+
+                    <p class="mb-0">
+                        AI recommendations are intended as
+                        preliminary guidance only. A mechanic
+                        may need to physically inspect the
+                        vehicle to confirm the actual fault
+                        and required repair.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             PREVIOUS AI DIAGNOSTICS
+        ====================================================== -->
+        <div class="history-card mt-5">
+
+            <div class="history-header">
+
+                <div>
+
+                    <div class="d-flex align-items-center gap-2 mb-1">
+
+                        <div class="history-icon">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+
+                        <h4 class="fw-bold mb-0">
+                            Previous AI Diagnostics
+                        </h4>
+
+                    </div>
+
+                    <p class="text-muted mb-0">
+                        Review your previous AI-assisted recommendations
+                        and mechanic review status.
+                    </p>
+
+                </div>
+
+
+                <div class="history-count">
+
+                    <strong>
+                        @diagnosticHistory.Count
+                    </strong>
+
+                    <span>
+                        Records
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            @if (!diagnosticHistory.Any())
+            {
+                <!-- =============================================
+                     EMPTY HISTORY
+                ============================================== -->
+                <div class="empty-history">
+
+                    <div class="empty-icon">
+                        <i class="bi bi-clipboard2-pulse"></i>
+                    </div>
+
+                    <h5>
+                        No diagnostic history yet
+                    </h5>
+
+                    <p>
+                        Once you analyse your vehicle symptoms,
+                        your AI diagnostic recommendations will
+                        appear here.
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                <!-- =============================================
+                     HISTORY SEARCH & FILTER
+                ============================================== -->
+                <div class="history-toolbar">
+                    <div class="history-toolbar-left">
+                        <div class="history-search">
+                            <i class="bi bi-search"></i>
+                            <input type="text" id="diagnosticSearch" placeholder="Search vehicle, plate or symptoms..." autocomplete="off" />
+                            <button type="button" id="clearDiagnosticSearch" class="history-clear-search" aria-label="Clear search">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+
+                        <select id="priorityFilter" class="history-filter">
+                            <option value="all">All Priority</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+
+                        <select id="reviewFilter" class="history-filter">
+                            <option value="all">All Reviews</option>
+                            <option value="pending review">Pending Review</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="modified">Modified</option>
+                        </select>
+                    </div>
+
+                    <div class="history-result-count">
+                        Showing <strong id="diagnosticVisibleCount">@diagnosticHistory.Count</strong>
+                        of <strong>@diagnosticHistory.Count</strong>
+                    </div>
+                </div>
+
+                <!-- =============================================
+                     DESKTOP TABLE
+                ============================================== -->
+                <div class="table-responsive history-table-wrapper">
+
+                    <table class="table history-table align-middle mb-0">
+
+                        <thead>
+
+                            <tr>
+                                <th>Vehicle</th>
+                                <th>Symptoms</th>
+                                <th>Priority</th>
+                                <th>Mechanic Review</th>
+                                <th>Generated</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var diagnostic in diagnosticHistory)
+                            {
+                                <tr class="diagnostic-history-row"
+                                    data-vehicle="@(diagnostic.Vehicle != null ? $"{diagnostic.Vehicle.Brand} {diagnostic.Vehicle.Model}" : "")"
+                                    data-plate="@(diagnostic.Vehicle?.PlateNumber ?? "")"
+                                    data-symptoms="@diagnostic.Symptoms"
+                                    data-priority="@(diagnostic.Priority?.ToLower() ?? "")"
+                                    data-review="@(diagnostic.ReviewStatus?.ToLower() ?? "")">
+
+                                    <!-- VEHICLE -->
+                                    <td>
+
+                                        @if (diagnostic.Vehicle != null)
+                                        {
+                                            <div class="vehicle-cell">
+
+                                                <div class="vehicle-mini-icon">
+                                                    <i class="bi bi-car-front"></i>
+                                                </div>
+
+                                                <div>
+
+                                                    <strong>
+                                                        @diagnostic.Vehicle.Brand
+                                                        @diagnostic.Vehicle.Model
+                                                    </strong>
+
+                                                    <span>
+                                                        @diagnostic.Vehicle.PlateNumber
+                                                    </span>
+
+                                                </div>
+
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                Vehicle unavailable
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- SYMPTOMS -->
+                                    <td>
+
+                                        <div class="symptoms-preview"
+                                             title="@diagnostic.Symptoms">
+
+                                            @diagnostic.Symptoms
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- PRIORITY -->
+                                    <td>
+
+                                        @if (diagnostic.Priority == "High")
+                                        {
+                                            <span class="priority-badge high">
+                                                <span></span>
+                                                High
+                                            </span>
+                                        }
+                                        else if (diagnostic.Priority == "Medium")
+                                        {
+                                            <span class="priority-badge medium">
+                                                <span></span>
+                                                Medium
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="priority-badge low">
+                                                <span></span>
+                                                Low
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- MECHANIC REVIEW -->
+                                    <td>
+
+                                        @if (diagnostic.ReviewStatus ==
+                                                                        "Pending Review")
+                                        {
+                                            <span class="review-badge pending">
+                                                <i class="bi bi-clock"></i>
+                                                Pending Review
+                                            </span>
+                                        }
+                                        else if (diagnostic.ReviewStatus ==
+                                        "Confirmed")
+                                        {
+                                            <span class="review-badge confirmed">
+                                                <i class="bi bi-check-circle"></i>
+                                                Confirmed
+                                            </span>
+                                        }
+                                        else if (diagnostic.ReviewStatus ==
+                                        "Modified")
+                                        {
+                                            <span class="review-badge modified">
+                                                <i class="bi bi-pencil"></i>
+                                                Modified
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="review-badge default">
+                                                @diagnostic.ReviewStatus
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- DATE -->
+                                    <td>
+
+                                        <div class="date-cell">
+
+                                            <strong>
+                                                @diagnostic.CreatedAt.ToString(
+                                                "dd MMM yyyy")
+                                    </strong>
+
+                                    <span>
+                                        @diagnostic.CreatedAt.ToString(
+                                                                                "hh:mm tt")
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- ACTION -->
+                            <td class="text-end">
+
+                                <a asp-controller="Customer"
+                                   asp-action="AIDiagnosisResult"
+                                   asp-route-id="@diagnostic.DiagnosticId"
+                                   class="view-button">
+
+                                    View
+
+                                    <i class="bi bi-arrow-right"></i>
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+                                                }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div id="diagnosticNoResults" class="diagnostic-no-results">
+                    <div class="diagnostic-no-results-icon">
+                        <i class="bi bi-search"></i>
+                    </div>
+                    <h5>No diagnostics found</h5>
+                    <p>Try changing your search or filters.</p>
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     STYLES
+========================================================== -->
+<style>
+
+    /* =====================================================
+               PAGE
+            ====================================================== */
+
+    .ai-page {
+        min-height: 100vh;
+        background: #f6f8fb;
+    }
+
+    .ai-header h2 {
+        color: #1f2937;
+    }
+
+    .ai-header p {
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    .header-icon {
+        width: 52px;
+        height: 52px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0;
+        color: #0d6efd;
+        font-size: 23px;
+        background: #eaf2ff;
+        border-radius: 14px;
+    }
+
+
+    /* =====================================================
+               PROCESS
+            ====================================================== */
+
+    .process-card {
+        display: flex;
+        align-items: center;
+        padding: 20px 24px;
+        background: #ffffff;
+        border: 1px solid #e8ecf1;
+        border-radius: 16px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.035);
+    }
+
+    .process-step {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 190px;
+    }
+
+    .step-number {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 700;
+        background: #0d6efd;
+        border-radius: 50%;
+    }
+
+    .process-step strong {
+        display: block;
+        margin-bottom: 2px;
+        color: #29313d;
+        font-size: 13px;
+    }
+
+    .process-step span {
+        display: block;
+        color: #8a919b;
+        font-size: 11px;
+        line-height: 1.4;
+    }
+
+    .step-line {
+        height: 1px;
+        margin: 0 20px;
+        background: #dfe4ea;
+        flex: 1;
+    }
+
+
+    /* =====================================================
+               FORM CARD
+            ====================================================== */
+
+    .ai-form-card {
+        overflow: hidden;
+        border-radius: 18px !important;
+    }
+
+    .form-section-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .form-section-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0;
+        color: #0d6efd;
+        font-size: 21px;
+        background: #eaf2ff;
+        border-radius: 12px;
+    }
+
+    .form-section-header h4 {
+        color: #202833;
+        font-size: 20px;
+    }
+
+    .form-section-header p {
+        font-size: 13px;
+    }
+
+
+    /* =====================================================
+               AI NOTICE
+            ====================================================== */
+
+    .ai-notice {
+        display: flex;
+        gap: 14px;
+        padding: 16px 18px;
+        background: #f2f7ff;
+        border: 1px solid #dce9ff;
+        border-radius: 12px;
+    }
+
+    .notice-icon {
+        color: #0d6efd;
+        font-size: 19px;
+        flex-shrink: 0;
+    }
+
+    .ai-notice strong {
+        display: block;
+        margin-bottom: 4px;
+        color: #26384f;
+        font-size: 13px;
+    }
+
+    .ai-notice p {
+        color: #66758a;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+
+    /* =====================================================
+               VALIDATION
+            ====================================================== */
+
+    .validation-summary {
+        font-size: 13px;
+        border-radius: 10px;
+    }
+
+    .validation-summary-valid {
+        display: none;
+    }
+
+    .validation-text {
+        display: block;
+        margin-top: 6px;
+        font-size: 12px;
+    }
+
+
+    /* =====================================================
+               FORM BLOCK
+            ====================================================== */
+
+    .form-block {
+        display: flex;
+        gap: 16px;
+    }
+
+    .form-number {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0;
+        color: #0d6efd;
+        font-size: 12px;
+        font-weight: 700;
+        background: #eaf2ff;
+        border-radius: 9px;
+    }
+
+    .form-block-content {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .form-label {
+        color: #2b333e;
+        font-size: 14px;
+    }
+
+    .form-help {
+        margin-bottom: 12px;
+        color: #8a919b;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .form-divider {
+        height: 1px;
+        margin: 28px 0;
+        background: #edf0f3;
+    }
+
+
+    /* =====================================================
+               VEHICLE SELECT
+            ====================================================== */
+
+    .input-icon-wrapper {
+        position: relative;
+    }
+
+        .input-icon-wrapper > i {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            z-index: 5;
+            color: #7c8794;
+            font-size: 17px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+    .ai-input {
+        min-height: 50px;
+        padding-left: 45px;
+        color: #343b45;
+        font-size: 14px;
+        border: 1px solid #dfe4ea;
+        border-radius: 10px;
+    }
+
+        .ai-input:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.08);
+        }
+
+
+    /* =====================================================
+               NO VEHICLE
+            ====================================================== */
+
+    .no-vehicle-box {
+        display: flex;
+        gap: 13px;
+        padding: 16px;
+        color: #71540a;
+        background: #fff9e8;
+        border: 1px solid #f2e1ac;
+        border-radius: 11px;
+    }
+
+        .no-vehicle-box > i {
+            margin-top: 2px;
+            color: #d59b00;
+            flex-shrink: 0;
+        }
+
+        .no-vehicle-box strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+
+        .no-vehicle-box p,
+        .no-vehicle-box a {
+            font-size: 12px;
+        }
+
+
+    /* =====================================================
+               SYMPTOM GUIDE
+            ====================================================== */
+
+    .symptom-guide {
+        overflow: hidden;
+        background: #fbfcfe;
+        border: 1px solid #e6eaf0;
+        border-radius: 13px;
+    }
+
+    .guide-header {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 14px 16px;
+        background: #fff9e9;
+        border-bottom: 1px solid #f0e7ca;
+    }
+
+    .guide-header-icon {
+        color: #d59b00;
+        font-size: 18px;
+    }
+
+    .guide-header strong {
+        display: block;
+        margin-bottom: 1px;
+        color: #514a37;
+        font-size: 13px;
+    }
+
+    .guide-header span {
+        display: block;
+        color: #8b8166;
+        font-size: 11px;
+    }
+
+    .guide-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0;
+    }
+
+    .guide-item {
+        display: flex;
+        gap: 11px;
+        padding: 15px 16px;
+        border-bottom: 1px solid #edf0f3;
+    }
+
+        .guide-item:nth-child(odd) {
+            border-right: 1px solid #edf0f3;
+        }
+
+        .guide-item:nth-last-child(-n+2) {
+            border-bottom: none;
+        }
+
+    .guide-icon {
+        width: 31px;
+        height: 31px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0;
+        color: #0d6efd;
+        font-size: 14px;
+        background: #edf4ff;
+        border-radius: 8px;
+    }
+
+    .guide-item strong {
+        display: block;
+        margin-bottom: 3px;
+        color: #3c4550;
+        font-size: 12px;
+    }
+
+    .guide-item span {
+        display: block;
+        color: #8a919b;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+
+    /* =====================================================
+               EXAMPLE
+            ====================================================== */
+
+    .example-box {
+        padding: 15px 17px;
+        background: #f8f9fa;
+        border-left: 3px solid #0d6efd;
+        border-radius: 0 10px 10px 0;
+    }
+
+    .example-title {
+        margin-bottom: 6px;
+        color: #4d5865;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+        .example-title i {
+            margin-right: 5px;
+            color: #0d6efd;
+        }
+
+    .example-box p {
+        color: #717b86;
+        font-size: 12px;
+        font-style: italic;
+        line-height: 1.6;
+    }
+
+
+    /* =====================================================
+               TEXTAREA
+            ====================================================== */
+
+    .symptom-textarea {
+        min-height: 180px;
+        padding: 15px 16px;
+        color: #343b45;
+        font-size: 14px;
+        line-height: 1.6;
+        resize: vertical;
+        border: 1px solid #dfe4ea;
+        border-radius: 11px;
+    }
+
+        .symptom-textarea::placeholder {
+            color: #adb5bd;
+        }
+
+        .symptom-textarea:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.08);
+        }
+
+    .character-counter {
+        white-space: nowrap;
+        font-size: 11px;
+    }
+
+
+    /* =====================================================
+               ANALYSE SECTION
+            ====================================================== */
+
+    .analyse-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        padding-top: 22px;
+        border-top: 1px solid #edf0f3;
+    }
+
+    .analyse-security {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+        max-width: 330px;
+        color: #8a919b;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+        .analyse-security i {
+            margin-top: 1px;
+            color: #198754;
+            flex-shrink: 0;
+        }
+
+    .btn-analyse {
+        min-height: 48px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 9px;
+        padding: 0 20px;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 600;
+        background: #0d6efd;
+        border: none;
+        border-radius: 10px;
+        transition: 0.2s ease;
+    }
+
+        .btn-analyse:hover:not(:disabled) {
+            background: #0b5ed7;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(13, 110, 253, 0.18);
+        }
+
+        .btn-analyse:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+
+
+    /* =====================================================
+               SIDE CARDS
+            ====================================================== */
+
+    .side-card {
+        padding: 24px;
+        background: #ffffff;
+        border: 1px solid #e8ecf1;
+        border-radius: 16px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.035);
+    }
+
+    .side-card-icon {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 16px;
+        font-size: 19px;
+        border-radius: 11px;
+    }
+
+        .side-card-icon.blue {
+            color: #0d6efd;
+            background: #eaf2ff;
+        }
+
+        .side-card-icon.orange {
+            color: #d88a00;
+            background: #fff5dc;
+        }
+
+    .side-card h5 {
+        margin-bottom: 9px;
+        color: #2a323d;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.4;
+    }
+
+    .side-card > p {
+        color: #7e8792;
+        font-size: 12px;
+        line-height: 1.65;
+    }
+
+    .side-checklist {
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid #edf0f3;
+    }
+
+        .side-checklist div {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 11px;
+            color: #626d79;
+            font-size: 12px;
+        }
+
+            .side-checklist div:last-child {
+                margin-bottom: 0;
+            }
+
+        .side-checklist i {
+            margin-top: 1px;
+            color: #198754;
+            flex-shrink: 0;
+        }
+
+    .safety-card {
+        background: #fffcf5;
+        border-color: #f1e4c4;
+    }
+
+
+    /* =====================================================
+               HISTORY
+            ====================================================== */
+
+    .history-card {
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid #e8ecf1;
+        border-radius: 18px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.035);
+    }
+
+    .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        padding: 25px 28px;
+        border-bottom: 1px solid #edf0f3;
+    }
+
+        .history-header h4 {
+            color: #29313c;
+            font-size: 18px;
+        }
+
+        .history-header p {
+            font-size: 12px;
+        }
+
+    .history-icon {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #0d6efd;
+        background: #eaf2ff;
+        border-radius: 9px;
+    }
+
+    .history-count {
+        min-width: 68px;
+        padding: 9px 13px;
+        text-align: center;
+        background: #f6f8fa;
+        border-radius: 10px;
+    }
+
+        .history-count strong {
+            display: block;
+            color: #29313c;
+            font-size: 16px;
+        }
+
+        .history-count span {
+            display: block;
+            color: #8a919b;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+
+    /* =====================================================
+               EMPTY HISTORY
+            ====================================================== */
+
+    .empty-history {
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .empty-icon {
+        width: 62px;
+        height: 62px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 16px;
+        color: #9aa3ad;
+        font-size: 25px;
+        background: #f4f6f8;
+        border-radius: 50%;
+    }
+
+    .empty-history h5 {
+        margin-bottom: 7px;
+        color: #39424d;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .empty-history p {
+        max-width: 420px;
+        margin: 0 auto;
+        color: #929aa4;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+
+    /* =====================================================
+               HISTORY TABLE
+            ====================================================== */
+
+    .history-table-wrapper {
+        padding: 0 12px 12px;
+    }
+
+    .history-table {
+        font-size: 12px;
+    }
+
+        .history-table thead th {
+            padding: 15px 12px;
+            color: #7c8692;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            background: #fafbfc;
+            border-bottom: 1px solid #e9edf1;
+            white-space: nowrap;
+        }
+
+        .history-table tbody td {
+            padding: 16px 12px;
+            color: #4f5965;
+            border-color: #edf0f3;
+        }
+
+        .history-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .history-table tbody tr {
+            transition: background 0.15s ease;
+        }
+
+            .history-table tbody tr:hover {
+                background: #fafcff;
+            }
+
+
+    /* VEHICLE */
+
+    .vehicle-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 150px;
+    }
+
+    .vehicle-mini-icon {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0;
+        color: #0d6efd;
+        background: #edf4ff;
+        border-radius: 8px;
+    }
+
+    .vehicle-cell strong {
+        display: block;
+        color: #36404b;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .vehicle-cell span {
+        display: block;
+        margin-top: 2px;
+        color: #929aa4;
+        font-size: 10px;
+    }
+
+
+    /* SYMPTOMS */
+
+    .symptoms-preview {
+        max-width: 250px;
+        overflow: hidden;
+        color: #68727e;
+        font-size: 11px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+
+    /* PRIORITY */
+
+    .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 9px;
+        font-size: 10px;
+        font-weight: 600;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+
+        .priority-badge > span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .priority-badge.high {
+            color: #b42318;
+            background: #fff0ef;
+        }
+
+            .priority-badge.high > span {
+                background: #dc3545;
+            }
+
+        .priority-badge.medium {
+            color: #8a6100;
+            background: #fff7dd;
+        }
+
+            .priority-badge.medium > span {
+                background: #e5a800;
+            }
+
+        .priority-badge.low {
+            color: #157347;
+            background: #edf9f2;
+        }
+
+            .priority-badge.low > span {
+                background: #198754;
+            }
+
+
+    /* REVIEW */
+
+    .review-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 8px;
+        font-size: 10px;
+        font-weight: 600;
+        border-radius: 7px;
+        white-space: nowrap;
+    }
+
+        .review-badge.pending {
+            color: #8a6100;
+            background: #fff7dd;
+        }
+
+        .review-badge.confirmed {
+            color: #157347;
+            background: #edf9f2;
+        }
+
+        .review-badge.modified {
+            color: #0b5ed7;
+            background: #edf4ff;
+        }
+
+        .review-badge.default {
+            color: #66717d;
+            background: #f0f2f4;
+        }
+
+
+    /* DATE */
+
+    .date-cell {
+        min-width: 95px;
+    }
+
+        .date-cell strong {
+            display: block;
+            color: #4c5662;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        .date-cell span {
+            display: block;
+            margin-top: 2px;
+            color: #9aa1aa;
+            font-size: 9px;
+        }
+
+
+    /* VIEW */
+
+    .view-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 11px;
+        color: #0d6efd;
+        font-size: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        background: #ffffff;
+        border: 1px solid #cfe0ff;
+        border-radius: 7px;
+        transition: 0.15s ease;
+        white-space: nowrap;
+    }
+
+        .view-button:hover {
+            color: #ffffff;
+            background: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+
+    /* =====================================================
+               HISTORY SEARCH & FILTER
+            ====================================================== */
+
+    .history-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 14px 20px;
+        border-bottom: 1px solid #edf0f3;
+        background: #ffffff;
+    }
+
+    .history-toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        flex: 1;
+    }
+
+    .history-search {
+        position: relative;
+        width: 100%;
+        max-width: 380px;
+    }
+
+        .history-search > i {
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            z-index: 2;
+            color: #8a919b;
+            font-size: 12px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .history-search input {
+            width: 100%;
+            height: 36px;
+            padding: 6px 34px;
+            color: #36404b;
+            font-size: 11px;
+            background: #fff;
+            border: 1px solid #dfe4ea;
+            border-radius: 8px;
+            outline: none;
+        }
+
+            .history-search input:focus, .history-filter:focus {
+                border-color: #86b7fe;
+                box-shadow: 0 0 0 3px rgba(13,110,253,.08);
+            }
+
+            .history-search input::placeholder {
+                color: #9aa3ad;
+            }
+
+    .history-clear-search {
+        position: absolute;
+        top: 50%;
+        right: 9px;
+        display: none;
+        padding: 2px;
+        color: #8a919b;
+        font-size: 12px;
+        background: transparent;
+        border: 0;
+        transform: translateY(-50%);
+    }
+
+        .history-clear-search.show {
+            display: block;
+        }
+
+    .history-filter {
+        width: 145px;
+        height: 36px;
+        padding: 6px 28px 6px 10px;
+        color: #4f5965;
+        font-size: 11px;
+        background-color: #fff;
+        border: 1px solid #dfe4ea;
+        border-radius: 8px;
+        cursor: pointer;
+        outline: none;
+    }
+
+    .history-result-count {
+        flex-shrink: 0;
+        color: #8a919b;
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
+        .history-result-count strong {
+            color: #4f5965;
+        }
+
+    .diagnostic-no-results {
+        display: none;
+        padding: 45px 20px;
+        text-align: center;
+    }
+
+        .diagnostic-no-results.show {
+            display: block;
+        }
+
+    .diagnostic-no-results-icon {
+        width: 46px;
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+        color: #8a919b;
+        font-size: 18px;
+        background: #f4f6f8;
+        border-radius: 12px;
+    }
+
+    .diagnostic-no-results h5 {
+        margin-bottom: 4px;
+        color: #39424d;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .diagnostic-no-results p {
+        margin: 0;
+        color: #929aa4;
+        font-size: 11px;
+    }
+
+    html[data-bs-theme="dark"] .history-toolbar {
+        background: #181d25 !important;
+        border-color: #303946 !important;
+    }
+
+    html[data-bs-theme="dark"] .history-search input, html[data-bs-theme="dark"] .history-filter {
+        color: #e5edf6 !important;
+        background: #10151c !important;
+        border-color: #36404d !important;
+    }
+
+        html[data-bs-theme="dark"] .history-search input::placeholder {
+            color: #697586 !important;
+        }
+
+    html[data-bs-theme="dark"] .history-search > i, html[data-bs-theme="dark"] .history-clear-search {
+        color: #8793a3 !important;
+    }
+
+    html[data-bs-theme="dark"] .history-filter option {
+        color: #e5edf6;
+        background: #181d25;
+    }
+
+    html[data-bs-theme="dark"] .history-result-count {
+        color: #8793a3 !important;
+    }
+
+        html[data-bs-theme="dark"] .history-result-count strong {
+            color: #f1f5f9 !important;
+        }
+
+    html[data-bs-theme="dark"] .diagnostic-no-results-icon {
+        color: #8f9aaa !important;
+        background: #222832 !important;
+    }
+
+    html[data-bs-theme="dark"] .diagnostic-no-results h5 {
+        color: #e5edf6 !important;
+    }
+
+    html[data-bs-theme="dark"] .diagnostic-no-results p {
+        color: #8793a3 !important;
+    }
+
+    @@media (max-width: 767px) {
+        .history-toolbar {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .history-toolbar-left {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .history-search, .history-filter {
+            width: 100%;
+            max-width: none;
+        }
+    }
+
+    /* =====================================================
+               RESPONSIVE
+            ====================================================== */
+
+    @@media (max-width: 991px) {
+
+        .process-card {
+            align-items: stretch;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .process-step {
+            min-width: 0;
+        }
+
+        .step-line {
+            width: 1px;
+            height: 15px;
+            margin: -5px 0 -5px 17px;
+            flex: none;
+        }
+
+        .analyse-section {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .analyse-security {
+            max-width: none;
+        }
+
+        .btn-analyse {
+            width: 100%;
+        }
+    }
+
+
+    @@media (max-width: 767px) {
+
+        .ai-page .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .ai-header .d-flex {
+            align-items: center !important;
+        }
+
+        .header-icon {
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+        }
+
+        .ai-header h2 {
+            font-size: 21px;
+        }
+
+        .ai-header p {
+            font-size: 12px;
+        }
+
+        .ai-form-card .card-body {
+            padding: 22px !important;
+        }
+
+        .form-section-header {
+            align-items: flex-start;
+        }
+
+            .form-section-header h4 {
+                font-size: 17px;
+            }
+
+        .form-block {
+            gap: 11px;
+        }
+
+        .guide-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .guide-item:nth-child(odd) {
+            border-right: none;
+        }
+
+        .guide-item:nth-last-child(2) {
+            border-bottom: 1px solid #edf0f3;
+        }
+
+        .history-header {
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        .history-count {
+            min-width: 60px;
+        }
+    }
+
+
+    @@media (max-width: 480px) {
+
+        .process-card {
+            padding: 17px;
+        }
+
+        .form-number {
+            width: 28px;
+            height: 28px;
+        }
+
+        .symptom-textarea {
+            min-height: 160px;
+        }
+
+        .side-card {
+            padding: 20px;
+        }
+
+        .history-header {
+            flex-direction: column;
+        }
+
+        .history-count {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            width: fit-content;
+        }
+    }
+
+    /* =====================================================
+           AI DIAGNOSIS - DARK MODE
+           ===================================================== */
+
+    html[data-bs-theme="dark"] .ai-page {
+        background: #101318 !important;
+        color: #e5e7eb;
+    }
+
+    /* PAGE HEADER */
+    html[data-bs-theme="dark"] .ai-header h2 {
+        color: #f1f5f9 !important;
+    }
+
+    html[data-bs-theme="dark"] .ai-header p,
+    html[data-bs-theme="dark"] .text-muted {
+        color: #8f9aaa !important;
+    }
+
+    html[data-bs-theme="dark"] .header-icon {
+        background: rgba(59, 130, 246, .14) !important;
+        color: #60a5fa !important;
+    }
+
+
+    /* =====================================================
+           PROCESS STEPS
+           ===================================================== */
+
+    html[data-bs-theme="dark"] .process-card {
+        background: #181d25 !important;
+        border-color: #2b3440 !important;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .18) !important;
+    }
+
+    html[data-bs-theme="dark"] .process-step strong {
+        color: #e5edf6 !important;
+    }
+
+    html[data-bs-theme="dark"] .process-step span {
+        color: #8793a3 !important;
+    }
+
+    html[data-bs-theme="dark"] .step-line {
+        background: #36404d !important;
+    }
+
+
+    /* =====================================================
+           MAIN FORM CARD
+           ===================================================== */
+
+    html[data-bs-theme="dark"] .ai-form-card {
+        background: #181d25 !important;
+        color: #e5e7eb !important;
+    }
+
+        html[data-bs-theme="dark"] .ai-form-card .card-body {
+            background: #181d25 !important;
+        }
+
+    html[data-bs-theme="dark"] .form-section-header h4 {
+        color: #f1f5f9 !important;
+    }
+
+    html[data-bs-theme="dark"] .form-section-header p {
+        color: #8f9aaa !important;
+    }
+
+    html[data-bs-theme="dark"] .form-section-icon {
+        background: rgba(59, 130, 246, .14) !important;
+        color: #60a5fa !important;
+    }
+
+
+    /* =====================================================
+           AI NOTICE
+           ===================================================== */
+
+    html[data-bs-theme="dark"] .ai-notice {
+        background: #131e2d !important;
+        border-color: #263b59 !important;
+    }
+
+        html[data-bs-theme="dark"] .ai-notice strong {
+            color: #dbeafe !important;
+        }
+
+        html[data-bs-theme="dark"] .ai-notice p {
+            color: #94a3b8 !important;
+        }
+
+    html[data-bs-theme="dark"] .notice-icon {
+        color: #60a5fa !important;
+    }
+
+
+    /* =====================================================
+           FORM
+           ===================================================== */
+
+    html[data-bs-theme="dark"] .form-label {
+        color: #e2e8f0 !important;
+    }
+
+    html[data-bs-theme="dark"] .form-help {
+        color: #8793a3 !important;
+    }
+
+    html[data-bs-theme="dark"] .form-number {
+        background: rgba(59, 130, 246, .14) !important;
+        color: #60a5fa !important;
+    }
+
+    html[data-bs-theme="dark"] .form-divider {
+        background: #303946 !important;
+    }
+
+
+    /* VEHICLE SELECT */
+
+    html[data-bs-theme="dark"] .ai-input {
+        background-color: #10151c !important;
+        border-color: #36404d !important;
+        color: #e5edf6 !important;
+    }
+
+        html[data-bs-theme="dark"] .ai-input:focus {
+            background-color: #10151c !important;
+            color: #ffffff !important;
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, .10) !important;
+        }
+
+        html[data-bs-theme="dark"] .ai-input option {
+            background: #181d25;
+            color: #e5edf6;
+        }
+
+    html[data-bs-theme="dark"] .input-icon-wrapper > i {
+        color: #8da0b6 !important;
+    }
+
+
+    /* =====================================================
+           SYMPTOM GUIDE
+           ===================================================== */
+
+    html[data-bs-theme="dark"] .symptom-guide {
+        background: #141920 !important;
+        border-color: #303946 !important;
+    }
+
+    html[data-bs-theme="dark"] .guide-header {
+        background: #242016 !important;
+        border-color: #4b4023 !important;
+    }
+
+        html[data-bs-theme="dark"] .guide-header strong {
+            color: #f3e6bd !important;
+        }
+
+        html[data-bs-theme="dark"] .guide-header span {
+            color: #b6a980 !important;
+        }
+
+    html[data-bs-theme="dark"] .guide-header-icon {
+        color: #f0b429 !important;
+    }
+
+    html[data-bs-theme="dark"] .guide-item {
+        border-color: #303946 !important;
+    }
+
+        html[data-bs-theme="dark"] .guide-item:nth-child(odd) {
+            border-right-color: #303946 !important;
+        }
+
+    html[data-bs-theme="dark"] .guide-icon {
+        background: rgba(59, 130, 246, .12) !important;
+        color: #60a5fa !important;
+    }
+
+    html[data-bs-theme="dark"] .guide-item strong {
+        color: #dbe4ee !important;
+    }
+
+    html[data-bs-theme="dark"] .guide-item span {
+        color: #8793a3 !important;
+    }
+
+
+    /* =====================================================
+           EXAMPLE BOX
+           ===================================================== */
+
+    html[data-bs-theme="dark"] .example-box {
+        background: #141920 !important;
+        border-left-color: #3b82f6 !important;
+    }
+
+    html[data-bs-theme="dark"] .example-title {
+        color: #cbd5e1 !important;
+    }
+
+    html[data-bs-theme="dark"] .example-box p {
+        color: #8f9aaa !important;
+    }
+
+
+    /* =====================================================
+           SYMPTOM TEXTAREA
+           ===================================================== */
+
+    html[data-bs-theme="dark"] .symptom-textarea {
+        background: #10151c !important;
+        border-color: #36404d !important;
+        color: #e5edf6 !important;
+    }
+
+        html[data-bs-theme="dark"] .symptom-textarea::placeholder {
+            color: #697586 !important;
+        }
+
+        html[data-bs-theme="dark"] .symptom-textarea:focus {
+            background: #10151c !important;
+            color: #ffffff !important;
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, .10) !important;
+        }
+
+    html[data-bs-theme="dark"] .character-counter {
+        color: #7f8b9b !important;
+    }
+
+
+    /* =====================================================
+           ANALYSE SECTION
+           ===================================================== */
+
+    html[data-bs-theme="dark"] .analyse-section {
+        border-color: #303946 !important;
+    }
+
+    html[data-bs-theme="dark"] .analyse-security {
+        color: #8793a3 !important;
+    }
+
+
+    /* =====================================================
+           RIGHT SIDE CARDS
+           ===================================================== */
+
+    html[data-bs-theme="dark"] .side-card {
+        background: #181d25 !important;
+        border-color: #2b3440 !important;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .18) !important;
+    }
+
+        html[data-bs-theme="dark"] .side-card h5 {
+            color: #f1f5f9 !important;
+        }
+
+        html[data-bs-theme="dark"] .side-card > p {
+            color: #8f9aaa !important;
+        }
+
+    html[data-bs-theme="dark"] .side-card-icon.blue {
+        background: rgba(59, 130, 246, .14) !important;
+        color: #60a5fa !important;
+    }
+
+    html[data-bs-theme="dark"] .side-card-icon.orange {
+        background: rgba(245, 158, 11, .13) !important;
+        color: #fbbf24 !important;
+    }
+
+    html[data-bs-theme="dark"] .side-checklist {
+        border-color: #303946 !important;
+    }
+
+        html[data-bs-theme="dark"] .side-checklist div {
+            color: #a5afbd !important;
+        }
+
+    html[data-bs-theme="dark"] .safety-card {
+        background: #211d15 !important;
+        border-color: #493e25 !important;
+    }
+
+
+    /* =====================================================
+           NO VEHICLE
+           ===================================================== */
+
+    html[data-bs-theme="dark"] .no-vehicle-box {
+        background: #211d15 !important;
+        border-color: #493e25 !important;
+        color: #e9d9aa !important;
+    }
+
+
+    /* =====================================================
+           HISTORY
+           ===================================================== */
+
+    html[data-bs-theme="dark"] .history-card {
+        background: #181d25 !important;
+        border-color: #2b3440 !important;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .18) !important;
+    }
+
+    html[data-bs-theme="dark"] .history-header {
+        border-color: #303946 !important;
+    }
+
+        html[data-bs-theme="dark"] .history-header h4 {
+            color: #f1f5f9 !important;
+        }
+
+    html[data-bs-theme="dark"] .history-icon {
+        background: rgba(59, 130, 246, .14) !important;
+        color: #60a5fa !important;
+    }
+
+    html[data-bs-theme="dark"] .history-count {
+        background: #222832 !important;
+    }
+
+        html[data-bs-theme="dark"] .history-count strong {
+            color: #f1f5f9 !important;
+        }
+
+        html[data-bs-theme="dark"] .history-count span {
+            color: #8f9aaa !important;
+        }
+
+
+    /* EMPTY HISTORY */
+
+    html[data-bs-theme="dark"] .empty-icon {
+        background: #222832 !important;
+        color: #8f9aaa !important;
+    }
+
+    html[data-bs-theme="dark"] .empty-history h5 {
+        color: #e5edf6 !important;
+    }
+
+    html[data-bs-theme="dark"] .empty-history p {
+        color: #8793a3 !important;
+    }
+
+
+    /* =====================================================
+           HISTORY TABLE
+           ===================================================== */
+
+    html[data-bs-theme="dark"] .history-table {
+        --bs-table-bg: #181d25;
+        --bs-table-color: #cbd5e1;
+        --bs-table-border-color: #303946;
+    }
+
+        html[data-bs-theme="dark"] .history-table thead th {
+            background: #141920 !important;
+            color: #8f9aaa !important;
+            border-color: #303946 !important;
+        }
+
+        html[data-bs-theme="dark"] .history-table tbody td {
+            background: #181d25 !important;
+            color: #cbd5e1 !important;
+            border-color: #303946 !important;
+        }
+
+        html[data-bs-theme="dark"] .history-table tbody tr:hover td {
+            background: #1d232c !important;
+        }
+
+    html[data-bs-theme="dark"] .vehicle-mini-icon {
+        background: rgba(59, 130, 246, .12) !important;
+        color: #60a5fa !important;
+    }
+
+    html[data-bs-theme="dark"] .vehicle-cell strong {
+        color: #e5edf6 !important;
+    }
+
+    html[data-bs-theme="dark"] .vehicle-cell span,
+    html[data-bs-theme="dark"] .symptoms-preview,
+    html[data-bs-theme="dark"] .date-cell span {
+        color: #8793a3 !important;
+    }
+
+    html[data-bs-theme="dark"] .date-cell strong {
+        color: #cbd5e1 !important;
+    }
+
+    html[data-bs-theme="dark"] .view-button {
+        background: #141920 !important;
+        border-color: #31558a !important;
+        color: #60a5fa !important;
+    }
+
+        html[data-bs-theme="dark"] .view-button:hover {
+            background: #0d6efd !important;
+            border-color: #0d6efd !important;
+            color: #ffffff !important;
+        }
+
+
+    /* =====================================================
+           DARK BADGES
+           ===================================================== */
+
+    html[data-bs-theme="dark"] .priority-badge.high {
+        background: rgba(220, 53, 69, .15) !important;
+        color: #ff8b96 !important;
+    }
+
+    html[data-bs-theme="dark"] .priority-badge.medium {
+        background: rgba(255, 193, 7, .13) !important;
+        color: #f6cf62 !important;
+    }
+
+    html[data-bs-theme="dark"] .priority-badge.low {
+        background: rgba(25, 135, 84, .17) !important;
+        color: #65d69a !important;
+    }
+
+    html[data-bs-theme="dark"] .review-badge.pending {
+        background: rgba(255, 193, 7, .13) !important;
+        color: #f6cf62 !important;
+    }
+
+    html[data-bs-theme="dark"] .review-badge.confirmed {
+        background: rgba(25, 135, 84, .17) !important;
+        color: #65d69a !important;
+    }
+
+    html[data-bs-theme="dark"] .review-badge.modified {
+        background: rgba(59, 130, 246, .14) !important;
+        color: #60a5fa !important;
+    }
+
+    html[data-bs-theme="dark"] .review-badge.default {
+        background: #252c36 !important;
+        color: #aab4c1 !important;
+    }
+
+</style>
+
+
+<!-- =========================================================
+     SCRIPTS
+========================================================== -->
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const symptomsInput =
+                document.getElementById("symptomsInput");
+
+            const characterCount =
+                document.getElementById("characterCount");
+
+            if (symptomsInput && characterCount) {
+
+                function updateCharacterCount() {
+                    characterCount.textContent =
+                        symptomsInput.value.length;
+                }
+
+                updateCharacterCount();
+
+                symptomsInput.addEventListener(
+                    "input",
+                    updateCharacterCount
+                );
+            }
+
+            const diagnosticSearch = document.getElementById("diagnosticSearch");
+            const clearDiagnosticSearch = document.getElementById("clearDiagnosticSearch");
+            const priorityFilter = document.getElementById("priorityFilter");
+            const reviewFilter = document.getElementById("reviewFilter");
+            const diagnosticRows = Array.from(document.querySelectorAll(".diagnostic-history-row"));
+            const diagnosticVisibleCount = document.getElementById("diagnosticVisibleCount");
+            const diagnosticNoResults = document.getElementById("diagnosticNoResults");
+            const historyTableWrapper = document.querySelector(".history-table-wrapper");
+
+            function filterDiagnostics() {
+                if (!diagnosticSearch || !priorityFilter || !reviewFilter) return;
+
+                const search = diagnosticSearch.value.trim().toLowerCase();
+                const priority = priorityFilter.value.toLowerCase();
+                const review = reviewFilter.value.toLowerCase();
+                let count = 0;
+
+                diagnosticRows.forEach(function (row) {
+                    const searchableText = [row.dataset.vehicle, row.dataset.plate, row.dataset.symptoms].join(" ").toLowerCase();
+                    const matchesSearch = search === "" || searchableText.includes(search);
+                    const matchesPriority = priority === "all" || row.dataset.priority === priority;
+                    const matchesReview = review === "all" || row.dataset.review === review;
+                    const show = matchesSearch && matchesPriority && matchesReview;
+                    row.style.display = show ? "" : "none";
+                    if (show) count++;
+                });
+
+                if (diagnosticVisibleCount) diagnosticVisibleCount.textContent = count;
+                if (clearDiagnosticSearch) clearDiagnosticSearch.classList.toggle("show", diagnosticSearch.value.length > 0);
+
+                if (historyTableWrapper) historyTableWrapper.style.display = count === 0 ? "none" : "";
+                if (diagnosticNoResults) diagnosticNoResults.classList.toggle("show", count === 0);
+            }
+
+            if (diagnosticSearch && priorityFilter && reviewFilter) {
+                diagnosticSearch.addEventListener("input", filterDiagnostics);
+                priorityFilter.addEventListener("change", filterDiagnostics);
+                reviewFilter.addEventListener("change", filterDiagnostics);
+                if (clearDiagnosticSearch) {
+                    clearDiagnosticSearch.addEventListener("click", function () {
+                        diagnosticSearch.value = "";
+                        diagnosticSearch.focus();
+                        filterDiagnostics();
+                    });
+                }
+                filterDiagnostics();
+            }
+
+        });
+    </script>
+}

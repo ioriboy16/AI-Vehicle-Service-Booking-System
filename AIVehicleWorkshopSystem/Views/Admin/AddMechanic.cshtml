@@ -1,0 +1,957 @@
+﻿@model AIVehicleWorkshopSystem.ViewModels.AddMechanicViewModel
+
+@{
+    ViewData["Title"] = "Add Mechanic";
+}
+
+<style>
+    /* =========================================
+           ADD MECHANIC PAGE
+        ========================================= */
+
+    .add-mechanic-page {
+        min-height: 100vh;
+        background: #f7f9fc;
+    }
+
+    .add-mechanic-container {
+        max-width: 850px;
+    }
+
+    /* =========================================
+           HEADER
+        ========================================= */
+
+    .page-label {
+        font-size: .78rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .page-title {
+        color: #1f2937;
+        font-weight: 700;
+        margin-bottom: .35rem;
+    }
+
+    .page-description {
+        color: #6b7280;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #6b7280;
+        font-size: .88rem;
+        font-weight: 500;
+        text-decoration: none;
+        margin-bottom: 1.5rem;
+        transition: color .15s ease;
+    }
+
+        .back-link:hover {
+            color: #0d6efd;
+        }
+
+    /* =========================================
+           FORM CARD
+        ========================================= */
+
+    .mechanic-card {
+        background: #fff;
+        border: 1px solid #edf0f5;
+        border-radius: 16px;
+        box-shadow: 0 5px 22px rgba(0, 0, 0, .04);
+        overflow: hidden;
+    }
+
+    .mechanic-card-header {
+        padding: 1.4rem 1.6rem;
+        border-bottom: 1px solid #edf0f5;
+        background: #fff;
+    }
+
+    .mechanic-card-body {
+        padding: 1.6rem;
+    }
+
+    .card-heading {
+        color: #1f2937;
+        font-weight: 700;
+        margin-bottom: .2rem;
+    }
+
+    .card-description {
+        color: #6b7280;
+        font-size: .87rem;
+        margin-bottom: 0;
+    }
+
+    /* =========================================
+           SECTION
+        ========================================= */
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 1.25rem;
+    }
+
+    .section-icon {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        border-radius: 10px;
+        background: #eef4ff;
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+
+    .section-title {
+        color: #1f2937;
+        font-size: .95rem;
+        font-weight: 700;
+        margin-bottom: .1rem;
+    }
+
+    .section-description {
+        color: #9ca3af;
+        font-size: .78rem;
+        margin: 0;
+    }
+
+    .section-divider {
+        border: 0;
+        border-top: 1px solid #edf0f5;
+        margin: 1.8rem 0;
+        opacity: 1;
+    }
+
+    /* =========================================
+           FORM
+        ========================================= */
+
+    .form-label {
+        color: #374151;
+        font-size: .84rem;
+        font-weight: 600;
+        margin-bottom: .45rem;
+    }
+
+    .form-control {
+        min-height: 46px;
+        border-radius: 10px;
+        border: 1px solid #dfe3e8;
+        padding: .7rem .9rem;
+        font-size: .9rem;
+        transition: all .15s ease;
+    }
+
+        .form-control::placeholder {
+            color: #adb5bd;
+        }
+
+        .form-control:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .09);
+        }
+
+    .field-hint {
+        color: #9ca3af;
+        font-size: .75rem;
+        margin-top: .4rem;
+    }
+
+    .text-danger {
+        display: block;
+        font-size: .78rem;
+        margin-top: .35rem;
+    }
+
+    /* =========================================
+           PASSWORD
+        ========================================= */
+
+    .password-wrapper {
+        position: relative;
+    }
+
+        .password-wrapper .form-control {
+            padding-right: 55px;
+        }
+
+    .password-toggle {
+        position: absolute;
+        top: 50%;
+        right: 8px;
+        transform: translateY(-50%);
+        border: 0;
+        background: transparent;
+        color: #6b7280;
+        font-size: .76rem;
+        font-weight: 600;
+        padding: 6px 8px;
+        border-radius: 6px;
+    }
+
+        .password-toggle:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+    .password-info {
+        background: #f8fafc;
+        border: 1px solid #edf0f5;
+        border-radius: 10px;
+        padding: .85rem 1rem;
+        margin-top: .8rem;
+    }
+
+    .password-info-title {
+        font-size: .78rem;
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: .3rem;
+    }
+
+    .password-info-text {
+        color: #8b95a5;
+        font-size: .75rem;
+        margin: 0;
+    }
+
+    /* =========================================
+           ROLE INFORMATION
+        ========================================= */
+
+    .role-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        background: #f8fafc;
+        border: 1px solid #edf0f5;
+        border-radius: 12px;
+        padding: 1rem;
+    }
+
+    .role-info-title {
+        color: #374151;
+        font-size: .86rem;
+        font-weight: 600;
+        margin-bottom: .15rem;
+    }
+
+    .role-info-description {
+        color: #8b95a5;
+        font-size: .76rem;
+        margin: 0;
+    }
+
+    .mechanic-role-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: .4rem .7rem;
+        border-radius: 20px;
+        background: #eaf2ff;
+        color: #0d6efd;
+        font-size: .76rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* =========================================
+           VALIDATION SUMMARY
+        ========================================= */
+
+    .validation-summary-valid {
+        display: none;
+    }
+
+    .validation-summary-errors {
+        border: 0;
+        border-radius: 10px;
+        font-size: .85rem;
+    }
+
+        .validation-summary-errors ul {
+            margin-bottom: 0;
+            padding-left: 1.2rem;
+        }
+
+    /* =========================================
+           BUTTON AREA
+        ========================================= */
+
+    .form-actions {
+        padding: 1.25rem 1.6rem;
+        background: #fafbfc;
+        border-top: 1px solid #edf0f5;
+    }
+
+    .btn-back {
+        min-width: 110px;
+        border-radius: 9px;
+        font-weight: 600;
+        padding: .65rem 1.1rem;
+    }
+
+    .btn-create {
+        min-width: 165px;
+        border-radius: 9px;
+        font-weight: 600;
+        padding: .65rem 1.2rem;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, .15);
+        transition: all .2s ease;
+    }
+
+        .btn-create:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(13, 110, 253, .22);
+        }
+
+    /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+    @@media (max-width: 767.98px) {
+
+        .mechanic-card-body {
+            padding: 1.25rem;
+        }
+
+        .mechanic-card-header {
+            padding: 1.25rem;
+        }
+
+        .form-actions {
+            padding: 1.25rem;
+        }
+
+            .form-actions .d-flex {
+                flex-direction: column-reverse;
+            }
+
+        .btn-back,
+        .btn-create {
+            width: 100%;
+        }
+
+        .role-info {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+
+    /* =========================================
+       DARK MODE - ADD MECHANIC
+    ========================================= */
+
+    [data-bs-theme="dark"] .add-mechanic-page {
+        background: var(--bs-body-bg);
+    }
+
+    [data-bs-theme="dark"] .page-title,
+    [data-bs-theme="dark"] .card-heading,
+    [data-bs-theme="dark"] .section-title,
+    [data-bs-theme="dark"] .role-info-title,
+    [data-bs-theme="dark"] .password-info-title {
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .page-description,
+    [data-bs-theme="dark"] .card-description,
+    [data-bs-theme="dark"] .section-description,
+    [data-bs-theme="dark"] .role-info-description,
+    [data-bs-theme="dark"] .password-info-text,
+    [data-bs-theme="dark"] .field-hint,
+    [data-bs-theme="dark"] .back-link {
+        color: var(--bs-secondary-color);
+    }
+
+    [data-bs-theme="dark"] .mechanic-card,
+    [data-bs-theme="dark"] .mechanic-card-header {
+        background: var(--bs-body-bg);
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .mechanic-card {
+        box-shadow: 0 5px 22px rgba(0, 0, 0, .18);
+    }
+
+    [data-bs-theme="dark"] .form-label {
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .form-control {
+        background-color: var(--bs-body-bg);
+        border-color: var(--bs-border-color);
+        color: var(--bs-body-color);
+    }
+
+        [data-bs-theme="dark"] .form-control::placeholder {
+            color: var(--bs-secondary-color);
+        }
+
+        [data-bs-theme="dark"] .form-control:focus {
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+        }
+
+    [data-bs-theme="dark"] .role-info,
+    [data-bs-theme="dark"] .password-info {
+        background: var(--bs-tertiary-bg);
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .section-divider {
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .form-actions {
+        background: var(--bs-tertiary-bg);
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .password-toggle {
+        color: var(--bs-secondary-color);
+    }
+
+        [data-bs-theme="dark"] .password-toggle:hover {
+            background: var(--bs-secondary-bg);
+            color: var(--bs-body-color);
+        }
+
+    [data-bs-theme="dark"] .mechanic-role-badge {
+        background: rgba(13, 110, 253, .18);
+        color: #6ea8fe;
+    }
+
+    [data-bs-theme="dark"] .section-icon {
+        background: rgba(13, 110, 253, .18);
+        color: #6ea8fe;
+    }
+
+</style>
+
+
+<section class="add-mechanic-page py-5">
+
+    <div class="container add-mechanic-container">
+
+        <!-- =========================================
+             BACK
+        ========================================== -->
+
+        <a asp-controller="Admin"
+           asp-action="Users"
+           class="back-link">
+
+            <span>←</span>
+            Back to User Management
+
+        </a>
+
+
+        <!-- =========================================
+             PAGE HEADER
+        ========================================== -->
+
+        <div class="mb-4">
+
+            <div class="page-label text-primary mb-2">
+                User Management
+            </div>
+
+            <h1 class="page-title">
+                Add Mechanic
+            </h1>
+
+            <p class="page-description mb-0">
+                Create a new mechanic account for workshop staff.
+            </p>
+
+        </div>
+
+
+        <!-- =========================================
+             FORM CARD
+        ========================================== -->
+
+        <div class="mechanic-card">
+
+            <div class="mechanic-card-header">
+
+                <h5 class="card-heading">
+                    New Mechanic Account
+                </h5>
+
+                <p class="card-description">
+                    Enter the mechanic's information and login credentials.
+                </p>
+
+            </div>
+
+
+            <form asp-controller="Admin"
+                  asp-action="AddMechanic"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+
+                <div class="mechanic-card-body">
+
+
+                    <!-- =========================================
+                         VALIDATION
+                    ========================================== -->
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="alert alert-danger mb-4">
+                    </div>
+
+
+                    <!-- =========================================
+                         PERSONAL INFORMATION
+                    ========================================== -->
+
+                    <div class="form-section">
+
+                        <div class="section-header">
+
+                            <div class="section-icon">
+                                01
+                            </div>
+
+                            <div>
+
+                                <div class="section-title">
+                                    Personal Information
+                                </div>
+
+                                <p class="section-description">
+                                    Basic information about the workshop mechanic.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="row g-3">
+
+                            <!-- FULL NAME -->
+
+                            <div class="col-12">
+
+                                <label asp-for="FullName"
+                                       class="form-label">
+                                    Full Name
+                                </label>
+
+                                <input asp-for="FullName"
+                                       class="form-control"
+                                       placeholder="e.g. Muhammad Aiman Hakim"
+                                       autocomplete="name" />
+
+                                <span asp-validation-for="FullName"
+                                      class="text-danger">
+                                </span>
+
+                            </div>
+
+
+                            <!-- EMAIL -->
+
+                            <div class="col-md-6">
+
+                                <label asp-for="Email"
+                                       class="form-label">
+                                    Email Address
+                                </label>
+
+                                <input asp-for="Email"
+                                       class="form-control"
+                                       placeholder="e.g. aiman@serishautocare.com"
+                                       autocomplete="email" />
+
+                                <span asp-validation-for="Email"
+                                      class="text-danger">
+                                </span>
+
+                            </div>
+
+
+                            <!-- PHONE -->
+
+                            <div class="col-md-6">
+
+                                <label asp-for="PhoneNumber"
+                                       class="form-label">
+                                    Phone Number
+                                </label>
+
+                                <input asp-for="PhoneNumber"
+                                       class="form-control"
+                                       placeholder="e.g. 0123456789"
+                                       autocomplete="tel" />
+
+                                <span asp-validation-for="PhoneNumber"
+                                      class="text-danger">
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <hr class="section-divider" />
+
+
+                    <!-- =========================================
+                         ACCOUNT INFORMATION
+                    ========================================== -->
+
+                    <div class="form-section">
+
+                        <div class="section-header">
+
+                            <div class="section-icon">
+                                02
+                            </div>
+
+                            <div>
+
+                                <div class="section-title">
+                                    Account Information
+                                </div>
+
+                                <p class="section-description">
+                                    Login details used by the mechanic to access the system.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- USERNAME -->
+
+                        <div class="mb-3">
+
+                            <label asp-for="Username"
+                                   class="form-label">
+                                Username
+                            </label>
+
+                            <input asp-for="Username"
+                                   class="form-control"
+                                   placeholder="e.g. aiman.mechanic"
+                                   autocomplete="username" />
+
+                            <div class="field-hint">
+                                This username will be used to log in to the system.
+                            </div>
+
+                            <span asp-validation-for="Username"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+
+                        <!-- ROLE -->
+
+                        <div class="role-info">
+
+                            <div>
+
+                                <div class="role-info-title">
+                                    Assigned Role
+                                </div>
+
+                                <p class="role-info-description">
+                                    New accounts created from this page are automatically assigned as workshop mechanics.
+                                </p>
+
+                            </div>
+
+                            <span class="mechanic-role-badge">
+                                Mechanic
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <hr class="section-divider" />
+
+
+                    <!-- =========================================
+                         SECURITY
+                    ========================================== -->
+
+                    <div class="form-section">
+
+                        <div class="section-header">
+
+                            <div class="section-icon">
+                                03
+                            </div>
+
+                            <div>
+
+                                <div class="section-title">
+                                    Security
+                                </div>
+
+                                <p class="section-description">
+                                    Set the initial password for the mechanic account.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="row g-3">
+
+                            <!-- PASSWORD -->
+
+                            <div class="col-md-6">
+
+                                <label asp-for="Password"
+                                       class="form-label">
+                                    Password
+                                </label>
+
+                                <div class="password-wrapper">
+
+                                    <input asp-for="Password"
+                                           class="form-control"
+                                           placeholder="Enter password"
+                                           autocomplete="new-password"
+                                           id="mechanicPassword" />
+
+                                    <button type="button"
+                                            class="password-toggle"
+                                            data-target="mechanicPassword">
+
+                                        Show
+
+                                    </button>
+
+                                </div>
+
+                                <span asp-validation-for="Password"
+                                      class="text-danger">
+                                </span>
+
+                            </div>
+
+
+                            <!-- CONFIRM PASSWORD -->
+
+                            <div class="col-md-6">
+
+                                <label asp-for="ConfirmPassword"
+                                       class="form-label">
+                                    Confirm Password
+                                </label>
+
+                                <div class="password-wrapper">
+
+                                    <input asp-for="ConfirmPassword"
+                                           class="form-control"
+                                           placeholder="Re-enter password"
+                                           autocomplete="new-password"
+                                           id="mechanicConfirmPassword" />
+
+                                    <button type="button"
+                                            class="password-toggle"
+                                            data-target="mechanicConfirmPassword">
+
+                                        Show
+
+                                    </button>
+
+                                </div>
+
+                                <span asp-validation-for="ConfirmPassword"
+                                      class="text-danger">
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="password-info">
+
+                            <div class="password-info-title">
+                                Account Security
+                            </div>
+
+                            <p class="password-info-text">
+                                Use a strong temporary password and provide the login
+                                credentials securely to the mechanic.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================================
+                     ACTIONS
+                ========================================== -->
+
+                <div class="form-actions">
+
+                    <div class="d-flex justify-content-between gap-2">
+
+                        <a asp-controller="Admin"
+                           asp-action="Users"
+                           class="btn btn-outline-secondary btn-back">
+
+                            Cancel
+
+                        </a>
+
+
+                        <button type="submit"
+                                class="btn btn-primary btn-create"
+                                id="createMechanicBtn">
+
+                            Create Mechanic
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // =========================================
+            // SHOW / HIDE PASSWORD
+            // =========================================
+
+            const passwordButtons =
+                document.querySelectorAll(".password-toggle");
+
+
+            passwordButtons.forEach(function (button) {
+
+                button.addEventListener("click", function () {
+
+                    const targetId =
+                        this.getAttribute("data-target");
+
+                    const input =
+                        document.getElementById(targetId);
+
+
+                    if (!input) {
+                        return;
+                    }
+
+
+                    if (input.type === "password") {
+
+                        input.type = "text";
+
+                        this.textContent = "Hide";
+
+                    }
+                    else {
+
+                        input.type = "password";
+
+                        this.textContent = "Show";
+
+                    }
+
+                });
+
+            });
+
+
+            // =========================================
+            // PREVENT DOUBLE SUBMISSION
+            // =========================================
+
+            const form =
+                document.querySelector(
+                    'form[action*="AddMechanic"]'
+                );
+
+            const submitButton =
+                document.getElementById(
+                    "createMechanicBtn"
+                );
+
+
+            if (form && submitButton) {
+
+                form.addEventListener("submit", function () {
+
+                    // Allow ASP.NET validation to run first
+                    setTimeout(function () {
+
+                        if (form.checkValidity()) {
+
+                            submitButton.disabled = true;
+
+                            submitButton.innerHTML =
+                                '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Creating...';
+
+                        }
+
+                    }, 0);
+
+                });
+
+            }
+
+        });
+
+    </script>
+
+}

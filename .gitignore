@@ -361,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Local application secrets
+AIVehicleWorkshopSystem/appsettings.json
+AIVehicleWorkshopSystem/appsettings.Development.json
+
+# User uploaded files
+AIVehicleWorkshopSystem/wwwroot/uploads/
+
+# Local deployment configuration
+AIVehicleWorkshopSystem/Properties/ServiceDependencies/

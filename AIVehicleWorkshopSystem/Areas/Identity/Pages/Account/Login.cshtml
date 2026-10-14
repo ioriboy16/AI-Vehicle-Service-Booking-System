@@ -1,0 +1,389 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<style>
+    .login-page {
+        min-height: calc(100vh - 140px);
+        display: flex;
+        align-items: center;
+        background:
+            linear-gradient(135deg, rgba(13, 110, 253, 0.08), rgba(255, 255, 255, 0.95));
+        padding: 60px 0;
+    }
+
+    .login-card {
+        border: none;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        background: #ffffff;
+    }
+
+    .login-brand-panel {
+        background: linear-gradient(145deg, #0d6efd, #084298);
+        color: white;
+        padding: 55px 45px;
+        height: 100%;
+        min-height: 560px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .login-brand-badge {
+        display: inline-block;
+        width: fit-content;
+        background: rgba(255, 255, 255, 0.16);
+        border: 1px solid rgba(255, 255, 255, 0.20);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 24px;
+    }
+
+    .login-brand-panel h2 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 18px;
+    }
+
+    .login-brand-panel p {
+        color: rgba(255, 255, 255, 0.82);
+        line-height: 1.7;
+        margin-bottom: 28px;
+    }
+
+    .login-feature {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+        font-size: 0.95rem;
+    }
+
+    .login-feature-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.14);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .login-form-panel {
+        padding: 55px 50px;
+        min-height: 560px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .login-label {
+        color: #0d6efd;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+    }
+
+    .login-form-panel h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .login-subtitle {
+        color: #6c757d;
+        margin-bottom: 30px;
+    }
+
+    .login-form-panel .form-control {
+        min-height: 58px;
+        border-radius: 14px;
+        border: 1px solid #dee2e6;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .login-form-panel .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
+    }
+
+    .login-button {
+        min-height: 54px;
+        border-radius: 14px;
+        font-weight: 600;
+    }
+
+    .login-link {
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .login-divider {
+        position: relative;
+        text-align: center;
+        margin: 28px 0;
+    }
+
+    .login-divider::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #e9ecef;
+    }
+
+    .login-divider span {
+        position: relative;
+        background: white;
+        padding: 0 14px;
+        color: #adb5bd;
+        font-size: 0.85rem;
+    }
+
+    @@media (max-width: 991.98px) {
+        .login-brand-panel {
+            min-height: auto;
+            padding: 40px 30px;
+        }
+
+        .login-form-panel {
+            min-height: auto;
+            padding: 40px 30px;
+        }
+    }
+</style>
+
+<section class="login-page">
+    <div class="container">
+
+        <div class="row justify-content-center">
+            <div class="col-xl-10">
+
+                <div class="login-card">
+                    <div class="row g-0">
+
+                        <!-- LEFT BRAND PANEL -->
+                        <div class="col-lg-5">
+
+                            <div class="login-brand-panel">
+
+                                <span class="login-brand-badge">
+                                    SERISH AUTOCARE
+                                </span>
+
+                                <h2>
+                                    Smarter vehicle service starts here.
+                                </h2>
+
+                                <p>
+                                    Manage your vehicles, service appointments,
+                                    repair progress and diagnostic recommendations
+                                    securely in one place.
+                                </p>
+
+                                <div class="login-feature">
+                                    <div class="login-feature-icon">
+                                        🚗
+                                    </div>
+
+                                    <span>
+                                        Manage registered vehicles
+                                    </span>
+                                </div>
+
+                                <div class="login-feature">
+                                    <div class="login-feature-icon">
+                                        📅
+                                    </div>
+
+                                    <span>
+                                        Book and manage appointments
+                                    </span>
+                                </div>
+
+                                <div class="login-feature">
+                                    <div class="login-feature-icon">
+                                        🔧
+                                    </div>
+
+                                    <span>
+                                        Track vehicle repair progress
+                                    </span>
+                                </div>
+
+                                <div class="login-feature">
+                                    <div class="login-feature-icon">
+                                        🔒
+                                    </div>
+
+                                    <span>
+                                        Secure role-based access
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- RIGHT LOGIN FORM -->
+                        <div class="col-lg-7">
+
+                            <div class="login-form-panel">
+
+                                <p class="login-label mb-2">
+                                    WELCOME BACK
+                                </p>
+
+                                <h1>
+                                    Log in to your account
+                                </h1>
+
+                                <p class="login-subtitle">
+                                    Enter your registered email and password
+                                    to continue.
+                                </p>
+
+                                @if (TempData["RegistrationSuccess"] != null)
+                                {
+                                    <div class="alert alert-success d-flex align-items-start gap-2 mb-4"
+                                         role="alert">
+
+                                        <i class="bi bi-check-circle-fill mt-1"></i>
+
+                                        <div>
+                                            <strong>Account Created Successfully</strong>
+
+                                            <div class="small">
+                                                @TempData["RegistrationSuccess"]
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                }
+
+                                <form id="account" method="post">
+
+                                    <div asp-validation-summary="ModelOnly"
+                                         class="alert alert-danger"
+                                         role="alert">
+                                    </div>
+
+                                    <!-- EMAIL -->
+                                    <div class="mb-3">
+
+                                        <label asp-for="Input.Email"
+                                               class="form-label fw-semibold">
+                                            Email Address
+                                        </label>
+
+                                        <input asp-for="Input.Email"
+                                               class="form-control"
+                                               autocomplete="username"
+                                               aria-required="true"
+                                               placeholder="name@example.com" />
+
+                                        <span asp-validation-for="Input.Email"
+                                              class="text-danger small">
+                                        </span>
+
+                                    </div>
+
+                                    <!-- PASSWORD -->
+                                    <div class="mb-3">
+
+                                        <div class="d-flex justify-content-between align-items-center">
+
+                                            <label asp-for="Input.Password"
+                                                   class="form-label fw-semibold">
+                                                Password
+                                            </label>
+
+                                            <a id="forgot-password"
+                                               asp-page="./ForgotPassword"
+                                               class="login-link small">
+                                                Forgot password?
+                                            </a>
+
+                                        </div>
+
+                                        <input asp-for="Input.Password"
+                                               class="form-control"
+                                               autocomplete="current-password"
+                                               aria-required="true"
+                                               placeholder="Enter your password" />
+
+                                        <span asp-validation-for="Input.Password"
+                                              class="text-danger small">
+                                        </span>
+
+                                    </div>
+
+                                    <!-- REMEMBER ME -->
+                                    <div class="form-check mb-4">
+
+                                        <input class="form-check-input"
+                                               asp-for="Input.RememberMe" />
+
+                                        <label asp-for="Input.RememberMe"
+                                               class="form-check-label">
+                                            Remember me
+                                        </label>
+
+                                    </div>
+
+                                    <!-- LOGIN BUTTON -->
+                                    <button id="login-submit"
+                                            type="submit"
+                                            class="btn btn-primary w-100 login-button">
+                                        Log In
+                                    </button>
+
+                                    <div class="login-divider">
+                                        <span>New to Serish AutoCare?</span>
+                                    </div>
+
+                                    <!-- REGISTER -->
+                                    <a asp-page="./Register"
+                                       asp-route-returnUrl="@Model.ReturnUrl"
+                                       class="btn btn-outline-primary w-100 login-button d-flex align-items-center justify-content-center">
+                                        Create Customer Account
+                                    </a>
+
+                                    <div class="text-center mt-4">
+
+                                        <a id="resend-confirmation"
+                                           asp-page="./ResendEmailConfirmation"
+                                           class="login-link small text-muted">
+                                            Resend email confirmation
+                                        </a>
+
+                                    </div>
+
+                                </form>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,1801 @@
+﻿@model AIVehicleWorkshopSystem.Models.Repair
+
+@using AIVehicleWorkshopSystem.Models
+
+@{
+    ViewData["Title"] = "Repair Details";
+
+    var progressHistory =
+        ViewBag.ProgressHistory as List<RepairProgress>
+        ?? new List<RepairProgress>();
+
+    var vehicle = Model.Appointment?.Vehicle;
+    var appointment = Model.Appointment;
+
+    var statusClass =
+        Model.RepairStatus == "Completed"
+            ? "status-completed"
+            : Model.RepairStatus == "In Progress"
+                ? "status-progress"
+                : Model.RepairStatus == "Assigned"
+                    ? "status-assigned"
+                    : "status-default";
+}
+
+<style>
+
+    /* =========================================
+               PAGE
+            ========================================= */
+
+    .repair-details-page {
+        min-height: 100vh;
+        background: #f7f9fc;
+    }
+
+    .repair-details-container {
+        max-width: 1100px;
+    }
+
+    .page-label {
+        color: #0d6efd;
+        font-size: .76rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        margin-bottom: .45rem;
+    }
+
+    .page-title {
+        color: #1f2937;
+        font-weight: 700;
+        margin-bottom: .35rem;
+    }
+
+    .page-description {
+        color: #6b7280;
+        margin-bottom: 0;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: #6b7280;
+        font-size: .85rem;
+        font-weight: 600;
+        text-decoration: none;
+        margin-bottom: 1.4rem;
+        transition: color .15s ease;
+    }
+
+        .back-link:hover {
+            color: #0d6efd;
+        }
+
+
+    /* =========================================
+               COMMON CARD
+            ========================================= */
+
+    .detail-card {
+        background: #ffffff;
+        border: 1px solid #edf0f5;
+        border-radius: 15px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .035);
+        overflow: hidden;
+        margin-bottom: 1.25rem;
+    }
+
+    .detail-card-body {
+        padding: 1.5rem;
+    }
+
+    .detail-card-header {
+        padding: 1.2rem 1.5rem;
+        background: #ffffff;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .section-title {
+        color: #1f2937;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: .2rem;
+    }
+
+    .section-description {
+        color: #8b95a5;
+        font-size: .8rem;
+        margin-bottom: 0;
+    }
+
+
+    /* =========================================
+               STATUS HERO
+            ========================================= */
+
+    .status-card {
+        position: relative;
+        background: #ffffff;
+        border: 1px solid #edf0f5;
+        border-radius: 15px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .035);
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+        overflow: hidden;
+    }
+
+        .status-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: #0d6efd;
+        }
+
+        .status-card.status-progress::before {
+            background: #f59e0b;
+        }
+
+        .status-card.status-completed::before {
+            background: #198754;
+        }
+
+    .status-label {
+        color: #8b95a5;
+        font-size: .75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        margin-bottom: .3rem;
+    }
+
+    .status-title {
+        color: #1f2937;
+        font-size: 1.45rem;
+        font-weight: 700;
+        margin-bottom: 0;
+    }
+
+    .repair-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: .48rem .8rem;
+        border-radius: 20px;
+        font-size: .78rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .badge-assigned {
+        background: #eaf2ff;
+        color: #0d6efd;
+    }
+
+    .badge-progress {
+        background: #fff7e6;
+        color: #b76e00;
+    }
+
+    .badge-completed {
+        background: #eaf8ef;
+        color: #198754;
+    }
+
+    .badge-default {
+        background: #f1f3f5;
+        color: #6c757d;
+    }
+
+
+    /* =========================================
+               INFORMATION GRID
+            ========================================= */
+
+    .info-box {
+        height: 100%;
+        padding: 1rem;
+        background: #fafbfc;
+        border: 1px solid #edf0f5;
+        border-radius: 11px;
+    }
+
+    .info-label {
+        color: #8b95a5;
+        font-size: .73rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .035em;
+        margin-bottom: .4rem;
+    }
+
+    .info-value {
+        color: #374151;
+        font-size: .9rem;
+        font-weight: 600;
+        margin-bottom: .1rem;
+    }
+
+    .info-secondary {
+        color: #8b95a5;
+        font-size: .77rem;
+        margin-bottom: 0;
+    }
+
+
+    /* =========================================
+               CUSTOMER COMPLAINT
+            ========================================= */
+
+    .complaint-box {
+        background: #fafbfc;
+        border: 1px solid #edf0f5;
+        border-radius: 11px;
+        padding: 1rem;
+        color: #4b5563;
+        font-size: .88rem;
+        line-height: 1.6;
+    }
+
+
+    /* =========================================
+               CHAT
+            ========================================= */
+
+    .communication-card {
+        background: #ffffff;
+        border: 1px solid #edf0f5;
+        border-radius: 15px;
+        padding: 1.35rem 1.5rem;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .035);
+        margin-bottom: 1.25rem;
+    }
+
+    .communication-icon {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 11px;
+        background: #eef4ff;
+        color: #0d6efd;
+        font-size: .76rem;
+        font-weight: 700;
+    }
+
+    .communication-title {
+        color: #1f2937;
+        font-size: .95rem;
+        font-weight: 700;
+        margin-bottom: .15rem;
+    }
+
+    .communication-text {
+        color: #8b95a5;
+        font-size: .8rem;
+        margin-bottom: 0;
+    }
+
+
+    /* =========================================
+               WORKFLOW CARD
+            ========================================= */
+
+    .workflow-card {
+        background: #ffffff;
+        border: 1px solid #edf0f5;
+        border-radius: 15px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .035);
+        overflow: hidden;
+        margin-bottom: 1.25rem;
+    }
+
+    .workflow-header {
+        padding: 1.3rem 1.5rem;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .workflow-body {
+        padding: 1.5rem;
+    }
+
+    .workflow-number {
+        width: 37px;
+        height: 37px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #eef4ff;
+        color: #0d6efd;
+        font-size: .76rem;
+        font-weight: 700;
+    }
+
+        .workflow-number.complete {
+            background: #eaf8ef;
+            color: #198754;
+        }
+
+
+    /* =========================================
+               FORM
+            ========================================= */
+
+    .form-label {
+        color: #374151;
+        font-size: .83rem;
+        font-weight: 600;
+        margin-bottom: .45rem;
+    }
+
+    .form-control {
+        border: 1px solid #dfe3e8;
+        border-radius: 10px;
+        padding: .75rem .9rem;
+        font-size: .87rem;
+        resize: vertical;
+    }
+
+        .form-control:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .08);
+        }
+
+    .form-text {
+        color: #9ca3af;
+        font-size: .74rem;
+        margin-top: .4rem;
+    }
+
+
+    /* =========================================
+               NOTICE
+            ========================================= */
+
+    .notice-box {
+        display: flex;
+        gap: 10px;
+        padding: .9rem 1rem;
+        border: 1px solid #e6e9ed;
+        border-radius: 10px;
+        background: #fafbfc;
+        color: #6b7280;
+        font-size: .8rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .notice-symbol {
+        color: #f59e0b;
+        font-weight: 700;
+    }
+
+
+    /* =========================================
+               COMPLETED
+            ========================================= */
+
+    .completed-banner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: #eaf8ef;
+        border: 1px solid #ccebd8;
+        border-radius: 11px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .completed-icon {
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #198754;
+        color: #ffffff;
+        font-weight: 700;
+    }
+
+    .completed-title {
+        color: #146c43;
+        font-size: .88rem;
+        font-weight: 700;
+        margin-bottom: .1rem;
+    }
+
+    .completed-text {
+        color: #3f7f60;
+        font-size: .77rem;
+        margin-bottom: 0;
+    }
+
+    .summary-content {
+        padding: 1rem;
+        background: #fafbfc;
+        border: 1px solid #edf0f5;
+        border-radius: 10px;
+        color: #4b5563;
+        font-size: .87rem;
+        line-height: 1.6;
+    }
+
+
+    /* =========================================
+               HISTORY / TIMELINE
+            ========================================= */
+
+    .timeline {
+        position: relative;
+    }
+
+    .timeline-item {
+        position: relative;
+        display: flex;
+        gap: 16px;
+        padding-bottom: 1.5rem;
+    }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+    .timeline-marker-wrapper {
+        position: relative;
+        width: 30px;
+        display: flex;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .timeline-marker {
+        position: relative;
+        z-index: 2;
+        width: 12px;
+        height: 12px;
+        margin-top: 6px;
+        border-radius: 50%;
+        background: #0d6efd;
+        border: 3px solid #dbeafe;
+    }
+
+    .timeline-line {
+        position: absolute;
+        top: 18px;
+        bottom: -10px;
+        width: 2px;
+        background: #e5e7eb;
+    }
+
+    .timeline-item:last-child .timeline-line {
+        display: none;
+    }
+
+    .timeline-content {
+        flex-grow: 1;
+        min-width: 0;
+        padding-bottom: .2rem;
+    }
+
+    .timeline-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: .35rem;
+    }
+
+    .history-status {
+        display: inline-flex;
+        padding: .3rem .55rem;
+        border-radius: 20px;
+        font-size: .69rem;
+        font-weight: 600;
+    }
+
+    .history-assigned {
+        background: #eaf2ff;
+        color: #0d6efd;
+    }
+
+    .history-progress {
+        background: #fff7e6;
+        color: #b76e00;
+    }
+
+    .history-completed {
+        background: #eaf8ef;
+        color: #198754;
+    }
+
+    .history-update {
+        background: #f1f3f5;
+        color: #6c757d;
+    }
+
+    .history-description {
+        color: #4b5563;
+        font-size: .84rem;
+        line-height: 1.5;
+    }
+
+    .history-date {
+        color: #9ca3af;
+        font-size: .72rem;
+        white-space: nowrap;
+    }
+
+
+    /* =========================================
+               TIME INFORMATION
+            ========================================= */
+
+    .time-item {
+        position: relative;
+        padding-left: 14px;
+    }
+
+        .time-item::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 3px;
+            width: 3px;
+            height: calc(100% - 6px);
+            border-radius: 4px;
+            background: #dbeafe;
+        }
+
+    .time-label {
+        color: #8b95a5;
+        font-size: .72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: .3rem;
+    }
+
+    .time-value {
+        color: #374151;
+        font-size: .84rem;
+        font-weight: 600;
+    }
+
+
+    /* =========================================
+               BUTTONS
+            ========================================= */
+
+    .action-btn {
+        border-radius: 9px;
+        padding: .62rem 1.1rem;
+        font-size: .84rem;
+        font-weight: 600;
+    }
+
+    .footer-area {
+        padding-top: .4rem;
+    }
+
+    .last-updated {
+        color: #8b95a5;
+        font-size: .75rem;
+    }
+
+
+    /* =========================================
+               DARK MODE
+            ========================================= */
+
+    [data-bs-theme="dark"] .repair-details-page {
+        background: var(--bs-body-bg);
+    }
+
+    [data-bs-theme="dark"] .page-title,
+    [data-bs-theme="dark"] .status-title,
+    [data-bs-theme="dark"] .section-title,
+    [data-bs-theme="dark"] .communication-title,
+    [data-bs-theme="dark"] .info-value,
+    [data-bs-theme="dark"] .time-value {
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .page-description,
+    [data-bs-theme="dark"] .status-label,
+    [data-bs-theme="dark"] .section-description,
+    [data-bs-theme="dark"] .communication-text,
+    [data-bs-theme="dark"] .info-label,
+    [data-bs-theme="dark"] .info-secondary,
+    [data-bs-theme="dark"] .time-label,
+    [data-bs-theme="dark"] .last-updated,
+    [data-bs-theme="dark"] .history-date,
+    [data-bs-theme="dark"] .back-link {
+        color: var(--bs-secondary-color);
+    }
+
+    [data-bs-theme="dark"] .detail-card,
+    [data-bs-theme="dark"] .detail-card-header,
+    [data-bs-theme="dark"] .status-card,
+    [data-bs-theme="dark"] .communication-card,
+    [data-bs-theme="dark"] .workflow-card {
+        background: var(--bs-body-bg);
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .workflow-header {
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .info-box,
+    [data-bs-theme="dark"] .complaint-box,
+    [data-bs-theme="dark"] .summary-content,
+    [data-bs-theme="dark"] .notice-box {
+        background: var(--bs-tertiary-bg);
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .complaint-box,
+    [data-bs-theme="dark"] .summary-content,
+    [data-bs-theme="dark"] .history-description {
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .notice-box {
+        color: var(--bs-secondary-color);
+    }
+
+    [data-bs-theme="dark"] .form-label {
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .form-control {
+        background-color: var(--bs-body-bg);
+        border-color: var(--bs-border-color);
+        color: var(--bs-body-color);
+    }
+
+        [data-bs-theme="dark"] .form-control::placeholder {
+            color: var(--bs-secondary-color);
+        }
+
+    [data-bs-theme="dark"] .form-text {
+        color: var(--bs-secondary-color);
+    }
+
+    [data-bs-theme="dark"] .timeline-line {
+        background: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .completed-banner {
+        background: rgba(25, 135, 84, .15);
+        border-color: rgba(25, 135, 84, .3);
+    }
+
+    [data-bs-theme="dark"] .completed-title {
+        color: #75b798;
+    }
+
+    [data-bs-theme="dark"] .completed-text {
+        color: #a3cfbb;
+    }
+
+    [data-bs-theme="dark"] .badge-assigned,
+    [data-bs-theme="dark"] .history-assigned {
+        background: rgba(13, 110, 253, .18);
+        color: #6ea8fe;
+    }
+
+    [data-bs-theme="dark"] .badge-progress,
+    [data-bs-theme="dark"] .history-progress {
+        background: rgba(255, 193, 7, .16);
+        color: #ffda6a;
+    }
+
+    [data-bs-theme="dark"] .badge-completed,
+    [data-bs-theme="dark"] .history-completed {
+        background: rgba(25, 135, 84, .18);
+        color: #75b798;
+    }
+
+    [data-bs-theme="dark"] .badge-default,
+    [data-bs-theme="dark"] .history-update {
+        background: var(--bs-tertiary-bg);
+        color: var(--bs-secondary-color);
+    }
+
+    [data-bs-theme="dark"] .communication-icon,
+    [data-bs-theme="dark"] .workflow-number {
+        background: rgba(13, 110, 253, .18);
+        color: #6ea8fe;
+    }
+
+        [data-bs-theme="dark"] .workflow-number.complete {
+            background: rgba(25, 135, 84, .18);
+            color: #75b798;
+        }
+
+
+    /* =========================================
+               RESPONSIVE
+            ========================================= */
+
+    @@media (max-width: 767.98px) {
+
+        .detail-card-body,
+        .detail-card-header,
+        .workflow-body,
+        .workflow-header {
+            padding: 1.2rem;
+        }
+
+        .status-card {
+            padding: 1.2rem;
+        }
+
+        .timeline-top {
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .history-date {
+            white-space: normal;
+        }
+
+        .communication-card > .d-flex {
+            align-items: flex-start !important;
+        }
+
+        .communication-action {
+            width: 100%;
+            margin-top: .75rem;
+        }
+
+            .communication-action .btn {
+                width: 100%;
+            }
+
+        .footer-area {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 1rem;
+        }
+
+            .footer-area .btn {
+                width: 100%;
+            }
+
+        .last-updated {
+            text-align: center;
+        }
+    }
+
+</style>
+
+
+<section class="repair-details-page py-5">
+
+    <div class="container repair-details-container">
+
+
+        <!-- =========================================
+             BACK
+        ========================================== -->
+
+        <a asp-controller="Mechanic"
+           asp-action="Repairs"
+           class="back-link">
+
+            <span>←</span>
+            Back to My Repairs
+
+        </a>
+
+
+        <!-- =========================================
+             HEADER
+        ========================================== -->
+
+        <div class="mb-4">
+
+            <div class="page-label">
+                Repair Management
+            </div>
+
+            <h1 class="page-title">
+                Repair #@Model.RepairId
+            </h1>
+
+            <p class="page-description">
+                Review the vehicle issue and record the repair work performed.
+            </p>
+
+        </div>
+
+
+        <!-- =========================================
+             MESSAGES
+        ========================================== -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success
+                                alert-dismissible fade show
+                                border-0 shadow-sm rounded-3"
+                 role="alert">
+
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger
+                                alert-dismissible fade show
+                                border-0 shadow-sm rounded-3"
+                 role="alert">
+
+                @TempData["ErrorMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+
+            </div>
+        }
+
+
+        <!-- =========================================
+             CURRENT STATUS
+        ========================================== -->
+
+        <div class="status-card @statusClass">
+
+            <div class="d-flex
+                        justify-content-between
+                        align-items-center
+                        flex-wrap
+                        gap-3">
+
+                <div>
+
+                    <div class="status-label">
+                        Current Repair Status
+                    </div>
+
+                    <h2 class="status-title">
+                        @Model.RepairStatus
+                    </h2>
+
+                </div>
+
+
+                @if (Model.RepairStatus == "Assigned")
+                {
+                    <span class="repair-status-badge badge-assigned">
+
+                        <span class="status-dot"></span>
+
+                        Assigned
+
+                    </span>
+                }
+                else if (Model.RepairStatus == "In Progress")
+                {
+                    <span class="repair-status-badge badge-progress">
+
+                        <span class="status-dot"></span>
+
+                        In Progress
+
+                    </span>
+                }
+                else if (Model.RepairStatus == "Completed")
+                {
+                    <span class="repair-status-badge badge-completed">
+
+                        <span class="status-dot"></span>
+
+                        Completed
+
+                    </span>
+                }
+                else
+                {
+                    <span class="repair-status-badge badge-default">
+
+                        <span class="status-dot"></span>
+
+                        @Model.RepairStatus
+
+                    </span>
+                }
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             REPAIR INFORMATION
+        ========================================== -->
+
+        <div class="detail-card">
+
+            <div class="detail-card-header">
+
+                <h5 class="section-title">
+                    Repair Information
+                </h5>
+
+                <p class="section-description">
+                    Customer, vehicle and appointment information for this repair.
+                </p>
+
+            </div>
+
+
+            <div class="detail-card-body">
+
+                <div class="row g-3">
+
+
+                    <!-- CUSTOMER -->
+
+                    <div class="col-md-6">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Customer
+                            </div>
+
+                            <div class="info-value">
+                                @ViewBag.CustomerUsername
+                            </div>
+
+                            <div class="info-secondary">
+                                @ViewBag.CustomerEmail
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- VEHICLE -->
+
+                    <div class="col-md-6">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Vehicle
+                            </div>
+
+                            @if (vehicle != null)
+                            {
+                                <div class="info-value">
+                                    @vehicle.Brand @vehicle.Model
+                                </div>
+
+                                <div class="info-secondary">
+                                    @vehicle.PlateNumber
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="info-value">
+                                    Vehicle unavailable
+                                </div>
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- SERVICE -->
+
+                    <div class="col-md-6">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Service Type
+                            </div>
+
+                            <div class="info-value">
+                                @(appointment?.ServiceType ?? "-")
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- APPOINTMENT -->
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Appointment
+                            </div>
+
+                            @if (appointment != null)
+                            {
+                                <div class="info-value">
+                                    @(appointment.AppointmentDate.ToString("dd MMMM yyyy"))
+                                </div>
+
+                                <div class="info-secondary">
+                                    @(DateTime.Today.Add(appointment.AppointmentTime).ToString("hh:mm tt"))
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="info-value">
+                                    -
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+
+
+
+                    <!-- CUSTOMER COMPLAINT -->
+
+                    <div class="col-12">
+
+                        <div class="info-label mb-2">
+                            Customer Complaint
+                        </div>
+
+                        <div class="complaint-box">
+
+                            @if (!string.IsNullOrWhiteSpace(
+                                                        appointment?.CustomerComplaint))
+                            {
+                                @appointment.CustomerComplaint
+                            }
+                            else
+                            {
+                                <span class="text-muted">
+                                    No customer complaint recorded.
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             CUSTOMER COMMUNICATION
+        ========================================== -->
+
+        <div class="communication-card">
+
+            <div class="d-flex
+                        justify-content-between
+                        align-items-center
+                        flex-wrap
+                        gap-3">
+
+                <div class="d-flex align-items-center gap-3">
+
+                    <div class="communication-icon">
+                        CHAT
+                    </div>
+
+                    <div>
+
+                        <div class="communication-title">
+                            Customer Communication
+                        </div>
+
+                        <p class="communication-text">
+                            Communicate with the customer regarding this repair.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="communication-action">
+
+                    <a asp-controller="Chat"
+                       asp-action="RepairChat"
+                       asp-route-repairId="@Model.RepairId"
+                       class="btn btn-primary action-btn">
+
+                        Open Repair Chat
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             ASSIGNED - START REPAIR
+        ========================================== -->
+        @if (Model.RepairStatus == "Assigned")
+        {
+            <div class="workflow-card">
+
+                <div class="workflow-header">
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="workflow-number">
+                            01
+                        </div>
+
+                        <div>
+
+                            <h5 class="section-title">
+                                Start Repair
+                            </h5>
+
+                            <p class="section-description">
+                                Begin working on this assigned vehicle.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="workflow-body">
+
+                    <p class="text-muted small mb-4">
+                        Starting this repair will change its status from
+                        <strong>Assigned</strong> to
+                        <strong>In Progress</strong>.
+                    </p>
+
+
+                    <form asp-controller="Mechanic"
+                          asp-action="StartRepair"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="id"
+                               value="@Model.RepairId" />
+
+
+                        <button type="submit"
+                                class="btn btn-primary action-btn">
+
+                            Start Repair
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+        }
+
+
+        <!-- =========================================
+             IN PROGRESS
+        ========================================== -->
+        @if (Model.RepairStatus == "In Progress")
+        {
+
+            <!-- WORKSHOP UPDATE -->
+
+            <div class="workflow-card">
+
+                <div class="workflow-header">
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="workflow-number">
+                            01
+                        </div>
+
+                        <div>
+
+                            <h5 class="section-title">
+                                Workshop Update
+                            </h5>
+
+                            <p class="section-description">
+                                Record the diagnosis and repair work performed.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="workflow-body">
+
+                    <form asp-controller="Mechanic"
+                          asp-action="SaveWorkshopUpdate"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="id"
+                               value="@Model.RepairId" />
+
+
+                        <!-- ISSUE FOUND -->
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Issue Found
+                            </label>
+
+                            <textarea name="issueFound"
+                                  class="form-control"
+                                  rows="4"
+                                  maxlength="1000"
+                                  placeholder="Example: Radiator hose is leaking near the upper connection.">@Model.Diagnosis</textarea>
+
+                            <div class="form-text">
+                                Record the problem or fault identified during inspection.
+                            </div>
+
+                        </div>
+
+
+                        <!-- ACTION TAKEN -->
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Action Taken
+                            </label>
+
+                            <textarea name="actionTaken"
+                                  class="form-control"
+                                  rows="5"
+                                  maxlength="2000"
+                                  placeholder="Example: Replaced the damaged hose and refilled the coolant.">@Model.RepairNotes</textarea>
+
+                            <div class="form-text">
+                                Record repairs, replacements, adjustments or checks performed.
+                            </div>
+
+                        </div>
+
+
+                        <button type="submit"
+                                class="btn btn-primary action-btn">
+
+                            Save Workshop Update
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+            <!-- COMPLETE REPAIR -->
+
+            <div class="workflow-card">
+
+                <div class="workflow-header">
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="workflow-number complete">
+                            02
+                        </div>
+
+                        <div>
+
+                            <h5 class="section-title">
+                                Complete Repair
+                            </h5>
+
+                            <p class="section-description">
+                                Finish the repair after all required work has been completed.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="workflow-body">
+
+                    <div class="notice-box">
+
+                        <div class="notice-symbol">
+                            !
+                        </div>
+
+                        <div>
+                            Make sure both
+                            <strong>Issue Found</strong>
+                            and
+                            <strong>Action Taken</strong>
+                            have been saved before completing the repair.
+                        </div>
+
+                    </div>
+
+
+                    <form asp-controller="Mechanic"
+                          asp-action="CompleteRepair"
+                          method="post"
+                          id="completeRepairForm">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="id"
+                               value="@Model.RepairId" />
+
+
+                        <button type="submit"
+                                class="btn btn-success action-btn">
+
+                            Mark as Completed
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+        }
+
+
+        <!-- =========================================
+             COMPLETED REPAIR
+        ========================================== -->
+        @if (Model.RepairStatus == "Completed")
+        {
+            <div class="detail-card">
+
+                <div class="detail-card-body">
+
+                    <div class="completed-banner">
+
+                        <div class="completed-icon">
+                            ✓
+                        </div>
+
+                        <div>
+
+                            <div class="completed-title">
+                                Repair Completed
+                            </div>
+
+                            <p class="completed-text">
+                                This vehicle repair has been successfully completed.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <h5 class="section-title mb-4">
+                        Final Repair Summary
+                    </h5>
+
+
+                    <!-- ISSUE -->
+
+                    <div class="mb-4">
+
+                        <div class="info-label mb-2">
+                            Issue Found
+                        </div>
+
+                        <div class="summary-content">
+
+                            @if (!string.IsNullOrWhiteSpace(Model.Diagnosis))
+                            {
+                                @Model.Diagnosis
+                            }
+                            else
+                            {
+                                <span class="text-muted">
+                                    No diagnosis recorded.
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ACTION -->
+
+                    <div>
+
+                        <div class="info-label mb-2">
+                            Action Taken
+                        </div>
+
+                        <div class="summary-content">
+
+                            @if (!string.IsNullOrWhiteSpace(Model.RepairNotes))
+                            {
+                                @Model.RepairNotes
+                            }
+                            else
+                            {
+                                <span class="text-muted">
+                                    No repair notes recorded.
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+
+        <!-- =========================================
+             REPAIR HISTORY
+        ========================================== -->
+
+        <div class="detail-card">
+
+            <div class="detail-card-header">
+
+                <h5 class="section-title">
+                    Repair History
+                </h5>
+
+                <p class="section-description">
+                    Recorded activity and status changes for this repair.
+                </p>
+
+            </div>
+
+
+            <div class="detail-card-body">
+
+                @if (!progressHistory.Any())
+                {
+                    <div class="notice-box mb-0">
+
+                        <div>
+                            No repair history available yet.
+                        </div>
+
+                    </div>
+                }
+                else
+                {
+                    <div class="timeline">
+
+                        @foreach (var progress in progressHistory)
+                        {
+                            <div class="timeline-item">
+
+                                <div class="timeline-marker-wrapper">
+
+                                    <div class="timeline-marker"></div>
+
+                                    <div class="timeline-line"></div>
+
+                                </div>
+
+
+                                <div class="timeline-content">
+
+                                    <div class="timeline-top">
+
+                                        <div>
+
+                                            @if (progress.Status == "Assigned")
+                                            {
+                                                <span class="history-status history-assigned">
+                                                    Assigned
+                                                </span>
+                                            }
+                                            else if (progress.Status == "In Progress")
+                                            {
+                                                <span class="history-status history-progress">
+                                                    In Progress
+                                                </span>
+                                            }
+                                            else if (progress.Status == "Completed")
+                                            {
+                                                <span class="history-status history-completed">
+                                                    Completed
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="history-status history-update">
+                                                    Workshop Update
+                                                </span>
+                                            }
+
+                                        </div>
+
+
+                                        <div class="history-date">
+
+                                            @progress.CreatedAt.ToString(
+                                            "dd MMM yyyy, hh:mm tt"
+                                                                        )
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="history-description">
+                                @progress.Description
+                            </div>
+
+                        </div>
+
+                    </div>
+                                        }
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             TIME INFORMATION
+        ========================================== -->
+
+        <div class="detail-card">
+
+            <div class="detail-card-header">
+
+                <h5 class="section-title">
+                    Repair Timeline
+                </h5>
+
+                <p class="section-description">
+                    Important timestamps for this repair job.
+                </p>
+
+            </div>
+
+
+            <div class="detail-card-body">
+
+                <div class="row g-4">
+
+
+                    <!-- CREATED -->
+
+                    <div class="col-md-4">
+
+                        <div class="time-item">
+
+                            <div class="time-label">
+                                Repair Created
+                            </div>
+
+                            <div class="time-value">
+
+                                @Model.CreatedAt.ToString(
+                                "dd MMM yyyy, hh:mm tt"
+                                                                )
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- STARTED -->
+
+                    <div class="col-md-4">
+
+                        <div class="time-item">
+
+                            <div class="time-label">
+                                Work Started
+                            </div>
+
+                            <div class="time-value">
+
+                                @if (Model.StartedAt.HasValue)
+                                {
+                                    @Model.StartedAt.Value.ToString(
+                                    "dd MMM yyyy, hh:mm tt"
+                                                                )
+                                                                }
+                                else
+                                {
+                                    <span class="text-muted">
+                                        Not started
+                                    </span>
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- COMPLETED -->
+
+                    <div class="col-md-4">
+
+                        <div class="time-item">
+
+                            <div class="time-label">
+                                Completed
+                            </div>
+
+                            <div class="time-value">
+
+                                @if (Model.CompletedAt.HasValue)
+                                {
+                                    @Model.CompletedAt.Value.ToString(
+                                    "dd MMM yyyy, hh:mm tt"
+                                                                )
+                                                                }
+                                else
+                                {
+                                    <span class="text-muted">
+                                        Not completed
+                                    </span>
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             FOOTER
+        ========================================== -->
+
+        <div class="footer-area
+                    d-flex
+                    justify-content-between
+                    align-items-center">
+
+            <a asp-controller="Mechanic"
+               asp-action="Repairs"
+               class="btn btn-outline-secondary action-btn">
+
+                ← Back to Repairs
+
+            </a>
+
+
+            <div class="last-updated">
+
+                Last updated:
+                <strong>
+                    @Model.UpdatedAt.ToString(
+                    "dd MMM yyyy, hh:mm tt"
+                                        )
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+@section Scripts {
+
+    <script>
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                // =========================================
+                // COMPLETE REPAIR CONFIRMATION
+                // =========================================
+
+                const completeForm =
+                    document.getElementById(
+                        "completeRepairForm"
+                    );
+
+
+                if (completeForm) {
+
+                    completeForm.addEventListener(
+                        "submit",
+                        function (event) {
+
+                            const confirmed =
+                                confirm(
+                                    "Mark this repair as completed? " +
+                                    "Make sure the workshop update has been saved."
+                                );
+
+
+                            if (!confirmed) {
+
+                                event.preventDefault();
+
+                            }
+
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+    </script>
+
+}

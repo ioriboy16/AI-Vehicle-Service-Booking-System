@@ -1,0 +1,894 @@
+﻿@model AIVehicleWorkshopSystem.ViewModels.CreateInvoiceViewModel
+
+@{
+    ViewData["Title"] = "Create Invoice";
+}
+
+<div class="container py-4">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Create Invoice</h2>
+            <p class="text-muted mb-0">
+                Create an invoice for the completed repair.
+            </p>
+        </div>
+
+        <a asp-controller="Admin"
+           asp-action="Invoices"
+           class="btn btn-outline-secondary">
+            Back to Invoices
+        </a>
+    </div>
+
+
+    <!-- VALIDATION -->
+    <div asp-validation-summary="ModelOnly"
+         class="alert alert-danger">
+    </div>
+
+
+    <!-- CUSTOMER / VEHICLE INFORMATION -->
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0">
+                Repair Information
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-4">
+
+                <div class="col-md-6">
+                    <small class="text-muted d-block">
+                        Customer
+                    </small>
+
+                    <span class="fw-semibold">
+                        @Model.CustomerName
+                    </span>
+                </div>
+
+
+                <div class="col-md-6">
+                    <small class="text-muted d-block">
+                        Repair ID
+                    </small>
+
+                    <span class="fw-semibold">
+                        #@Model.RepairId
+                    </span>
+                </div>
+
+
+                <div class="col-md-6">
+                    <small class="text-muted d-block">
+                        Vehicle
+                    </small>
+
+                    <span class="fw-semibold">
+                        @Model.VehicleName
+                    </span>
+                </div>
+
+
+                <div class="col-md-6">
+                    <small class="text-muted d-block">
+                        Plate Number
+                    </small>
+
+                    <span class="fw-semibold">
+                        @Model.PlateNumber
+                    </span>
+                </div>
+
+
+                <div class="col-md-6">
+                    <small class="text-muted d-block">
+                        Issue Found
+                    </small>
+
+                    <span>
+                        @(string.IsNullOrWhiteSpace(Model.IssueFound)
+                                                ? "-"
+                                                : Model.IssueFound)
+                    </span>
+                </div>
+
+
+                <div class="col-md-6">
+                    <small class="text-muted d-block">
+                        Action Taken
+                    </small>
+
+                    <span>
+                        @(string.IsNullOrWhiteSpace(Model.ActionTaken)
+                                                ? "-"
+                                                : Model.ActionTaken)
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- CREATE INVOICE FORM -->
+    <form asp-controller="Admin"
+          asp-action="CreateInvoice"
+          method="post"
+          id="invoiceForm">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               asp-for="RepairId" />
+
+
+        <!-- MILEAGE / REMARKS -->
+        <div class="card border-0 shadow-sm mb-4">
+
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0">
+                    Invoice Information
+                </h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+
+                        <label asp-for="Mileage"
+                               class="form-label fw-semibold">
+                            Vehicle Mileage (KM)
+                        </label>
+
+                        <input asp-for="Mileage"
+                               type="number"
+                               min="0"
+                               class="form-control"
+                               placeholder="e.g. 187597" />
+
+                        <span asp-validation-for="Mileage"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+
+                    <div class="col-md-8">
+
+                        <label asp-for="Remarks"
+                               class="form-label fw-semibold">
+                            Remarks / Customer Complaint
+                        </label>
+
+                        <textarea asp-for="Remarks"
+                                  class="form-control"
+                                  rows="3"
+                                  placeholder="Enter remarks if required..."></textarea>
+
+                        <span asp-validation-for="Remarks"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- INVOICE ITEMS -->
+        <div class="card border-0 shadow-sm mb-4">
+
+            <div class="card-header bg-white py-3">
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <div>
+                        <h5 class="fw-bold mb-1">
+                            Invoice Items
+                        </h5>
+
+                        <small class="text-muted">
+                            Add parts, labour, services or other charges.
+                        </small>
+                    </div>
+
+
+                    <button type="button"
+                            class="btn btn-outline-primary btn-sm"
+                            id="addItemButton">
+
+                        + Add Item
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="table align-middle"
+                           id="invoiceItemsTable">
+
+                        <thead class="table-light">
+
+                            <tr>
+                                <th style="min-width: 220px;">
+                                    Description
+                                </th>
+
+                                <th style="min-width: 140px;">
+                                    Type
+                                </th>
+
+                                <th style="width: 110px;">
+                                    Qty
+                                </th>
+
+                                <th style="width: 160px;">
+                                    Unit Price (RM)
+                                </th>
+
+                                <th style="width: 150px;"
+                                    class="text-end">
+                                    Amount
+                                </th>
+
+                                <th style="width: 80px;"></th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="invoiceItemsBody">
+
+                            @for (var i = 0; i < Model.Items.Count; i++)
+                            {
+                                <tr class="invoice-item-row">
+
+                                    <td>
+
+                                        <input asp-for="Items[i].Description"
+                                               class="form-control item-description"
+                                               placeholder="e.g. Radiator Perodua Myvi" />
+
+                                        <span asp-validation-for="Items[i].Description"
+                                              class="text-danger small">
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <select asp-for="Items[i].ItemType"
+                                                class="form-select item-type">
+
+                                            <option value="">
+                                                Select Type
+                                            </option>
+
+                                            <option value="Part">
+                                                Part
+                                            </option>
+
+                                            <option value="Labour">
+                                                Labour
+                                            </option>
+
+                                            <option value="Service">
+                                                Service
+                                            </option>
+
+                                            <option value="Other">
+                                                Other
+                                            </option>
+
+                                        </select>
+
+                                        <span asp-validation-for="Items[i].ItemType"
+                                              class="text-danger small">
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <input asp-for="Items[i].Quantity"
+                                               type="number"
+                                               min="0.01"
+                                               step="0.01"
+                                               class="form-control item-quantity" />
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                RM
+                                            </span>
+
+                                            <input asp-for="Items[i].UnitPrice"
+                                                   type="number"
+                                                   min="0"
+                                                   step="0.01"
+                                                   class="form-control item-price" />
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <td class="text-end">
+
+                                        <span class="fw-semibold item-amount">
+                                            RM 0.00
+                                        </span>
+
+                                    </td>
+
+
+                                    <td class="text-end">
+
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger remove-item-button">
+
+                                            Remove
+
+                                        </button>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div id="itemValidation"
+                     class="text-danger small mb-3">
+                </div>
+
+
+                <!-- TOTAL -->
+                <div class="row justify-content-end">
+
+                    <div class="col-md-5 col-lg-4">
+
+                        <div class="border rounded p-3 bg-light">
+
+                            <div class="d-flex justify-content-between mb-2">
+
+                                <span class="text-muted">
+                                    Subtotal
+                                </span>
+
+                                <span id="subtotalDisplay"
+                                      class="fw-semibold">
+                                    RM 0.00
+                                </span>
+
+                            </div>
+
+
+                            <hr class="my-2" />
+
+
+                            <div class="d-flex justify-content-between">
+
+                                <span class="fw-bold fs-5">
+                                    Total
+                                </span>
+
+                                <span id="totalDisplay"
+                                      class="fw-bold fs-5">
+                                    RM 0.00
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ACTION BUTTONS -->
+        <div class="d-flex justify-content-end gap-2">
+
+            <a asp-controller="Admin"
+               asp-action="Invoices"
+               class="btn btn-outline-secondary">
+
+                Cancel
+
+            </a>
+
+
+            <button type="submit"
+                    class="btn btn-primary px-4">
+
+                Generate Invoice
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                const itemsBody =
+                    document.getElementById(
+                        "invoiceItemsBody"
+                    );
+
+                const addButton =
+                    document.getElementById(
+                        "addItemButton"
+                    );
+
+                const invoiceForm =
+                    document.getElementById(
+                        "invoiceForm"
+                    );
+
+                const subtotalDisplay =
+                    document.getElementById(
+                        "subtotalDisplay"
+                    );
+
+                const totalDisplay =
+                    document.getElementById(
+                        "totalDisplay"
+                    );
+
+                const itemValidation =
+                    document.getElementById(
+                        "itemValidation"
+                    );
+
+
+                // =====================================
+                // MONEY FORMAT
+                // =====================================
+                function formatMoney(value) {
+
+                    const number =
+                        Number(value) || 0;
+
+                    return "RM " +
+                        number.toLocaleString(
+                            "en-MY",
+                            {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            }
+                        );
+                }
+
+
+                // =====================================
+                // UPDATE INPUT INDEXES
+                // =====================================
+                function updateIndexes() {
+
+                    const rows =
+                        itemsBody.querySelectorAll(
+                            ".invoice-item-row"
+                        );
+
+                    rows.forEach(
+                        function (row, index) {
+
+                            const description =
+                                row.querySelector(
+                                    ".item-description"
+                                );
+
+                            const type =
+                                row.querySelector(
+                                    ".item-type"
+                                );
+
+                            const quantity =
+                                row.querySelector(
+                                    ".item-quantity"
+                                );
+
+                            const price =
+                                row.querySelector(
+                                    ".item-price"
+                                );
+
+
+                            description.name =
+                                "Items[" +
+                                index +
+                                "].Description";
+
+                            description.id =
+                                "Items_" +
+                                index +
+                                "__Description";
+
+
+                            type.name =
+                                "Items[" +
+                                index +
+                                "].ItemType";
+
+                            type.id =
+                                "Items_" +
+                                index +
+                                "__ItemType";
+
+
+                            quantity.name =
+                                "Items[" +
+                                index +
+                                "].Quantity";
+
+                            quantity.id =
+                                "Items_" +
+                                index +
+                                "__Quantity";
+
+
+                            price.name =
+                                "Items[" +
+                                index +
+                                "].UnitPrice";
+
+                            price.id =
+                                "Items_" +
+                                index +
+                                "__UnitPrice";
+
+                        }
+                    );
+                }
+
+
+                // =====================================
+                // CALCULATE TOTAL
+                // =====================================
+                function calculateTotals() {
+
+                    const rows =
+                        itemsBody.querySelectorAll(
+                            ".invoice-item-row"
+                        );
+
+                    let subtotal = 0;
+
+
+                    rows.forEach(
+                        function (row) {
+
+                            const quantity =
+                                parseFloat(
+                                    row.querySelector(
+                                        ".item-quantity"
+                                    ).value
+                                ) || 0;
+
+
+                            const unitPrice =
+                                parseFloat(
+                                    row.querySelector(
+                                        ".item-price"
+                                    ).value
+                                ) || 0;
+
+
+                            const amount =
+                                quantity *
+                                unitPrice;
+
+
+                            subtotal += amount;
+
+
+                            row.querySelector(
+                                ".item-amount"
+                            ).textContent =
+                                formatMoney(amount);
+
+                        }
+                    );
+
+
+                    subtotalDisplay.textContent =
+                        formatMoney(subtotal);
+
+                    totalDisplay.textContent =
+                        formatMoney(subtotal);
+
+                }
+
+
+                // =====================================
+                // CREATE NEW ROW
+                // =====================================
+                function createItemRow() {
+
+                    const row =
+                        document.createElement("tr");
+
+                    row.className =
+                        "invoice-item-row";
+
+
+                    row.innerHTML = `
+
+                        <td>
+
+                            <input type="text"
+                                   class="form-control item-description"
+                                   placeholder="e.g. Radiator Perodua Myvi" />
+
+                        </td>
+
+
+                        <td>
+
+                            <select class="form-select item-type">
+
+                                <option value="">
+                                    Select Type
+                                </option>
+
+                                <option value="Part">
+                                    Part
+                                </option>
+
+                                <option value="Labour">
+                                    Labour
+                                </option>
+
+                                <option value="Service">
+                                    Service
+                                </option>
+
+                                <option value="Other">
+                                    Other
+                                </option>
+
+                            </select>
+
+                        </td>
+
+
+                        <td>
+
+                            <input type="number"
+                                   min="0.01"
+                                   step="0.01"
+                                   value="1"
+                                   class="form-control item-quantity" />
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="input-group">
+
+                                <span class="input-group-text">
+                                    RM
+                                </span>
+
+                                <input type="number"
+                                       min="0"
+                                       step="0.01"
+                                       value="0"
+                                       class="form-control item-price" />
+
+                            </div>
+
+                        </td>
+
+
+                        <td class="text-end">
+
+                            <span class="fw-semibold item-amount">
+                                RM 0.00
+                            </span>
+
+                        </td>
+
+
+                        <td class="text-end">
+
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger remove-item-button">
+
+                                Remove
+
+                            </button>
+
+                        </td>
+
+                    `;
+
+
+                    itemsBody.appendChild(row);
+
+                    updateIndexes();
+
+                    calculateTotals();
+
+                }
+
+
+                // =====================================
+                // ADD ITEM
+                // =====================================
+                addButton.addEventListener(
+                    "click",
+                    function () {
+
+                        createItemRow();
+
+                    }
+                );
+
+
+                // =====================================
+                // INPUT CHANGES
+                // =====================================
+                itemsBody.addEventListener(
+                    "input",
+                    function (event) {
+
+                        if (
+                            event.target.classList.contains(
+                                "item-quantity"
+                            ) ||
+                            event.target.classList.contains(
+                                "item-price"
+                            )
+                        ) {
+                            calculateTotals();
+                        }
+
+                    }
+                );
+
+
+                // =====================================
+                // REMOVE ITEM
+                // =====================================
+                itemsBody.addEventListener(
+                    "click",
+                    function (event) {
+
+                        const removeButton =
+                            event.target.closest(
+                                ".remove-item-button"
+                            );
+
+                        if (!removeButton) {
+                            return;
+                        }
+
+
+                        const rows =
+                            itemsBody.querySelectorAll(
+                                ".invoice-item-row"
+                            );
+
+
+                        if (rows.length <= 1) {
+
+                            itemValidation.textContent =
+                                "At least one invoice item is required.";
+
+                            return;
+                        }
+
+
+                        removeButton
+                            .closest(
+                                ".invoice-item-row"
+                            )
+                            .remove();
+
+
+                        itemValidation.textContent =
+                            "";
+
+
+                        updateIndexes();
+
+                        calculateTotals();
+
+                    }
+                );
+
+
+                // =====================================
+                // FINAL CHECK BEFORE SUBMIT
+                // =====================================
+                invoiceForm.addEventListener(
+                    "submit",
+                    function (event) {
+
+                        updateIndexes();
+
+                        const rows =
+                            itemsBody.querySelectorAll(
+                                ".invoice-item-row"
+                            );
+
+
+                        if (rows.length === 0) {
+
+                            event.preventDefault();
+
+                            itemValidation.textContent =
+                                "Please add at least one invoice item.";
+
+                            return;
+                        }
+
+
+                        itemValidation.textContent =
+                            "";
+
+                    }
+                );
+
+
+                // =====================================
+                // INITIAL CALCULATION
+                // =====================================
+                updateIndexes();
+
+                calculateTotals();
+
+            }
+        );
+
+    </script>
+}

@@ -1,0 +1,486 @@
+﻿@page
+@model RegisterModel
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<style>
+    .register-page {
+        min-height: calc(100vh - 140px);
+        display: flex;
+        align-items: center;
+        background: linear-gradient(135deg, rgba(13, 110, 253, 0.08), rgba(255, 255, 255, 0.96));
+        padding: 60px 0;
+    }
+
+    .register-card {
+        border: none;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        background: #ffffff;
+    }
+
+    .register-brand-panel {
+        background: linear-gradient(145deg, #0d6efd, #084298);
+        color: white;
+        padding: 55px 45px;
+        height: 100%;
+        min-height: 620px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .register-brand-badge {
+        display: inline-block;
+        width: fit-content;
+        background: rgba(255, 255, 255, 0.16);
+        border: 1px solid rgba(255, 255, 255, 0.20);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 24px;
+    }
+
+    .register-brand-panel h2 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 18px;
+    }
+
+    .register-brand-panel p {
+        color: rgba(255, 255, 255, 0.82);
+        line-height: 1.7;
+        margin-bottom: 28px;
+    }
+
+    .register-feature {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+        font-size: 0.95rem;
+    }
+
+    .register-feature-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.14);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .register-form-panel {
+        padding: 55px 50px;
+        min-height: 620px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .register-label {
+        color: #0d6efd;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+    }
+
+    .register-form-panel h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .register-subtitle {
+        color: #6c757d;
+        margin-bottom: 30px;
+    }
+
+    .register-form-panel .form-control {
+        min-height: 58px;
+        border-radius: 14px;
+        border: 1px solid #dee2e6;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+        .register-form-panel .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
+        }
+
+    .register-button {
+        min-height: 54px;
+        border-radius: 14px;
+        font-weight: 600;
+    }
+
+    .register-link {
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .register-divider {
+        position: relative;
+        text-align: center;
+        margin: 28px 0;
+    }
+
+        .register-divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e9ecef;
+        }
+
+        .register-divider span {
+            position: relative;
+            background: white;
+            padding: 0 14px;
+            color: #adb5bd;
+            font-size: 0.85rem;
+        }
+
+    @@media (max-width: 991.98px) {
+        .register-brand-panel {
+            min-height: auto;
+            padding: 40px 30px;
+        }
+
+        .register-form-panel {
+            min-height: auto;
+            padding: 40px 30px;
+        }
+    }
+
+    .password-input-group .form-control {
+        border-radius: 14px 0 0 14px;
+    }
+
+    .password-input-group .password-toggle {
+        width: 52px;
+        border: 1px solid #dee2e6;
+        border-left: 0;
+        border-radius: 0 14px 14px 0;
+        background: #ffffff;
+        color: #6c757d;
+    }
+
+        .password-input-group .password-toggle:hover {
+            background: #f8f9fa;
+            color: #0d6efd;
+        }
+
+        .password-input-group .password-toggle:focus {
+            box-shadow: none;
+            border-color: #0d6efd;
+        }
+
+    .password-requirements {
+        color: #6c757d;
+        font-size: 0.8rem;
+    }
+</style>
+
+<section class="register-page">
+    <div class="container">
+
+        <div class="row justify-content-center">
+            <div class="col-xl-10">
+
+                <div class="register-card">
+                    <div class="row g-0">
+
+                        <!-- LEFT BRAND PANEL -->
+                        <div class="col-lg-5">
+
+                            <div class="register-brand-panel">
+
+                                <span class="register-brand-badge">
+                                    SERISH AUTOCARE
+                                </span>
+
+                                <h2>
+                                    Create your customer account.
+                                </h2>
+
+                                <p>
+                                    Register once and manage your vehicle services,
+                                    appointments, repair progress and diagnostic
+                                    recommendations from one secure platform.
+                                </p>
+
+                                <div class="register-feature">
+                                    <div class="register-feature-icon">
+                                        🚗
+                                    </div>
+
+                                    <span>
+                                        Register and manage vehicles
+                                    </span>
+                                </div>
+
+                                <div class="register-feature">
+                                    <div class="register-feature-icon">
+                                        📅
+                                    </div>
+
+                                    <span>
+                                        Book service appointments
+                                    </span>
+                                </div>
+
+                                <div class="register-feature">
+                                    <div class="register-feature-icon">
+                                        🔧
+                                    </div>
+
+                                    <span>
+                                        Track repair progress
+                                    </span>
+                                </div>
+
+                                <div class="register-feature">
+                                    <div class="register-feature-icon">
+                                        🔒
+                                    </div>
+
+                                    <span>
+                                        Secure customer access
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- RIGHT REGISTER FORM -->
+                        <div class="col-lg-7">
+
+                            <div class="register-form-panel">
+
+                                <p class="register-label mb-2">
+                                    CREATE ACCOUNT
+                                </p>
+
+                                <h1>
+                                    Register as a customer
+                                </h1>
+
+                                <p class="register-subtitle">
+                                    Enter your email and create a password
+                                    to get started.
+                                </p>
+
+                                <form id="registerForm"
+                                      asp-route-returnUrl="@Model.ReturnUrl"
+                                      method="post">
+
+                                    <div asp-validation-summary="ModelOnly"
+                                         class="alert alert-danger"
+                                         role="alert">
+                                    </div>
+
+                                    <!-- FULL NAME -->
+                                    <div class="mb-3">
+
+                                        <label asp-for="Input.FullName"
+                                               class="form-label fw-semibold">
+                                            Full Name
+                                        </label>
+
+                                        <input asp-for="Input.FullName"
+                                               class="form-control"
+                                               autocomplete="name"
+                                               aria-required="true"
+                                               placeholder="Enter your full name" />
+
+                                        <span asp-validation-for="Input.FullName"
+                                              class="text-danger small">
+                                        </span>
+
+                                    </div>
+
+                                    <div class="mb-3">
+
+                                        <label asp-for="Input.Username"
+                                               class="form-label fw-semibold">
+                                            Username
+                                        </label>
+
+                                        <input asp-for="Input.Username"
+                                               class="form-control"
+                                               autocomplete="username"
+                                               aria-required="true"
+                                               placeholder="Choose a username" />
+
+                                        <span asp-validation-for="Input.Username"
+                                              class="text-danger small">
+                                        </span>
+
+                                    </div>
+
+                                    <!-- EMAIL -->
+                                    <div class="mb-3">
+
+                                        <label asp-for="Input.Email"
+                                               class="form-label fw-semibold">
+                                            Email Address
+                                        </label>
+
+                                        <input asp-for="Input.Email"
+                                               class="form-control"
+                                               autocomplete="username"
+                                               aria-required="true"
+                                               placeholder="name@example.com" />
+
+                                        <span asp-validation-for="Input.Email"
+                                              class="text-danger small">
+                                        </span>
+
+                                    </div>
+
+                                    <!-- PASSWORD -->
+                                    <div class="mb-3">
+
+                                        <label asp-for="Input.Password"
+                                               class="form-label fw-semibold">
+                                            Password
+                                        </label>
+
+                                        <div class="input-group password-input-group">
+
+                                            <input asp-for="Input.Password"
+                                                   class="form-control"
+                                                   autocomplete="new-password"
+                                                   aria-required="true"
+                                                   placeholder="Create a password"
+                                                   id="registerPassword" />
+
+                                            <button class="btn btn-outline-secondary password-toggle"
+                                                    type="button"
+                                                    data-target="registerPassword"
+                                                    aria-label="Show or hide password">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+
+                                        </div>
+
+                                        <span asp-validation-for="Input.Password"
+                                              class="text-danger small">
+                                        </span>
+
+                                        <div class="password-requirements mt-2">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            Password must contain at least 6 characters.
+                                        </div>
+
+                                    </div>
+
+                                    <!-- CONFIRM PASSWORD -->
+                                    <div class="mb-4">
+
+                                        <label asp-for="Input.ConfirmPassword"
+                                               class="form-label fw-semibold">
+                                            Confirm Password
+                                        </label>
+
+                                        <div class="input-group password-input-group">
+
+                                            <input asp-for="Input.ConfirmPassword"
+                                                   class="form-control"
+                                                   autocomplete="new-password"
+                                                   aria-required="true"
+                                                   placeholder="Re-enter your password"
+                                                   id="confirmRegisterPassword" />
+
+                                            <button class="btn btn-outline-secondary password-toggle"
+                                                    type="button"
+                                                    data-target="confirmRegisterPassword"
+                                                    aria-label="Show or hide password">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+
+                                        </div>
+
+                                        <span asp-validation-for="Input.ConfirmPassword"
+                                              class="text-danger small">
+                                        </span>
+
+                                    </div>
+
+                                    <!-- REGISTER BUTTON -->
+                                    <button id="registerSubmit"
+                                            type="submit"
+                                            class="btn btn-primary w-100 register-button">
+                                        Create Account
+                                    </button>
+
+                                    <div class="register-divider">
+                                        <span>Already have an account?</span>
+                                    </div>
+
+                                    <!-- LOGIN -->
+                                    <a asp-page="./Login"
+                                       asp-route-returnUrl="@Model.ReturnUrl"
+                                       class="btn btn-outline-primary w-100 register-button d-flex align-items-center justify-content-center">
+                                        Log In
+                                    </a>
+
+                                </form>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.querySelectorAll(".password-toggle").forEach(button => {
+
+            button.addEventListener("click", function () {
+
+                const targetId = this.getAttribute("data-target");
+                const input = document.getElementById(targetId);
+                const icon = this.querySelector("i");
+
+                if (input.type === "password") {
+
+                    input.type = "text";
+
+                    icon.classList.remove("bi-eye");
+                    icon.classList.add("bi-eye-slash");
+
+                } else {
+
+                    input.type = "password";
+
+                    icon.classList.remove("bi-eye-slash");
+                    icon.classList.add("bi-eye");
+                }
+
+            });
+
+        });
+    </script>
+
+}

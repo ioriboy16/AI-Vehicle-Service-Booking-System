@@ -1,0 +1,53 @@
+﻿<ul class="nav account-manage-nav">
+
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)"
+           id="profile"
+           asp-page="./Index">
+
+            <i class="bi bi-person"></i>
+            <span>Profile</span>
+
+        </a>
+    </li>
+
+
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)"
+           id="email"
+           asp-page="./Email">
+
+            <i class="bi bi-envelope"></i>
+            <span>Email</span>
+
+        </a>
+    </li>
+
+
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)"
+           id="change-password"
+           asp-page="./ChangePassword">
+
+            <i class="bi bi-key"></i>
+            <span>Password</span>
+
+        </a>
+    </li>
+
+
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)"
+           id="two-factor"
+           asp-page="./TwoFactorAuthentication">
+
+            <i class="bi bi-shield-lock"></i>
+            <span>Two-Factor Authentication</span>
+
+        </a>
+    </li>
+
+
+    
+
+</ul>

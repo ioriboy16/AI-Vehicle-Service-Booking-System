@@ -1,0 +1,1541 @@
+﻿@model IEnumerable<AIVehicleWorkshopSystem.Models.Repair>
+
+@{
+    ViewData["Title"] = "My Repairs";
+
+    var unreadChatCounts =
+        ViewBag.UnreadChatCounts as Dictionary<int, int>
+        ?? new Dictionary<int, int>();
+
+    var repairs = Model?.ToList()
+        ?? new List<AIVehicleWorkshopSystem.Models.Repair>();
+
+    var totalRepairs = repairs.Count;
+
+    var completedRepairs =
+        repairs.Count(r => r.RepairStatus == "Completed");
+
+    var inProgressRepairs =
+        repairs.Count(r => r.RepairStatus == "In Progress");
+
+    var otherRepairs =
+        totalRepairs - completedRepairs - inProgressRepairs;
+}
+
+
+<style>
+
+    /* =========================================
+           MY REPAIRS PAGE
+        ========================================= */
+
+    .repairs-page {
+        min-height: 100vh;
+        background: #f7f9fc;
+    }
+
+    .repairs-container {
+        max-width: 1400px;
+    }
+
+    .page-label {
+        font-size: .78rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .page-title {
+        color: #1f2937;
+        font-weight: 700;
+        margin-bottom: .35rem;
+    }
+
+    .page-description {
+        color: #6b7280;
+    }
+
+
+    /* =========================================
+           SUMMARY CARDS
+        ========================================= */
+
+    .summary-card {
+        background: #ffffff;
+        border: 1px solid #edf0f5;
+        border-radius: 14px;
+        padding: 1rem 1.2rem;
+        height: 100%;
+        transition: all .2s ease;
+    }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .055);
+        }
+
+    .summary-label {
+        color: #6b7280;
+        font-size: .8rem;
+        margin-bottom: .2rem;
+    }
+
+    .summary-value {
+        color: #1f2937;
+        font-size: 1.45rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .summary-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .8rem;
+        font-weight: 700;
+    }
+
+    .icon-total {
+        background: #eef4ff;
+        color: #0d6efd;
+    }
+
+    .icon-progress {
+        background: #fff7e6;
+        color: #b76e00;
+    }
+
+    .icon-completed {
+        background: #eaf8ef;
+        color: #198754;
+    }
+
+    .icon-other {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+
+    /* =========================================
+           MAIN CARD
+        ========================================= */
+
+    .repair-card {
+        background: #ffffff;
+        border: 1px solid #edf0f5;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .035);
+    }
+
+    .repair-card-header {
+        padding: 1.2rem 1.4rem;
+        border-bottom: 1px solid #edf0f5;
+        background: #ffffff;
+    }
+
+    .card-title-custom {
+        color: #1f2937;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: .2rem;
+    }
+
+    .card-description {
+        color: #8b95a5;
+        font-size: .8rem;
+        margin: 0;
+    }
+
+    .repair-count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+        height: 28px;
+        padding: 0 .65rem;
+        border-radius: 20px;
+        background: #eef4ff;
+        color: #0d6efd;
+        font-size: .78rem;
+        font-weight: 700;
+    }
+
+
+    /* =========================================
+           SEARCH / FILTER
+        ========================================= */
+
+    .filter-area {
+        padding: 1rem 1.4rem;
+        background: #fafbfc;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .filter-label {
+        display: block;
+        color: #6b7280;
+        font-size: .74rem;
+        font-weight: 600;
+        margin-bottom: .4rem;
+    }
+
+    .search-wrapper {
+        position: relative;
+    }
+
+    .search-icon {
+        position: absolute;
+        top: 50%;
+        left: 14px;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        pointer-events: none;
+    }
+
+    .search-input {
+        height: 44px;
+        padding-left: 42px;
+        border-radius: 10px;
+        border: 1px solid #dfe3e8;
+        font-size: .87rem;
+    }
+
+        .search-input::placeholder {
+            color: #adb5bd;
+        }
+
+    .filter-select {
+        height: 44px;
+        border-radius: 10px;
+        border: 1px solid #dfe3e8;
+        font-size: .87rem;
+    }
+
+        .search-input:focus,
+        .filter-select:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .08);
+        }
+
+    .clear-filter-btn {
+        height: 44px;
+        border-radius: 10px;
+        font-size: .82rem;
+        font-weight: 600;
+    }
+
+
+    /* =========================================
+           RESULT COUNT
+        ========================================= */
+
+    .result-area {
+        padding: .7rem 1.4rem;
+        border-bottom: 1px solid #edf0f5;
+        color: #8b95a5;
+        font-size: .76rem;
+    }
+
+        .result-area strong {
+            color: #4b5563;
+        }
+
+
+    /* =========================================
+           TABLE
+        ========================================= */
+
+    .repair-table {
+        margin-bottom: 0;
+    }
+
+        .repair-table thead th {
+            background: #f8fafc;
+            color: #6b7280;
+            font-size: .75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .025em;
+            white-space: nowrap;
+            padding: .9rem 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .repair-table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-color: #f0f2f5;
+            color: #4b5563;
+            font-size: .87rem;
+        }
+
+        .repair-table tbody tr {
+            transition: background-color .15s ease;
+        }
+
+            .repair-table tbody tr:hover {
+                background: #fafcff;
+            }
+
+
+    /* =========================================
+           REPAIR ID
+        ========================================= */
+
+    .repair-id {
+        display: inline-flex;
+        align-items: center;
+        padding: .35rem .55rem;
+        border-radius: 7px;
+        background: #f3f6fb;
+        color: #374151;
+        font-size: .78rem;
+        font-weight: 700;
+    }
+
+
+    /* =========================================
+           VEHICLE
+        ========================================= */
+
+    .vehicle-name {
+        color: #374151;
+        font-weight: 600;
+        margin-bottom: .1rem;
+    }
+
+    .vehicle-plate {
+        color: #8b95a5;
+        font-size: .76rem;
+    }
+
+    .service-name {
+        color: #4b5563;
+        font-weight: 500;
+    }
+
+
+    /* =========================================
+           STATUS BADGES
+        ========================================= */
+
+    .repair-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: .38rem .65rem;
+        border-radius: 20px;
+        font-size: .74rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .status-completed {
+        background: #eaf8ef;
+        color: #198754;
+    }
+
+    .status-progress {
+        background: #fff7e6;
+        color: #b76e00;
+    }
+
+    .status-other {
+        background: #eaf2ff;
+        color: #0d6efd;
+    }
+
+
+    /* =========================================
+           CREATED DATE
+        ========================================= */
+
+    .created-date {
+        color: #4b5563;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .created-time {
+        color: #8b95a5;
+        font-size: .75rem;
+        margin-top: .1rem;
+    }
+
+
+    /* =========================================
+           BUTTONS
+        ========================================= */
+
+    .repair-action-btn {
+        border-radius: 8px;
+        padding: .42rem .75rem;
+        font-size: .78rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .chat-button {
+        position: relative;
+    }
+
+    .chat-count {
+        min-width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 5px;
+        border-radius: 20px;
+        background: #dc3545;
+        color: #ffffff;
+        font-size: .65rem;
+        font-weight: 700;
+        margin-left: 4px;
+    }
+
+
+    /* =========================================
+           EMPTY STATE
+        ========================================= */
+
+    .empty-state {
+        text-align: center;
+        padding: 3.5rem 1rem;
+    }
+
+    .empty-icon {
+        width: 55px;
+        height: 55px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+        background: #f1f5f9;
+        color: #64748b;
+        font-weight: 700;
+    }
+
+    .empty-title {
+        color: #374151;
+        font-weight: 700;
+        margin-bottom: .3rem;
+    }
+
+    .empty-text {
+        color: #8b95a5;
+        font-size: .85rem;
+        margin-bottom: 0;
+    }
+
+    .filter-empty-state {
+        display: none;
+    }
+
+
+    /* =========================================
+           DARK MODE
+           Uses your existing data-bs-theme system
+        ========================================= */
+
+    [data-bs-theme="dark"] .repairs-page {
+        background: var(--bs-body-bg);
+    }
+
+    [data-bs-theme="dark"] .page-title,
+    [data-bs-theme="dark"] .summary-value,
+    [data-bs-theme="dark"] .card-title-custom,
+    [data-bs-theme="dark"] .vehicle-name,
+    [data-bs-theme="dark"] .created-date,
+    [data-bs-theme="dark"] .empty-title {
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .page-description,
+    [data-bs-theme="dark"] .summary-label,
+    [data-bs-theme="dark"] .card-description,
+    [data-bs-theme="dark"] .filter-label,
+    [data-bs-theme="dark"] .vehicle-plate,
+    [data-bs-theme="dark"] .created-time,
+    [data-bs-theme="dark"] .empty-text {
+        color: var(--bs-secondary-color);
+    }
+
+    [data-bs-theme="dark"] .summary-card,
+    [data-bs-theme="dark"] .repair-card,
+    [data-bs-theme="dark"] .repair-card-header {
+        background: var(--bs-body-bg);
+        border-color: var(--bs-border-color);
+    }
+
+        [data-bs-theme="dark"] .summary-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .18);
+        }
+
+    [data-bs-theme="dark"] .repair-card {
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .15);
+    }
+
+
+    /* FILTER */
+
+    [data-bs-theme="dark"] .filter-area {
+        background: var(--bs-tertiary-bg);
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .search-input,
+    [data-bs-theme="dark"] .filter-select {
+        background-color: var(--bs-body-bg);
+        border-color: var(--bs-border-color);
+        color: var(--bs-body-color);
+    }
+
+        [data-bs-theme="dark"] .search-input::placeholder {
+            color: var(--bs-secondary-color);
+        }
+
+    [data-bs-theme="dark"] .search-icon {
+        color: var(--bs-secondary-color);
+    }
+
+
+    /* RESULT */
+
+    [data-bs-theme="dark"] .result-area {
+        border-color: var(--bs-border-color);
+        color: var(--bs-secondary-color);
+    }
+
+        [data-bs-theme="dark"] .result-area strong {
+            color: var(--bs-body-color);
+        }
+
+
+    /* TABLE */
+
+    [data-bs-theme="dark"] .repair-table {
+        --bs-table-bg: transparent;
+        --bs-table-color: var(--bs-body-color);
+        --bs-table-border-color: var(--bs-border-color);
+    }
+
+        [data-bs-theme="dark"] .repair-table thead th {
+            background: var(--bs-tertiary-bg);
+            color: var(--bs-secondary-color);
+            border-color: var(--bs-border-color);
+        }
+
+        [data-bs-theme="dark"] .repair-table tbody td {
+            color: var(--bs-body-color);
+            border-color: var(--bs-border-color);
+        }
+
+        [data-bs-theme="dark"] .repair-table tbody tr:hover {
+            background: var(--bs-tertiary-bg);
+        }
+
+            [data-bs-theme="dark"] .repair-table tbody tr:hover > * {
+                background: var(--bs-tertiary-bg);
+            }
+
+
+    /* REPAIR / VEHICLE */
+
+    [data-bs-theme="dark"] .repair-id {
+        background: var(--bs-tertiary-bg);
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .service-name {
+        color: var(--bs-body-color);
+    }
+
+
+    /* STATUS */
+
+    [data-bs-theme="dark"] .status-completed {
+        background: rgba(25, 135, 84, .18);
+        color: #75b798;
+    }
+
+    [data-bs-theme="dark"] .status-progress {
+        background: rgba(255, 193, 7, .16);
+        color: #ffda6a;
+    }
+
+    [data-bs-theme="dark"] .status-other {
+        background: rgba(13, 110, 253, .18);
+        color: #6ea8fe;
+    }
+
+    [data-bs-theme="dark"] .repair-count-badge {
+        background: rgba(13, 110, 253, .18);
+        color: #6ea8fe;
+    }
+
+
+    /* EMPTY */
+
+    [data-bs-theme="dark"] .empty-icon {
+        background: var(--bs-tertiary-bg);
+        color: var(--bs-secondary-color);
+    }
+
+
+    /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+    @@media (max-width: 767.98px) {
+
+        .repair-card-header,
+        .filter-area,
+        .result-area {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .repair-action-btn {
+            width: 100%;
+        }
+
+        .repair-actions {
+            min-width: 145px;
+        }
+    }
+
+</style>
+
+
+<section class="repairs-page py-5">
+
+    <div class="container repairs-container">
+
+
+        <!-- =========================================
+             PAGE HEADER
+        ========================================== -->
+
+        <div class="mb-4">
+
+            <div class="page-label text-primary mb-2">
+                Workshop Tasks
+            </div>
+
+            <h1 class="page-title">
+                My Repairs
+            </h1>
+
+            <p class="page-description mb-0">
+                View, manage and communicate about vehicle repairs assigned to you.
+            </p>
+
+        </div>
+
+
+        <!-- =========================================
+             SUMMARY CARDS
+        ========================================== -->
+
+        <div class="row g-3 mb-4">
+
+
+            <!-- TOTAL -->
+
+            <div class="col-6 col-lg-3">
+
+                <div class="summary-card">
+
+                    <div class="d-flex
+                                justify-content-between
+                                align-items-center">
+
+                        <div>
+
+                            <div class="summary-label">
+                                Total Repairs
+                            </div>
+
+                            <p class="summary-value">
+                                @totalRepairs
+                            </p>
+
+                        </div>
+
+                        <div class="summary-icon icon-total">
+                            ALL
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- IN PROGRESS -->
+
+            <div class="col-6 col-lg-3">
+
+                <div class="summary-card">
+
+                    <div class="d-flex
+                                justify-content-between
+                                align-items-center">
+
+                        <div>
+
+                            <div class="summary-label">
+                                In Progress
+                            </div>
+
+                            <p class="summary-value">
+                                @inProgressRepairs
+                            </p>
+
+                        </div>
+
+                        <div class="summary-icon icon-progress">
+                            ...
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- COMPLETED -->
+
+            <div class="col-6 col-lg-3">
+
+                <div class="summary-card">
+
+                    <div class="d-flex
+                                justify-content-between
+                                align-items-center">
+
+                        <div>
+
+                            <div class="summary-label">
+                                Completed
+                            </div>
+
+                            <p class="summary-value">
+                                @completedRepairs
+                            </p>
+
+                        </div>
+
+                        <div class="summary-icon icon-completed">
+                            ✓
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- OTHER -->
+
+            <div class="col-6 col-lg-3">
+
+                <div class="summary-card">
+
+                    <div class="d-flex
+                                justify-content-between
+                                align-items-center">
+
+                        <div>
+
+                            <div class="summary-label">
+                                Other Status
+                            </div>
+
+                            <p class="summary-value">
+                                @otherRepairs
+                            </p>
+
+                        </div>
+
+                        <div class="summary-icon icon-other">
+                            JOB
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             NO REPAIRS
+        ========================================== -->
+        @if (!repairs.Any())
+        {
+
+            <div class="repair-card">
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        ✓
+                    </div>
+
+                    <h5 class="empty-title">
+                        No Repairs Assigned
+                    </h5>
+
+                    <p class="empty-text">
+                        You currently have no repair jobs assigned to you.
+                    </p>
+
+                </div>
+
+            </div>
+
+        }
+        else
+        {
+
+            <!-- =========================================
+                 REPAIR CARD
+            ========================================== -->
+
+            <div class="repair-card">
+
+
+                <!-- HEADER -->
+
+                <div class="repair-card-header">
+
+                    <div class="d-flex
+                                    justify-content-between
+                                    align-items-center
+                                    gap-3">
+
+                        <div>
+
+                            <h5 class="card-title-custom">
+                                Assigned Repair Jobs
+                            </h5>
+
+                            <p class="card-description">
+                                Repairs currently assigned to your mechanic account.
+                            </p>
+
+                        </div>
+
+                        <span class="repair-count-badge">
+                            @totalRepairs
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================================
+                     SEARCH & FILTER
+                ========================================== -->
+
+                <div class="filter-area">
+
+                    <div class="row g-3 align-items-end">
+
+
+                        <!-- SEARCH -->
+
+                        <div class="col-12 col-lg-6">
+
+                            <label class="filter-label">
+                                Search Repairs
+                            </label>
+
+                            <div class="search-wrapper">
+
+                                <span class="search-icon">
+                                    🔍
+                                </span>
+
+                                <input type="search"
+                                       id="repairSearch"
+                                       class="form-control search-input"
+                                       placeholder="Search repair ID, vehicle, plate or service..."
+                                       autocomplete="off" />
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- STATUS -->
+
+                        <div class="col-6 col-lg-3">
+
+                            <label class="filter-label">
+                                Repair Status
+                            </label>
+
+                            <select id="statusFilter"
+                                    class="form-select filter-select">
+
+                                <option value="">
+                                    All Status
+                                </option>
+
+                                @foreach (
+                                                            var status in repairs
+                                                            .Select(r => r.RepairStatus)
+                                                            .Where(s => !string.IsNullOrWhiteSpace(s))
+                                                            .Distinct()
+                                                            .OrderBy(s => s)
+                                                            )
+                                {
+                                    <option value="@status">
+                                        @status
+                                    </option>
+                                }
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- CLEAR -->
+
+                        <div class="col-6 col-lg-3">
+
+                            <button type="button"
+                                    id="clearFilters"
+                                    class="btn btn-outline-secondary clear-filter-btn w-100">
+
+                                Clear Filters
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================================
+                     RESULT COUNT
+                ========================================== -->
+
+                <div class="result-area">
+
+                    Showing
+
+                    <strong id="visibleRepairCount">
+                        @totalRepairs
+                    </strong>
+
+                    of
+
+                    <strong>
+                        @totalRepairs
+                    </strong>
+
+                    repair jobs
+
+                </div>
+
+
+                <!-- =========================================
+                     TABLE
+                ========================================== -->
+
+                <div class="table-responsive">
+
+                    <table class="table repair-table align-middle">
+
+                        <thead>
+
+                            <tr>
+
+                                <th class="ps-4">
+                                    Repair
+                                </th>
+
+                                <th>
+                                    Vehicle
+                                </th>
+
+                                <th>
+                                    Service
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Created
+                                </th>
+
+                                <th class="text-end pe-4">
+                                    Actions
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var repair in repairs)
+                            {
+                                var unreadCount =
+                                unreadChatCounts.ContainsKey(
+                                repair.RepairId
+                                )
+                                ? unreadChatCounts[
+                                repair.RepairId
+                                ]
+                                : 0;
+
+
+                                var vehicle =
+                                repair.Appointment?.Vehicle;
+
+
+                                var vehicleName =
+                                vehicle != null
+                                ? $"{vehicle.Brand} {vehicle.Model}"
+                                : "Vehicle unavailable";
+
+
+                                var plateNumber =
+                                vehicle?.PlateNumber ?? "";
+
+
+                                var serviceType =
+                                repair.Appointment?.ServiceType
+                                ?? "-";
+
+
+                                var repairStatus =
+                                repair.RepairStatus
+                                ?? "Unknown";
+
+
+                                <tr class="repair-row"
+                                    data-repair="@repair.RepairId"
+                                    data-vehicle="@vehicleName.ToLowerInvariant()"
+                                    data-plate="@plateNumber.ToLowerInvariant()"
+                                    data-service="@serviceType.ToLowerInvariant()"
+                                    data-status="@repairStatus">
+
+
+                                    <!-- =================================
+                                         REPAIR ID
+                                    ================================== -->
+
+                                    <td class="ps-4">
+
+                                        <span class="repair-id">
+                                            #@repair.RepairId
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- =================================
+                                         VEHICLE
+                                    ================================== -->
+
+                                    <td>
+
+                                        @if (vehicle != null)
+                                        {
+
+                                            <div class="vehicle-name">
+
+                                                @vehicle.Brand
+                                                @vehicle.Model
+
+                                            </div>
+
+                                            <div class="vehicle-plate">
+                                                @vehicle.PlateNumber
+                                            </div>
+
+                                        }
+                                        else
+                                        {
+
+                                            <span class="text-muted">
+                                                Vehicle unavailable
+                                            </span>
+
+                                        }
+
+                                    </td>
+
+
+                                    <!-- =================================
+                                         SERVICE
+                                    ================================== -->
+
+                                    <td>
+
+                                        @if (repair.Appointment != null)
+                                        {
+
+                                            <span class="service-name">
+                                                @repair.Appointment.ServiceType
+                                            </span>
+
+                                        }
+                                        else
+                                        {
+
+                                            <span class="text-muted">
+                                                -
+                                            </span>
+
+                                        }
+
+                                    </td>
+
+
+                                    <!-- =================================
+                                         STATUS
+                                    ================================== -->
+
+                                    <td>
+
+                                        @if (
+                                                                        repair.RepairStatus ==
+                                                                        "Completed"
+                                                                        )
+                                        {
+
+                                            <span class="repair-status status-completed">
+
+                                                <span class="status-dot">
+                                                </span>
+
+                                                Completed
+
+                                            </span>
+
+                                        }
+                                        else if (
+                                        repair.RepairStatus ==
+                                        "In Progress"
+                                        )
+                                        {
+
+                                            <span class="repair-status status-progress">
+
+                                                <span class="status-dot">
+                                                </span>
+
+                                                In Progress
+
+                                            </span>
+
+                                        }
+                                        else
+                                        {
+
+                                            <span class="repair-status status-other">
+
+                                                <span class="status-dot">
+                                                </span>
+
+                                                @repair.RepairStatus
+
+                                            </span>
+
+                                        }
+
+                                    </td>
+
+
+                                    <!-- =================================
+                                         CREATED
+                                    ================================== -->
+
+                                    <td>
+
+                                        <div class="created-date">
+
+                                            @repair.CreatedAt.ToString(
+                                            "dd MMM yyyy"
+                                                                        )
+
+                                </div>
+
+                                <div class="created-time">
+
+                                    @repair.CreatedAt.ToString(
+                                                                        "hh:mm tt"
+                                                                        )
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- =================================
+                                 ACTIONS
+                            ================================== -->
+
+                            <td class="text-end pe-4 repair-actions">
+
+                                <div class="d-flex
+                                                    justify-content-end
+                                                    gap-2
+                                                    flex-wrap">
+
+
+                                    <!-- VIEW DETAILS -->
+
+                                    <a asp-controller="Mechanic"
+                                       asp-action="RepairDetails"
+                                       asp-route-id="@repair.RepairId"
+                                       class="btn btn-outline-primary btn-sm repair-action-btn">
+
+                                        View Details
+
+                                    </a>
+
+
+                                    <!-- CHAT -->
+
+                                    <a asp-controller="Chat"
+                                       asp-action="RepairChat"
+                                       asp-route-repairId="@repair.RepairId"
+                                       class="btn btn-primary btn-sm repair-action-btn chat-button">
+
+                                        Chat
+
+                                        @if (unreadCount > 0)
+                                                {
+
+                                                    <span class="chat-count">
+                                                        @unreadCount
+                                                    </span>
+
+                                                }
+
+                                            </a>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- =========================================
+                     NO FILTER RESULTS
+                ========================================== -->
+
+                <div id="noRepairResults"
+                     class="empty-state filter-empty-state">
+
+                    <div class="empty-icon">
+                        ?
+                    </div>
+
+                    <h5 class="empty-title">
+                        No Matching Repairs
+                    </h5>
+
+                    <p class="empty-text mb-3">
+                        Try changing your search keyword or repair status.
+                    </p>
+
+                    <button type="button"
+                            id="clearFiltersEmpty"
+                            class="btn btn-outline-primary btn-sm px-3">
+
+                        Clear Filters
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        }
+
+    </div>
+
+</section>
+
+
+@section Scripts {
+
+    <script>
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                // =========================================
+                // ELEMENTS
+                // =========================================
+
+                const searchInput =
+                    document.getElementById(
+                        "repairSearch"
+                    );
+
+                const statusFilter =
+                    document.getElementById(
+                        "statusFilter"
+                    );
+
+                const clearButton =
+                    document.getElementById(
+                        "clearFilters"
+                    );
+
+                const clearEmptyButton =
+                    document.getElementById(
+                        "clearFiltersEmpty"
+                    );
+
+                const repairRows =
+                    document.querySelectorAll(
+                        ".repair-row"
+                    );
+
+                const visibleCount =
+                    document.getElementById(
+                        "visibleRepairCount"
+                    );
+
+                const noResults =
+                    document.getElementById(
+                        "noRepairResults"
+                    );
+
+
+                // =========================================
+                // FILTER
+                // =========================================
+
+                function filterRepairs() {
+
+                    if (
+                        !searchInput ||
+                        !statusFilter
+                    ) {
+                        return;
+                    }
+
+
+                    const searchValue =
+                        searchInput.value
+                            .trim()
+                            .toLowerCase();
+
+
+                    const selectedStatus =
+                        statusFilter.value;
+
+
+                    let visibleRepairs = 0;
+
+
+                    repairRows.forEach(
+                        function (row) {
+
+                            const repairId =
+                                row.dataset.repair || "";
+
+                            const vehicle =
+                                row.dataset.vehicle || "";
+
+                            const plate =
+                                row.dataset.plate || "";
+
+                            const service =
+                                row.dataset.service || "";
+
+                            const status =
+                                row.dataset.status || "";
+
+
+                            // SEARCH
+                            const matchesSearch =
+                                searchValue === "" ||
+                                repairId
+                                    .toLowerCase()
+                                    .includes(searchValue) ||
+                                vehicle.includes(
+                                    searchValue
+                                ) ||
+                                plate.includes(
+                                    searchValue
+                                ) ||
+                                service.includes(
+                                    searchValue
+                                );
+
+
+                            // STATUS
+                            const matchesStatus =
+                                selectedStatus === "" ||
+                                status === selectedStatus;
+
+
+                            // DISPLAY
+                            if (
+                                matchesSearch &&
+                                matchesStatus
+                            ) {
+
+                                row.style.display = "";
+
+                                visibleRepairs++;
+
+                            }
+                            else {
+
+                                row.style.display =
+                                    "none";
+
+                            }
+
+                        }
+                    );
+
+
+                    // =====================================
+                    // RESULT COUNT
+                    // =====================================
+
+                    if (visibleCount) {
+
+                        visibleCount.textContent =
+                            visibleRepairs;
+
+                    }
+
+
+                    // =====================================
+                    // EMPTY RESULT
+                    // =====================================
+
+                    if (noResults) {
+
+                        noResults.style.display =
+                            visibleRepairs === 0
+                                ? "block"
+                                : "none";
+
+                    }
+
+                }
+
+
+                // =========================================
+                // CLEAR FILTERS
+                // =========================================
+
+                function clearFilters() {
+
+                    if (
+                        !searchInput ||
+                        !statusFilter
+                    ) {
+                        return;
+                    }
+
+
+                    searchInput.value = "";
+
+                    statusFilter.value = "";
+
+                    filterRepairs();
+
+                    searchInput.focus();
+
+                }
+
+
+                // =========================================
+                // EVENTS
+                // =========================================
+
+                if (searchInput) {
+
+                    searchInput.addEventListener(
+                        "input",
+                        filterRepairs
+                    );
+
+                }
+
+
+                if (statusFilter) {
+
+                    statusFilter.addEventListener(
+                        "change",
+                        filterRepairs
+                    );
+
+                }
+
+
+                if (clearButton) {
+
+                    clearButton.addEventListener(
+                        "click",
+                        clearFilters
+                    );
+
+                }
+
+
+                if (clearEmptyButton) {
+
+                    clearEmptyButton.addEventListener(
+                        "click",
+                        clearFilters
+                    );
+
+                }
+
+            }
+        );
+
+    </script>
+
+}

@@ -1,0 +1,565 @@
+﻿@page
+@using Microsoft.AspNetCore.Http.Features
+@model TwoFactorAuthenticationModel
+
+@{
+    ViewData["Title"] = "Two-Factor Authentication";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+
+    var consentFeature =
+        HttpContext.Features.Get<ITrackingConsentFeature>();
+}
+
+
+<!-- PAGE HEADER -->
+
+<div class="account-page-header">
+
+    <div class="account-page-icon">
+        <i class="bi bi-shield-lock"></i>
+    </div>
+
+    <div>
+
+        <p class="account-eyebrow mb-1">
+            ACCOUNT SECURITY
+        </p>
+
+        <h2 class="fw-bold mb-1">
+            Two-Factor Authentication
+        </h2>
+
+        <p class="text-muted mb-0">
+            Add an additional layer of protection to your
+            Serish AutoCare account.
+        </p>
+
+    </div>
+
+</div>
+
+
+<partial name="_StatusMessage"
+         for="StatusMessage" />
+
+
+@if (consentFeature?.CanTrack ?? true)
+{
+
+    <!-- =====================================================
+         SECURITY STATUS
+         ===================================================== -->
+
+    <div class="twofa-settings-status
+                    @(Model.Is2faEnabled ? "twofa-enabled" : "twofa-disabled")">
+
+        <div class="twofa-settings-status-icon">
+
+            @if (Model.Is2faEnabled)
+            {
+                <i class="bi bi-shield-check"></i>
+            }
+            else
+            {
+                <i class="bi bi-shield-exclamation"></i>
+            }
+
+        </div>
+
+
+        <div class="twofa-settings-status-info">
+
+            <span class="twofa-settings-label">
+                TWO-FACTOR AUTHENTICATION
+            </span>
+
+            @if (Model.Is2faEnabled)
+            {
+                <h4>2FA is enabled</h4>
+
+                <p>
+                    Your account requires an authenticator code
+                    when signing in from an untrusted device.
+                </p>
+            }
+            else
+            {
+                <h4>2FA is not enabled</h4>
+
+                <p>
+                    Protect your account with an authenticator
+                    app and a time-based verification code.
+                </p>
+            }
+
+        </div>
+
+
+        <div class="twofa-settings-badge">
+
+            @if (Model.Is2faEnabled)
+            {
+                <span class="badge rounded-pill text-bg-success">
+                    <i class="bi bi-check-circle me-1"></i>
+                    Enabled
+                </span>
+            }
+            else
+            {
+                <span class="badge rounded-pill text-bg-secondary">
+                    Disabled
+                </span>
+            }
+
+        </div>
+
+    </div>
+
+
+    @if (Model.Is2faEnabled)
+    {
+
+        <!-- =================================================
+             SECURITY OVERVIEW
+             ================================================= -->
+
+        <div class="twofa-overview-grid">
+
+
+            <!-- AUTHENTICATOR -->
+
+            <div class="twofa-overview-card">
+
+                <div class="twofa-overview-icon">
+                    <i class="bi bi-phone"></i>
+                </div>
+
+                <div>
+
+                    <span>
+                        Authenticator
+                    </span>
+
+                    <strong>
+                        @(Model.HasAuthenticator
+                                        ? "Connected"
+                                        : "Not Connected")
+                                                      </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- RECOVERY CODES -->
+
+            <div class="twofa-overview-card">
+
+                <div class="twofa-overview-icon">
+                    <i class="bi bi-key"></i>
+                </div>
+
+                <div>
+
+                    <span>
+                        Recovery Codes
+                    </span>
+
+                    <strong>
+                        @Model.RecoveryCodesLeft remaining
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- DEVICE -->
+
+            <div class="twofa-overview-card">
+
+                <div class="twofa-overview-icon">
+                    <i class="bi bi-laptop"></i>
+                </div>
+
+                <div>
+
+                    <span>
+                        Current Browser
+                    </span>
+
+                    <strong>
+                        @(Model.IsMachineRemembered
+                                        ? "Remembered"
+                                        : "Not Remembered")
+            </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             RECOVERY CODE WARNING
+             ================================================= -->
+@if (Model.RecoveryCodesLeft == 0)
+        {
+            <div class="twofa-warning twofa-warning-danger">
+
+                <i class="bi bi-exclamation-triangle-fill"></i>
+
+                <div>
+
+                    <strong>
+                        No recovery codes remaining
+                    </strong>
+
+                    <p>
+                        Generate a new set of recovery codes so
+                        you have a backup method for accessing
+                        your account.
+                    </p>
+
+                    <a asp-page="./GenerateRecoveryCodes">
+                        Generate recovery codes
+                    </a>
+
+                </div>
+
+            </div>
+        }
+        else if (Model.RecoveryCodesLeft <= 3)
+        {
+            <div class="twofa-warning">
+
+                <i class="bi bi-exclamation-circle"></i>
+
+                <div>
+
+                    <strong>
+                        Only @Model.RecoveryCodesLeft recovery
+                        @(Model.RecoveryCodesLeft == 1 ? "code" : "codes") remaining
+                    </strong>
+
+                    <p>
+                        Consider generating a new set before
+                        your remaining recovery codes are used.
+                    </p>
+
+                    <a asp-page="./GenerateRecoveryCodes">
+                        Generate new codes
+                    </a>
+
+                </div>
+
+            </div>
+        }
+
+
+        <!-- =================================================
+             AUTHENTICATOR MANAGEMENT
+             ================================================= -->
+
+        <div class="twofa-management-section">
+
+            <div class="twofa-section-heading">
+
+                <div>
+
+                    <h5>
+                        Authenticator App
+                    </h5>
+
+                    <p>
+                        Manage the authenticator connected to
+                        your Serish AutoCare account.
+                    </p>
+
+                </div>
+
+                <i class="bi bi-phone"></i>
+
+            </div>
+
+
+            <div class="twofa-action-list">
+
+
+                <!-- SETUP AGAIN -->
+
+                <div class="twofa-action-row">
+
+                    <div class="twofa-action-info">
+
+                        <div class="twofa-action-icon">
+                            <i class="bi bi-qr-code"></i>
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Configure authenticator
+                            </strong>
+
+                            <span>
+                                View the setup page for your
+                                authenticator app.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <a id="enable-authenticator"
+                       asp-page="./EnableAuthenticator"
+                       class="btn btn-outline-primary btn-sm">
+
+                        Configure
+
+                    </a>
+
+                </div>
+
+
+                <!-- RESET AUTHENTICATOR -->
+
+                <div class="twofa-action-row">
+
+                    <div class="twofa-action-info">
+
+                        <div class="twofa-action-icon">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Reset authenticator
+                            </strong>
+
+                            <span>
+                                Replace the current authenticator
+                                key and configure your app again.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <a id="reset-authenticator"
+                       asp-page="./ResetAuthenticator"
+                       class="btn btn-outline-secondary btn-sm">
+
+                        Reset
+
+                    </a>
+
+                </div>
+
+
+                <!-- RECOVERY CODES -->
+
+                <div class="twofa-action-row">
+
+                    <div class="twofa-action-info">
+
+                        <div class="twofa-action-icon">
+                            <i class="bi bi-key"></i>
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Recovery codes
+                            </strong>
+
+                            <span>
+                                Generate a new set of backup
+                                recovery codes.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <a asp-page="./GenerateRecoveryCodes"
+                       class="btn btn-outline-secondary btn-sm">
+
+                        Generate
+
+                    </a>
+
+                </div>
+
+
+                <!-- FORGET BROWSER -->
+                @if (Model.IsMachineRemembered)
+                {
+                    <div class="twofa-action-row">
+
+                        <div class="twofa-action-info">
+
+                            <div class="twofa-action-icon">
+                                <i class="bi bi-laptop"></i>
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    Remembered browser
+                                </strong>
+
+                                <span>
+                                    Require a verification code
+                                    again on this browser.
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <form method="post"
+                              class="m-0">
+
+                            <button type="submit"
+                                    class="btn btn-outline-secondary btn-sm">
+
+                                Forget Browser
+
+                            </button>
+
+                        </form>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             DANGER ZONE
+             ================================================= -->
+
+        <div class="twofa-danger-zone">
+
+            <div>
+
+                <span class="twofa-danger-label">
+                    SECURITY SETTING
+                </span>
+
+                <h5>
+                    Disable Two-Factor Authentication
+                </h5>
+
+                <p>
+                    Disabling 2FA removes the additional
+                    verification step from your account.
+                </p>
+
+            </div>
+
+
+            <a asp-page="./Disable2fa"
+               class="btn btn-outline-danger">
+
+                <i class="bi bi-shield-x me-1"></i>
+
+                Disable 2FA
+
+            </a>
+
+        </div>
+
+    }
+    else
+    {
+
+        <!-- =================================================
+             2FA NOT ENABLED
+             ================================================= -->
+
+        <div class="twofa-enable-panel">
+
+            <div class="twofa-enable-icon">
+                <i class="bi bi-phone"></i>
+            </div>
+
+
+            <div class="twofa-enable-content">
+
+                <h4>
+                    Protect your account with an authenticator
+                </h4>
+
+                <p>
+                    After entering your password, you'll also
+                    need a temporary verification code generated
+                    by your authenticator app.
+                </p>
+
+
+                <div class="twofa-benefits">
+
+                    <div>
+                        <i class="bi bi-check-circle-fill"></i>
+                        Additional sign-in protection
+                    </div>
+
+                    <div>
+                        <i class="bi bi-check-circle-fill"></i>
+                        Time-based verification codes
+                    </div>
+
+                    <div>
+                        <i class="bi bi-check-circle-fill"></i>
+                        Backup recovery codes
+                    </div>
+
+                </div>
+
+
+                <a id="enable-authenticator"
+                   asp-page="./EnableAuthenticator"
+                   class="btn btn-primary mt-3">
+
+                    <i class="bi bi-shield-plus me-1"></i>
+
+                    Set Up Authenticator
+
+                </a>
+
+            </div>
+
+        </div>
+
+    }
+
+}
+else
+{
+
+    <div class="alert alert-danger">
+
+        <strong>
+            Privacy settings required
+        </strong>
+
+        <p class="mb-0 mt-1">
+            You must accept the privacy and cookie policy
+            before configuring two-factor authentication.
+        </p>
+
+    </div>
+
+}
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

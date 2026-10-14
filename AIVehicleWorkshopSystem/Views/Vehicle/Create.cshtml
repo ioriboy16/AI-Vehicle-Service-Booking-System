@@ -1,0 +1,746 @@
+﻿@model AIVehicleWorkshopSystem.Models.Vehicle
+
+@{
+    ViewData["Title"] = "Register Vehicle";
+}
+
+<div class="vehicle-form-page">
+    <div class="container py-4 py-lg-5">
+
+        <div class="vehicle-form-container">
+
+            <!-- PAGE HEADER -->
+            <div class="page-topbar">
+
+                <div>
+                    <div class="page-label">
+                        <i class="bi bi-car-front-fill"></i>
+                        VEHICLE MANAGEMENT
+                    </div>
+
+                    <h2>Register Vehicle</h2>
+
+                    <p>
+                        Add your vehicle information to your Serish AutoCare account.
+                    </p>
+                </div>
+
+                <a asp-controller="Vehicle"
+                   asp-action="Index"
+                   class="back-button">
+
+                    <i class="bi bi-arrow-left"></i>
+                    My Vehicles
+
+                </a>
+
+            </div>
+
+
+            <!-- FORM CARD -->
+            <div class="vehicle-form-card">
+
+                <!-- CARD HEADER -->
+                <div class="form-card-header">
+
+                    <div class="form-header-icon">
+                        <i class="bi bi-car-front-fill"></i>
+                    </div>
+
+                    <div>
+                        <h4>Vehicle Information</h4>
+
+                        <p>
+                            Enter the details of the vehicle you want to register.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <form asp-controller="Vehicle"
+                      asp-action="Create"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-content">
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="validation-summary text-danger mb-3">
+                        </div>
+
+
+                        <div class="vehicle-form-grid">
+
+                            <!-- PLATE NUMBER -->
+                            <div class="vehicle-field">
+
+                                <label asp-for="PlateNumber">
+                                    Plate Number
+                                    <span class="required">*</span>
+                                </label>
+
+                                <div class="input-with-icon">
+
+                                    <i class="bi bi-credit-card-2-front"></i>
+
+                                    <input asp-for="PlateNumber"
+                                           class="form-control"
+                                           placeholder="Example: ABC 1234" />
+
+                                </div>
+
+                                <span asp-validation-for="PlateNumber"
+                                      class="text-danger validation-message">
+                                </span>
+
+                            </div>
+
+
+                            <!-- BRAND -->
+                            <div class="vehicle-field">
+
+                                <label asp-for="Brand">
+                                    Brand
+                                    <span class="required">*</span>
+                                </label>
+
+                                <div class="input-with-icon">
+
+                                    <i class="bi bi-building"></i>
+
+                                    <input asp-for="Brand"
+                                           class="form-control"
+                                           placeholder="Example: Perodua" />
+
+                                </div>
+
+                                <span asp-validation-for="Brand"
+                                      class="text-danger validation-message">
+                                </span>
+
+                            </div>
+
+
+                            <!-- MODEL -->
+                            <div class="vehicle-field">
+
+                                <label asp-for="Model">
+                                    Model
+                                    <span class="required">*</span>
+                                </label>
+
+                                <div class="input-with-icon">
+
+                                    <i class="bi bi-car-front"></i>
+
+                                    <input asp-for="Model"
+                                           class="form-control"
+                                           placeholder="Example: Myvi" />
+
+                                </div>
+
+                                <span asp-validation-for="Model"
+                                      class="text-danger validation-message">
+                                </span>
+
+                            </div>
+
+
+                            <!-- YEAR -->
+                            <div class="vehicle-field">
+
+                                <label asp-for="ManufacturingYear">
+                                    Manufacturing Year
+                                    <span class="required">*</span>
+                                </label>
+
+                                <div class="input-with-icon">
+
+                                    <i class="bi bi-calendar3"></i>
+
+                                    <input asp-for="ManufacturingYear"
+                                           type="number"
+                                           min="1980"
+                                           max="@DateTime.Now.Year"
+                                           class="form-control"
+                                           placeholder="Example: 2020" />
+
+                                </div>
+
+                                <span asp-validation-for="ManufacturingYear"
+                                      class="text-danger validation-message">
+                                </span>
+
+                            </div>
+
+
+                            <!-- COLOUR -->
+                            <div class="vehicle-field">
+
+                                <label asp-for="Colour">
+                                    Colour
+                                </label>
+
+                                <div class="input-with-icon">
+
+                                    <i class="bi bi-palette"></i>
+
+                                    <input asp-for="Colour"
+                                           class="form-control"
+                                           placeholder="Example: Silver" />
+
+                                </div>
+
+                                <span asp-validation-for="Colour"
+                                      class="text-danger validation-message">
+                                </span>
+
+                            </div>
+
+
+                            <!-- MILEAGE -->
+                            <div class="vehicle-field">
+
+                                <label asp-for="CurrentMileage">
+                                    Current Mileage
+                                </label>
+
+                                <div class="mileage-input">
+
+                                    <div class="input-with-icon">
+
+                                        <i class="bi bi-speedometer2"></i>
+
+                                        <input asp-for="CurrentMileage"
+                                               type="number"
+                                               min="0"
+                                               class="form-control"
+                                               placeholder="Example: 85000" />
+
+                                    </div>
+
+                                    <span class="mileage-unit">
+                                        KM
+                                    </span>
+
+                                </div>
+
+                                <span asp-validation-for="CurrentMileage"
+                                      class="text-danger validation-message">
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- INFO -->
+                        <div class="form-notice">
+
+                            <i class="bi bi-info-circle-fill"></i>
+
+                            <div>
+                                <strong>Before saving your vehicle</strong>
+
+                                <span>
+                                    Make sure the plate number and vehicle information
+                                    are entered correctly.
+                                </span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ACTIONS -->
+                    <div class="form-actions">
+
+                        <a asp-controller="Vehicle"
+                           asp-action="Index"
+                           class="cancel-button">
+
+                            <i class="bi bi-x-lg"></i>
+                            Cancel
+
+                        </a>
+
+                        <button type="submit"
+                                class="save-button">
+
+                            <i class="bi bi-check-lg"></i>
+                            Save Vehicle
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<style>
+
+    .vehicle-form-page {
+        min-height: 100vh;
+        background: #f6f8fb;
+    }
+
+    .vehicle-form-container {
+        max-width: 980px;
+        margin: 0 auto;
+    }
+
+
+    /* HEADER */
+
+    .page-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 22px;
+    }
+
+    .page-label {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 6px;
+        color: #0d6efd;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .7px;
+    }
+
+    .page-topbar h2 {
+        margin: 0 0 5px;
+        color: #252d38;
+        font-size: 27px;
+        font-weight: 750;
+    }
+
+    .page-topbar p {
+        margin: 0;
+        color: #87909b;
+        font-size: 12px;
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 14px;
+        color: #56606c;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        background: #ffffff;
+        border: 1px solid #dde2e7;
+        border-radius: 9px;
+        transition: .15s ease;
+        white-space: nowrap;
+    }
+
+        .back-button:hover {
+            color: #0d6efd;
+            background: #f8fbff;
+            border-color: #b9d3ff;
+        }
+
+
+    /* CARD */
+
+    .vehicle-form-card {
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid #e7ebef;
+        border-radius: 18px;
+        box-shadow: 0 5px 22px rgba(0, 0, 0, .04);
+    }
+
+    .form-card-header {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 22px 26px;
+        background: linear-gradient(135deg, #f8fbff, #ffffff);
+        border-bottom: 1px solid #edf0f3;
+    }
+
+    .form-header-icon {
+        width: 43px;
+        height: 43px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #0d6efd;
+        font-size: 18px;
+        background: #eaf2ff;
+        border-radius: 11px;
+    }
+
+    .form-card-header h4 {
+        margin: 0 0 3px;
+        color: #303945;
+        font-size: 16px;
+        font-weight: 750;
+    }
+
+    .form-card-header p {
+        margin: 0;
+        color: #929ba6;
+        font-size: 10px;
+    }
+
+    .form-content {
+        padding: 25px 26px;
+    }
+
+
+    /* GRID */
+
+    .vehicle-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px 18px;
+    }
+
+    .vehicle-field label {
+        display: block;
+        margin-bottom: 7px;
+        color: #48525e;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .required {
+        color: #dc3545;
+    }
+
+
+    /* INPUT */
+
+    .input-with-icon {
+        position: relative;
+        width: 100%;
+    }
+
+        .input-with-icon > i {
+            position: absolute;
+            top: 50%;
+            left: 13px;
+            z-index: 3;
+            color: #8b96a3;
+            font-size: 13px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .input-with-icon .form-control {
+            min-height: 43px;
+            padding-left: 39px;
+            color: #38424d;
+            font-size: 11px;
+            background: #ffffff;
+            border: 1px solid #dfe4ea;
+            border-radius: 9px;
+            box-shadow: none;
+        }
+
+            .input-with-icon .form-control::placeholder {
+                color: #a1a9b2;
+            }
+
+            .input-with-icon .form-control:focus {
+                background: #ffffff;
+                border-color: #86b7fe;
+                box-shadow: 0 0 0 3px rgba(13, 110, 253, .08);
+            }
+
+    .validation-message {
+        display: block;
+        margin-top: 5px;
+        font-size: 9px;
+    }
+
+
+    /* MILEAGE */
+
+    .mileage-input {
+        display: flex;
+    }
+
+        .mileage-input .input-with-icon {
+            flex: 1;
+        }
+
+        .mileage-input .form-control {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+    .mileage-unit {
+        min-width: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #68727e;
+        font-size: 10px;
+        font-weight: 700;
+        background: #f5f7f9;
+        border: 1px solid #dfe4ea;
+        border-left: 0;
+        border-radius: 0 9px 9px 0;
+    }
+
+
+    /* NOTICE */
+
+    .form-notice {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 23px;
+        padding: 12px 14px;
+        color: #48617d;
+        background: #f5f9ff;
+        border: 1px solid #dbe9ff;
+        border-radius: 9px;
+    }
+
+        .form-notice > i {
+            margin-top: 1px;
+            color: #0d6efd;
+            font-size: 13px;
+        }
+
+        .form-notice strong {
+            display: block;
+            margin-bottom: 2px;
+            font-size: 10px;
+        }
+
+        .form-notice span {
+            display: block;
+            color: #748397;
+            font-size: 9px;
+        }
+
+
+    /* ACTIONS */
+
+    .form-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        padding: 17px 26px;
+        background: #fafbfc;
+        border-top: 1px solid #edf0f3;
+    }
+
+    .cancel-button,
+    .save-button {
+        min-height: 37px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 15px;
+        font-size: 10px;
+        font-weight: 650;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: .15s ease;
+    }
+
+    .cancel-button {
+        color: #68727e;
+        background: #ffffff;
+        border: 1px solid #dce1e6;
+    }
+
+        .cancel-button:hover {
+            color: #343d47;
+            background: #f4f6f8;
+        }
+
+    .save-button {
+        color: #ffffff;
+        background: #0d6efd;
+        border: 1px solid #0d6efd;
+    }
+
+        .save-button:hover {
+            background: #0b5ed7;
+            border-color: #0b5ed7;
+        }
+
+
+    /* DARK MODE */
+
+    html[data-bs-theme="dark"] .vehicle-form-page {
+        background: #101318 !important;
+        color: #e5e7eb;
+    }
+
+    html[data-bs-theme="dark"] .page-topbar h2 {
+        color: #f1f5f9;
+    }
+
+    html[data-bs-theme="dark"] .page-topbar p {
+        color: #8f9aaa;
+    }
+
+    html[data-bs-theme="dark"] .back-button {
+        color: #b7c0cc;
+        background: #181d25;
+        border-color: #333d49;
+    }
+
+        html[data-bs-theme="dark"] .back-button:hover {
+            color: #60a5fa;
+            background: #1d232c;
+            border-color: #31558a;
+        }
+
+    html[data-bs-theme="dark"] .vehicle-form-card {
+        background: #181d25;
+        border-color: #2b3440;
+        box-shadow: 0 5px 22px rgba(0, 0, 0, .2);
+    }
+
+    html[data-bs-theme="dark"] .form-card-header {
+        background: linear-gradient(135deg, #181e27, #181d25);
+        border-color: #303946;
+    }
+
+    html[data-bs-theme="dark"] .form-header-icon {
+        color: #60a5fa;
+        background: rgba(59, 130, 246, .14);
+    }
+
+    html[data-bs-theme="dark"] .form-card-header h4 {
+        color: #f1f5f9;
+    }
+
+    html[data-bs-theme="dark"] .form-card-header p {
+        color: #7f8a99;
+    }
+
+    html[data-bs-theme="dark"] .vehicle-field label {
+        color: #c5ced9;
+    }
+
+    html[data-bs-theme="dark"] .input-with-icon .form-control {
+        color: #e5edf6;
+        background: #10151c;
+        border-color: #36404d;
+    }
+
+        html[data-bs-theme="dark"] .input-with-icon .form-control::placeholder {
+            color: #697586;
+        }
+
+        html[data-bs-theme="dark"] .input-with-icon .form-control:focus {
+            background: #10151c;
+            border-color: #4d8de8;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, .1);
+        }
+
+    html[data-bs-theme="dark"] .input-with-icon > i {
+        color: #8793a3;
+    }
+
+    html[data-bs-theme="dark"] .mileage-unit {
+        color: #aab4c1;
+        background: #20262f;
+        border-color: #36404d;
+    }
+
+    html[data-bs-theme="dark"] .form-notice {
+        color: #a9c9f5;
+        background: rgba(59, 130, 246, .08);
+        border-color: rgba(96, 165, 250, .22);
+    }
+
+        html[data-bs-theme="dark"] .form-notice span {
+            color: #8fa4bf;
+        }
+
+    html[data-bs-theme="dark"] .form-actions {
+        background: #141920;
+        border-color: #303946;
+    }
+
+    html[data-bs-theme="dark"] .cancel-button {
+        color: #aeb8c5;
+        background: #1d232c;
+        border-color: #36404d;
+    }
+
+
+    /* RESPONSIVE */
+
+    @@media (max-width: 767px) {
+
+        .vehicle-form-page .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .page-topbar {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .back-button {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .vehicle-form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+
+    @@media (max-width: 480px) {
+
+        .page-topbar h2 {
+            font-size: 23px;
+        }
+
+        .form-card-header,
+        .form-content {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .form-actions {
+            padding: 15px 20px;
+        }
+
+        .cancel-button,
+        .save-button {
+            flex: 1;
+        }
+    }
+
+</style>
+
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

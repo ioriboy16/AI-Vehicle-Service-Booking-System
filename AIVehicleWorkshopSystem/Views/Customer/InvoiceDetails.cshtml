@@ -1,0 +1,481 @@
+﻿@model AIVehicleWorkshopSystem.Models.Invoice
+
+@{
+    ViewData["Title"] = "Invoice Details";
+
+    var repair = Model.Repair;
+    var appointment = repair?.Appointment;
+    var vehicle = appointment?.Vehicle;
+}
+
+<div class="container py-4">
+
+    <!-- TOP ACTIONS -->
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                Invoice Details
+            </h2>
+
+            <p class="text-muted mb-0">
+                @Model.InvoiceNumber
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a asp-controller="Customer"
+               asp-action="Invoices"
+               class="btn btn-outline-secondary">
+                Back to My Invoices
+            </a>
+
+            <button type="button"
+                    class="btn btn-primary"
+                    onclick="window.print()">
+                Print Invoice
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- INVOICE -->
+    <div class="card border-0 shadow-sm invoice-card">
+
+        <div class="card-body p-4 p-md-5">
+
+
+            <!-- COMPANY HEADER -->
+            <div class="row align-items-start mb-4">
+
+                <div class="col-md-7">
+
+                    <h2 class="fw-bold mb-1">
+                        SERISH AUTOTECH SERVICES
+                    </h2>
+
+                    <div class="text-muted">
+                        Vehicle Service & Repair
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-5 text-md-end mt-3 mt-md-0">
+
+                    <h3 class="fw-bold mb-2">
+                        INVOICE
+                    </h3>
+
+                    <div>
+                        <strong>Invoice No:</strong>
+                        @Model.InvoiceNumber
+                    </div>
+
+                    <div>
+                        <strong>Date:</strong>
+                        @Model.InvoiceDate.ToString("dd MMMM yyyy")
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <hr />
+
+
+            <!-- CUSTOMER AND VEHICLE -->
+            <div class="row g-4 my-3">
+
+                <!-- CUSTOMER -->
+                <div class="col-md-6">
+
+                    <h6 class="fw-bold text-uppercase mb-3">
+                        Bill To
+                    </h6>
+
+                    <div class="mb-1">
+                        <strong>
+                            @ViewBag.CustomerName
+                        </strong>
+                    </div>
+
+                    <div>
+                        @ViewBag.CustomerEmail
+                    </div>
+
+                </div>
+
+
+                <!-- VEHICLE -->
+                <div class="col-md-6">
+
+                    <h6 class="fw-bold text-uppercase mb-3">
+                        Vehicle Information
+                    </h6>
+
+                    @if (vehicle != null)
+                    {
+                        <div>
+                            <strong>Vehicle:</strong>
+                            @vehicle.Brand @vehicle.Model
+                        </div>
+
+                        <div>
+                            <strong>Plate Number:</strong>
+                            @vehicle.PlateNumber
+                        </div>
+
+                        <div>
+                            <strong>Year:</strong>
+                            @vehicle.ManufacturingYear
+                        </div>
+                    }
+
+                    @if (Model.Mileage.HasValue)
+                    {
+                        <div>
+                            <strong>Mileage:</strong>
+                            @Model.Mileage.Value.ToString("N0") KM
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+
+            <hr />
+
+
+            <!-- REPAIR INFORMATION -->
+            <div class="row g-4 my-3">
+
+                <!-- ISSUE FOUND -->
+                <div class="col-md-6">
+
+                    <h6 class="fw-bold">
+                        Issue Found
+                    </h6>
+
+                    <p class="mb-0">
+                        @(string.IsNullOrWhiteSpace(repair?.Diagnosis)
+                                                ? "-"
+                                                : repair.Diagnosis)
+                    </p>
+
+                </div>
+
+
+                <!-- ACTION TAKEN -->
+                <div class="col-md-6">
+
+                    <h6 class="fw-bold">
+                        Action Taken
+                    </h6>
+
+                    <p class="mb-0">
+                        @(string.IsNullOrWhiteSpace(repair?.RepairNotes)
+                                                ? "-"
+                                                : repair.RepairNotes)
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- REMARKS -->
+            @if (!string.IsNullOrWhiteSpace(Model.Remarks))
+            {
+                <div class="mt-4">
+
+                    <h6 class="fw-bold">
+                        Remarks / Customer Complaint
+                    </h6>
+
+                    <p class="mb-0">
+                        @Model.Remarks
+                    </p>
+
+                </div>
+            }
+
+
+            <!-- INVOICE ITEMS -->
+            <div class="table-responsive mt-5">
+
+                <table class="table table-bordered align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th style="width: 50px;">
+                                No.
+                            </th>
+
+                            <th>
+                                Description
+                            </th>
+
+                            <th style="width: 120px;">
+                                Type
+                            </th>
+
+                            <th class="text-center"
+                                style="width: 90px;">
+                                Qty
+                            </th>
+
+                            <th class="text-end"
+                                style="width: 150px;">
+                                Unit Price
+                            </th>
+
+                            <th class="text-end"
+                                style="width: 150px;">
+                                Amount
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @{
+                            var itemNumber = 1;
+                        }
+
+                        @foreach (var item in Model.InvoiceItems)
+                        {
+                            <tr>
+
+                                <td>
+                                    @itemNumber
+                                </td>
+
+                                <td>
+                                    @item.Description
+                                </td>
+
+                                <td>
+                                    @item.ItemType
+                                </td>
+
+                                <td class="text-center">
+                                    @item.Quantity.ToString("0.##")
+                                </td>
+
+                                <td class="text-end">
+                                    RM @item.UnitPrice.ToString("N2")
+                                </td>
+
+                                <td class="text-end fw-semibold">
+                                    RM @item.Amount.ToString("N2")
+                                </td>
+
+                            </tr>
+
+                            itemNumber++;
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- TOTAL -->
+            <div class="row justify-content-end mt-4">
+
+                <div class="col-md-6 col-lg-5">
+
+                    <table class="table">
+
+                        <tbody>
+
+                            <tr>
+
+                                <td>
+                                    Subtotal
+                                </td>
+
+                                <td class="text-end">
+                                    RM @Model.Subtotal.ToString("N2")
+                                </td>
+
+                            </tr>
+
+
+                            <tr class="fw-bold fs-5">
+
+                                <td>
+                                    Total
+                                </td>
+
+                                <td class="text-end">
+                                    RM @Model.TotalAmount.ToString("N2")
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td>
+                                    Payment
+                                </td>
+
+                                <td class="text-end">
+                                    RM @Model.PaidAmount.ToString("N2")
+                                </td>
+
+                            </tr>
+
+
+                            <tr class="fw-bold">
+
+                                <td>
+                                    Balance
+                                </td>
+
+                                <td class="text-end">
+                                    RM @Model.BalanceAmount.ToString("N2")
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+
+                    <!-- PAYMENT STATUS -->
+                    <div class="text-end mt-3">
+
+                        @if (Model.PaymentStatus == "Paid")
+                        {
+                            <span class="badge bg-success fs-6">
+                                PAID
+                            </span>
+                        }
+                        else if (
+                        Model.PaymentStatus ==
+                        "Partially Paid")
+                        {
+                            <span class="badge bg-warning text-dark fs-6">
+                                PARTIALLY PAID
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger fs-6">
+                                UNPAID
+                            </span>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- PAYMENT INFORMATION -->
+            <div class="mt-5 pt-4 border-top">
+
+                <h6 class="fw-bold">
+                    Payment Information
+                </h6>
+
+                @if (Model.PaymentStatus == "Paid")
+                {
+                    <p class="text-success fw-semibold mb-0">
+                        This invoice has been fully paid.
+                    </p>
+                }
+                else
+                {
+                    <p class="text-muted mb-1">
+                        Outstanding balance:
+                        <strong>
+                            RM @Model.BalanceAmount.ToString("N2")
+                        </strong>
+                    </p>
+
+                    <p class="text-muted mb-0">
+                        Please contact Serish Autotech Services
+                        for available payment methods.
+                    </p>
+                }
+
+            </div>
+
+
+            <!-- FOOTER -->
+            <div class="text-center text-muted mt-5 pt-4 border-top">
+
+                <small>
+                    Thank you for choosing Serish Autotech Services.
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    .invoice-card {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+
+    @@media print {
+
+        .no-print,
+        header,
+        footer,
+        nav {
+            display: none !important;
+        }
+
+        body {
+            background: white !important;
+        }
+
+        .container {
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .invoice-card {
+            box-shadow: none !important;
+            border: none !important;
+            max-width: 100% !important;
+        }
+
+            .invoice-card .card-body {
+                padding: 0 !important;
+            }
+
+        .table {
+            font-size: 12px;
+        }
+    }
+
+</style>

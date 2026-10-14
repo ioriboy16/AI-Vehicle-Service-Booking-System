@@ -1,0 +1,1793 @@
+﻿@model AIVehicleWorkshopSystem.Models.AIDiagnostic
+
+@{
+    ViewData["Title"] = "AI Diagnostic Details";
+}
+
+<div class="ai-details-page">
+
+    <div class="container py-4 py-lg-5">
+
+        <!-- =====================================================
+             TOP NAVIGATION
+             ===================================================== -->
+
+        <a asp-controller="Admin"
+           asp-action="AIDiagnostics"
+           class="back-link">
+
+            <i class="bi bi-arrow-left"></i>
+            Back to AI Diagnostics
+
+        </a>
+
+
+        <!-- =====================================================
+             PAGE HEADER
+             ===================================================== -->
+
+        <div class="details-header">
+
+            <div class="header-main">
+
+                <div class="header-icon">
+                    <i class="bi bi-stars"></i>
+                </div>
+
+                <div>
+
+                    <div class="page-label">
+                        AI DIAGNOSTIC REQUEST
+                    </div>
+
+                    <h2>
+                        Diagnostic #@Model.DiagnosticId
+                    </h2>
+
+                    @if (Model.Vehicle != null)
+                    {
+                        <p>
+
+                            <i class="bi bi-car-front-fill"></i>
+
+                            @Model.Vehicle.Brand
+                            @Model.Vehicle.Model
+
+                            <span class="dot">•</span>
+
+                            @Model.Vehicle.PlateNumber
+
+                        </p>
+                    }
+
+                </div>
+
+            </div>
+
+
+            <!-- STATUS -->
+            <div>
+
+                @if (Model.ReviewStatus == "Pending Assignment")
+                {
+                    <span class="status-badge assignment">
+
+                        <i class="bi bi-person-plus-fill"></i>
+                        Pending Assignment
+
+                    </span>
+                }
+                else if (Model.ReviewStatus == "Pending Review")
+                {
+                    <span class="status-badge review">
+
+                        <i class="bi bi-clock-fill"></i>
+                        Pending Review
+
+                    </span>
+                }
+                else if (Model.ReviewStatus == "Confirmed")
+                {
+                    <span class="status-badge confirmed">
+
+                        <i class="bi bi-check-circle-fill"></i>
+                        Confirmed
+
+                    </span>
+                }
+                else if (Model.ReviewStatus == "Modified")
+                {
+                    <span class="status-badge modified">
+
+                        <i class="bi bi-pencil-fill"></i>
+                        Modified
+
+                    </span>
+                }
+                else
+                {
+                    <span class="status-badge default-status">
+                        @Model.ReviewStatus
+                    </span>
+                }
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             MESSAGES
+             ===================================================== -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show
+                            border-0 shadow-sm rounded-3">
+
+                <i class="bi bi-check-circle-fill me-2"></i>
+
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show
+                            border-0 shadow-sm rounded-3">
+
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+
+                @TempData["ErrorMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+
+            </div>
+        }
+
+
+        <!-- =====================================================
+             MAIN GRID
+             ===================================================== -->
+
+        <div class="row g-4">
+
+
+            <!-- =================================================
+                 LEFT
+                 ================================================= -->
+
+            <div class="col-xl-8">
+
+
+                <!-- =============================================
+                     REQUEST INFORMATION
+                     ============================================= -->
+
+                <div class="content-card mb-4">
+
+                    <div class="card-heading">
+
+                        <div class="heading-icon blue">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+
+                        <div>
+
+                            <h4>
+                                Request Information
+                            </h4>
+
+                            <p>
+                                Customer and vehicle information for this diagnostic request.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-grid">
+
+
+                        <!-- CUSTOMER -->
+                        <div class="info-box">
+
+                            <div class="info-icon purple">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Customer
+                                </span>
+
+                                <strong>
+                                    @ViewBag.CustomerName
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- VEHICLE -->
+                        <div class="info-box">
+
+                            <div class="info-icon blue">
+                                <i class="bi bi-car-front-fill"></i>
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Vehicle
+                                </span>
+
+                                @if (Model.Vehicle != null)
+                                {
+                                    <strong>
+                                        @Model.Vehicle.Brand
+                                        @Model.Vehicle.Model
+                                    </strong>
+
+                                    <small>
+                                        @Model.Vehicle.PlateNumber
+                                    </small>
+                                }
+                                else
+                                {
+                                    <strong>
+                                        Vehicle unavailable
+                                    </strong>
+                                }
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- PRIORITY -->
+                        <div class="info-box">
+
+                            <div class="info-icon orange">
+                                <i class="bi bi-exclamation-circle-fill"></i>
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Priority
+                                </span>
+
+                                @if (Model.Priority == "High")
+                                {
+                                    <div>
+                                        <span class="priority-badge high">
+                                            <i class="bi bi-exclamation-circle-fill"></i>
+                                            High
+                                        </span>
+                                    </div>
+                                }
+                                else if (Model.Priority == "Medium")
+                                {
+                                    <div>
+                                        <span class="priority-badge medium">
+                                            <i class="bi bi-dash-circle-fill"></i>
+                                            Medium
+                                        </span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div>
+                                        <span class="priority-badge low">
+                                            <i class="bi bi-arrow-down-circle-fill"></i>
+                                            Low
+                                        </span>
+                                    </div>
+                                }
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- GENERATED -->
+                        <div class="info-box">
+
+                            <div class="info-icon green">
+                                <i class="bi bi-calendar-check-fill"></i>
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Generated
+                                </span>
+
+                                <strong>
+                                    @Model.CreatedAt.ToString("dd MMM yyyy")
+                                </strong>
+
+                                <small>
+                                    @Model.CreatedAt.ToString("hh:mm tt")
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================================
+                     CUSTOMER SYMPTOMS
+                     ============================================= -->
+
+                <div class="content-card mb-4">
+
+                    <div class="card-heading">
+
+                        <div class="heading-icon orange">
+                            <i class="bi bi-chat-left-text"></i>
+                        </div>
+
+                        <div>
+
+                            <h4>
+                                Customer-Reported Symptoms
+                            </h4>
+
+                            <p>
+                                Symptoms submitted by the customer for AI analysis.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="symptom-box">
+
+                        <div class="quote-icon">
+                            <i class="bi bi-quote"></i>
+                        </div>
+
+                        <div>
+                            @Model.Symptoms
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================================
+                     AI RECOMMENDATION
+                     ============================================= -->
+
+                <div class="content-card">
+
+                    <div class="card-heading recommendation-heading">
+
+                        <div class="heading-left">
+
+                            <div class="heading-icon ai">
+                                <i class="bi bi-stars"></i>
+                            </div>
+
+                            <div>
+
+                                <h4>
+                                    AI-Assisted Recommendation
+                                </h4>
+
+                                <p>
+                                    Preliminary analysis generated from the reported symptoms.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <span class="ai-generated-badge">
+
+                            <i class="bi bi-cpu-fill"></i>
+                            AI Generated
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="recommendation-list">
+
+
+                        <!-- POSSIBLE ISSUE -->
+                        <div class="recommendation-item">
+
+                            <div class="recommendation-number">
+                                01
+                            </div>
+
+                            <div class="recommendation-content">
+
+                                <div class="recommendation-label">
+
+                                    <i class="bi bi-exclamation-diamond"></i>
+
+                                    Possible Issue
+
+                                </div>
+
+                                <p>
+                                    @Model.PossibleIssue
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- INSPECTION -->
+                        <div class="recommendation-item">
+
+                            <div class="recommendation-number">
+                                02
+                            </div>
+
+                            <div class="recommendation-content">
+
+                                <div class="recommendation-label">
+
+                                    <i class="bi bi-search"></i>
+
+                                    Recommended Inspection
+
+                                </div>
+
+                                <p>
+                                    @Model.RecommendedInspection
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- MAINTENANCE -->
+                        <div class="recommendation-item">
+
+                            <div class="recommendation-number">
+                                03
+                            </div>
+
+                            <div class="recommendation-content">
+
+                                <div class="recommendation-label">
+
+                                    <i class="bi bi-tools"></i>
+
+                                    Maintenance Suggestion
+
+                                </div>
+
+                                <p>
+                                    @Model.MaintenanceSuggestion
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 RIGHT
+                 ================================================= -->
+
+            <div class="col-xl-4">
+
+
+                <!-- =============================================
+                     ASSIGNMENT
+                     ============================================= -->
+
+                <div class="content-card assignment-card">
+
+                    <div class="card-heading">
+
+                        <div class="heading-icon purple">
+                            <i class="bi bi-person-gear"></i>
+                        </div>
+
+                        <div>
+
+                            <h4>
+                                Mechanic Assignment
+                            </h4>
+
+                            <p>
+                                Assign this request for professional review.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- CURRENT MECHANIC -->
+                    <div class="current-assignment">
+
+                        <div class="current-label">
+
+                            <i class="bi bi-person-check"></i>
+
+                            Currently Assigned
+
+                        </div>
+
+                        <div class="assigned-mechanic">
+
+                            <div class="mechanic-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    @ViewBag.AssignedMechanicName
+                                </strong>
+
+                                <span>
+                                    Assigned Mechanic
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    @if (Model.ReviewStatus != "Confirmed" &&
+                                        Model.ReviewStatus != "Modified")
+                    {
+                        <!-- =====================================
+                             ASSIGN FORM
+                             ===================================== -->
+
+                        <form asp-controller="Admin"
+                              asp-action="AssignAIDiagnosticMechanic"
+                              method="post"
+                              class="assignment-form">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="id"
+                                   value="@Model.DiagnosticId" />
+
+
+                            <div class="mb-3">
+
+                                <label class="form-label">
+                                    Select Mechanic
+                                </label>
+
+                                <div class="select-wrapper">
+
+                                    <i class="bi bi-person-gear"></i>
+
+                                    <select name="mechanicId"
+                                            asp-items="ViewBag.Mechanics"
+                                            class="form-select"
+                                            required>
+
+                                        <option value="">
+                                            -- Select Mechanic --
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+
+                            @if (Model.ReviewStatus == "Pending Review")
+                            {
+                                <div class="reassign-warning">
+
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+
+                                    <div>
+
+                                        <strong>
+                                            Reassigning request
+                                        </strong>
+
+                                        <span>
+                                            Selecting another mechanic will reassign this diagnostic request.
+                                        </span>
+
+                                    </div>
+
+                                </div>
+                            }
+
+
+                            <button type="submit"
+                                    class="assign-button">
+
+                                @if (Model.ReviewStatus ==
+                                                            "Pending Assignment")
+                                {
+                                    <i class="bi bi-person-plus-fill"></i>
+
+                                    <span>
+                                        Assign Mechanic
+                                    </span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-arrow-repeat"></i>
+
+                                    <span>
+                                        Reassign Mechanic
+                                    </span>
+                                }
+
+                            </button>
+
+                        </form>
+                    }
+                    else
+                    {
+                        <!-- =====================================
+                             REVIEW COMPLETE
+                             ===================================== -->
+
+                        <div class="review-complete">
+
+                            <div class="complete-icon">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    Review Completed
+                                </strong>
+
+                                <p>
+                                    This diagnostic has already been reviewed
+                                    and can no longer be reassigned.
+                                </p>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+
+                <!-- =============================================
+                     MECHANIC REVIEW
+                     ============================================= -->
+                @if (Model.ReviewStatus == "Confirmed" ||
+                                Model.ReviewStatus == "Modified")
+                {
+                    <div class="content-card mechanic-review-card mt-4">
+
+                        <div class="card-heading">
+
+                            <div class="heading-icon green">
+                                <i class="bi bi-clipboard-check"></i>
+                            </div>
+
+                            <div>
+
+                                <h4>
+                                    Mechanic Review
+                                </h4>
+
+                                <p>
+                                    Final professional assessment.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- DECISION -->
+                        <div class="review-section">
+
+                            <span class="section-label">
+                                Decision
+                            </span>
+
+                            @if (Model.ReviewStatus == "Confirmed")
+                            {
+                                <span class="review-decision confirmed">
+
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    AI Recommendation Confirmed
+
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="review-decision modified">
+
+                                    <i class="bi bi-pencil-fill"></i>
+                                    Recommendation Modified
+
+                                </span>
+                            }
+
+                        </div>
+
+
+                        <!-- COMMENTS -->
+                        <div class="review-section">
+
+                            <span class="section-label">
+                                Mechanic Comments
+                            </span>
+
+                            <div class="mechanic-comments">
+
+                                @if (!string.IsNullOrWhiteSpace(
+                                                            Model.MechanicComments))
+                                {
+                                    @Model.MechanicComments
+                                }
+                                else
+                                {
+                                    <span class="empty-comment">
+                                        No additional comments.
+                                    </span>
+                                }
+
+                            </div>
+
+                        </div>
+
+
+                        @if (Model.ReviewedAt.HasValue)
+                        {
+                            <div class="review-date">
+
+                                <i class="bi bi-calendar-check"></i>
+
+                                <span>
+                                    Reviewed on
+                                    <strong>
+                                        @Model.ReviewedAt.Value.ToString("dd MMM yyyy, hh:mm tt")
+                                    </strong>
+                                </span>
+
+                            </div>
+                        }
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    /* =========================================================
+           PAGE
+           ========================================================= */
+
+    .ai-details-page {
+        min-height: 100vh;
+        background: #f6f8fb;
+    }
+
+        .ai-details-page > .container {
+            max-width: 1180px;
+        }
+
+
+    /* =========================================================
+           BACK
+           ========================================================= */
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 20px;
+        color: #65707d;
+        font-size: 12px;
+        font-weight: 650;
+        text-decoration: none;
+        transition: .15s ease;
+    }
+
+        .back-link:hover {
+            color: #0d6efd;
+        }
+
+
+    /* =========================================================
+           HEADER
+           ========================================================= */
+
+    .details-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 25px;
+        margin-bottom: 24px;
+    }
+
+    .header-main {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .header-icon {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #0d6efd;
+        font-size: 20px;
+        background: #eaf2ff;
+        border-radius: 13px;
+    }
+
+    .page-label {
+        margin-bottom: 3px;
+        color: #0d6efd;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .8px;
+    }
+
+    .details-header h2 {
+        margin: 0;
+        color: #27313d;
+        font-size: 28px;
+        font-weight: 750;
+    }
+
+    .details-header p {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 4px 0 0;
+        color: #87909b;
+        font-size: 12px;
+    }
+
+        .details-header p i {
+            color: #0d6efd;
+        }
+
+    .dot {
+        color: #c0c6cc;
+    }
+
+
+    /* =========================================================
+           STATUS
+           ========================================================= */
+
+    .status-badge,
+    .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 7px 11px;
+        font-size: 10px;
+        font-weight: 750;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+
+        .status-badge.assignment {
+            color: #856100;
+            background: #fff3cd;
+        }
+
+        .status-badge.review {
+            color: #0d6efd;
+            background: #eaf2ff;
+        }
+
+        .status-badge.confirmed {
+            color: #157347;
+            background: #e7f7ee;
+        }
+
+        .status-badge.modified {
+            color: #087990;
+            background: #e8f7fa;
+        }
+
+        .status-badge.default-status {
+            color: #68717c;
+            background: #eef0f2;
+        }
+
+
+    /* =========================================================
+           CONTENT CARD
+           ========================================================= */
+
+    .content-card {
+        padding: 22px;
+        background: #ffffff;
+        border: 1px solid #e4e8ed;
+        border-radius: 15px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .03);
+    }
+
+    .card-heading {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        margin-bottom: 20px;
+    }
+
+    .heading-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 15px;
+        border-radius: 10px;
+    }
+
+        .heading-icon.blue {
+            color: #0d6efd;
+            background: #eaf2ff;
+        }
+
+        .heading-icon.orange {
+            color: #9b7000;
+            background: #fff5d6;
+        }
+
+        .heading-icon.purple {
+            color: #6554c0;
+            background: #f0edff;
+        }
+
+        .heading-icon.green {
+            color: #198754;
+            background: #eaf8f0;
+        }
+
+        .heading-icon.ai {
+            color: #0d6efd;
+            background: linear-gradient( 135deg, #eaf2ff, #f2ecff );
+        }
+
+    .card-heading h4 {
+        margin: 0 0 2px;
+        color: #303945;
+        font-size: 16px;
+        font-weight: 750;
+    }
+
+    .card-heading p {
+        margin: 0;
+        color: #929ba6;
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+           INFO GRID
+           ========================================================= */
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .info-box {
+        min-height: 76px;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 13px;
+        background: #fafbfc;
+        border: 1px solid #edf0f3;
+        border-radius: 10px;
+    }
+
+    .info-icon {
+        width: 37px;
+        height: 37px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 14px;
+        border-radius: 9px;
+    }
+
+        .info-icon.blue {
+            color: #0d6efd;
+            background: #eaf2ff;
+        }
+
+        .info-icon.purple {
+            color: #6554c0;
+            background: #f0edff;
+        }
+
+        .info-icon.orange {
+            color: #9b7000;
+            background: #fff5d6;
+        }
+
+        .info-icon.green {
+            color: #198754;
+            background: #eaf8f0;
+        }
+
+    .info-box span:not(.priority-badge) {
+        display: block;
+        margin-bottom: 2px;
+        color: #929ba6;
+        font-size: 9px;
+    }
+
+    .info-box strong {
+        display: block;
+        color: #3e4853;
+        font-size: 12px;
+        font-weight: 650;
+    }
+
+    .info-box small {
+        display: block;
+        margin-top: 1px;
+        color: #929ba6;
+        font-size: 9px;
+    }
+
+
+    /* =========================================================
+           PRIORITY
+           ========================================================= */
+
+    .priority-badge {
+        padding: 5px 9px;
+    }
+
+        .priority-badge.high {
+            color: #b42318;
+            background: #ffeded;
+        }
+
+        .priority-badge.medium {
+            color: #856100;
+            background: #fff3cd;
+        }
+
+        .priority-badge.low {
+            color: #157347;
+            background: #e7f7ee;
+        }
+
+
+    /* =========================================================
+           SYMPTOMS
+           ========================================================= */
+
+    .symptom-box {
+        position: relative;
+        display: flex;
+        gap: 11px;
+        padding: 16px;
+        color: #4e5965;
+        font-size: 12px;
+        line-height: 1.7;
+        background: #fafbfc;
+        border: 1px solid #edf0f3;
+        border-radius: 10px;
+    }
+
+    .quote-icon {
+        flex-shrink: 0;
+        color: #aab2bc;
+        font-size: 21px;
+    }
+
+
+    /* =========================================================
+           AI RECOMMENDATION
+           ========================================================= */
+
+    .recommendation-heading {
+        justify-content: space-between;
+    }
+
+    .heading-left {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+    }
+
+    .ai-generated-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 9px;
+        color: #0d6efd;
+        font-size: 9px;
+        font-weight: 750;
+        background: #eaf2ff;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+
+    .recommendation-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .recommendation-item {
+        display: flex;
+        gap: 13px;
+        padding: 15px;
+        background: #fafbfc;
+        border: 1px solid #edf0f3;
+        border-radius: 10px;
+    }
+
+    .recommendation-number {
+        width: 31px;
+        height: 31px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #0d6efd;
+        font-size: 9px;
+        font-weight: 800;
+        background: #eaf2ff;
+        border-radius: 8px;
+    }
+
+    .recommendation-content {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .recommendation-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 5px;
+        color: #3e4853;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+        .recommendation-label i {
+            color: #0d6efd;
+        }
+
+    .recommendation-content p {
+        margin: 0;
+        color: #697480;
+        font-size: 11px;
+        line-height: 1.65;
+        white-space: pre-line;
+    }
+
+
+    /* =========================================================
+           ASSIGNMENT
+           ========================================================= */
+
+    .assignment-card {
+        position: sticky;
+        top: 20px;
+    }
+
+    .current-assignment {
+        padding: 13px;
+        margin-bottom: 18px;
+        background: #fafbfc;
+        border: 1px solid #edf0f3;
+        border-radius: 10px;
+    }
+
+    .current-label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 10px;
+        color: #8b949f;
+        font-size: 9px;
+        font-weight: 650;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+    }
+
+    .assigned-mechanic {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
+
+    .mechanic-avatar {
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #6554c0;
+        background: #f0edff;
+        border-radius: 9px;
+    }
+
+    .assigned-mechanic strong {
+        display: block;
+        color: #3e4853;
+        font-size: 12px;
+        font-weight: 650;
+    }
+
+    .assigned-mechanic span {
+        display: block;
+        margin-top: 1px;
+        color: #929ba6;
+        font-size: 9px;
+    }
+
+
+    /* FORM */
+
+    .assignment-form {
+        padding-top: 1px;
+    }
+
+        .assignment-form .form-label {
+            margin-bottom: 7px;
+            color: #59636e;
+            font-size: 11px;
+            font-weight: 650;
+        }
+
+    .select-wrapper {
+        position: relative;
+    }
+
+        .select-wrapper > i {
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            z-index: 2;
+            color: #8c96a2;
+            font-size: 12px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .select-wrapper .form-select {
+            min-height: 42px;
+            padding-left: 36px;
+            color: #4e5864;
+            font-size: 11px;
+            background-color: #ffffff;
+            border: 1px solid #dfe4ea;
+            border-radius: 8px;
+            box-shadow: none;
+        }
+
+            .select-wrapper .form-select:focus {
+                border-color: #86b7fe;
+                box-shadow: 0 0 0 3px rgba(13, 110, 253, .07);
+            }
+
+
+    /* WARNING */
+
+    .reassign-warning {
+        display: flex;
+        gap: 9px;
+        margin-bottom: 14px;
+        padding: 11px;
+        color: #856100;
+        background: #fff8dd;
+        border: 1px solid #f8e5a1;
+        border-radius: 8px;
+    }
+
+        .reassign-warning > i {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .reassign-warning strong {
+            display: block;
+            margin-bottom: 2px;
+            font-size: 10px;
+        }
+
+        .reassign-warning span {
+            display: block;
+            font-size: 9px;
+            line-height: 1.5;
+        }
+
+
+    /* ASSIGN BUTTON */
+
+    .assign-button {
+        width: 100%;
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 9px 13px;
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 700;
+        background: #0d6efd;
+        border: 1px solid #0d6efd;
+        border-radius: 8px;
+        transition: .15s ease;
+    }
+
+        .assign-button:hover {
+            background: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+
+    /* =========================================================
+           REVIEW COMPLETED
+           ========================================================= */
+
+    .review-complete {
+        display: flex;
+        gap: 10px;
+        padding: 13px;
+        background: #edf9f2;
+        border: 1px solid #ccebd9;
+        border-radius: 10px;
+    }
+
+    .complete-icon {
+        color: #198754;
+        font-size: 17px;
+        flex-shrink: 0;
+    }
+
+    .review-complete strong {
+        display: block;
+        margin-bottom: 3px;
+        color: #157347;
+        font-size: 11px;
+    }
+
+    .review-complete p {
+        margin: 0;
+        color: #4d7560;
+        font-size: 9px;
+        line-height: 1.5;
+    }
+
+
+    /* =========================================================
+           MECHANIC REVIEW
+           ========================================================= */
+
+    .review-section {
+        margin-bottom: 16px;
+    }
+
+    .section-label {
+        display: block;
+        margin-bottom: 7px;
+        color: #8b949f;
+        font-size: 9px;
+        font-weight: 650;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+    }
+
+    .review-decision {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 9px;
+        font-size: 10px;
+        font-weight: 700;
+        border-radius: 20px;
+    }
+
+        .review-decision.confirmed {
+            color: #157347;
+            background: #e7f7ee;
+        }
+
+        .review-decision.modified {
+            color: #087990;
+            background: #e8f7fa;
+        }
+
+    .mechanic-comments {
+        padding: 12px;
+        color: #59636e;
+        font-size: 10px;
+        line-height: 1.6;
+        background: #fafbfc;
+        border: 1px solid #edf0f3;
+        border-radius: 8px;
+    }
+
+    .empty-comment {
+        color: #929ba6;
+    }
+
+    .review-date {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+        padding-top: 13px;
+        color: #8b949f;
+        font-size: 9px;
+        border-top: 1px solid #edf0f3;
+    }
+
+        .review-date i {
+            color: #198754;
+        }
+
+        .review-date strong {
+            color: #59636e;
+            font-weight: 650;
+        }
+
+
+    /* =========================================================
+           DARK MODE
+           ========================================================= */
+
+    html[data-bs-theme="dark"] .ai-details-page {
+        background: #101318 !important;
+        color: #e5e7eb;
+    }
+
+    html[data-bs-theme="dark"] .back-link {
+        color: #9ba7b5;
+    }
+
+        html[data-bs-theme="dark"] .back-link:hover {
+            color: #60a5fa;
+        }
+
+    html[data-bs-theme="dark"] .details-header h2 {
+        color: #f1f5f9;
+    }
+
+    html[data-bs-theme="dark"] .details-header p {
+        color: #8f9aaa;
+    }
+
+    html[data-bs-theme="dark"] .header-icon,
+    html[data-bs-theme="dark"] .heading-icon.blue,
+    html[data-bs-theme="dark"] .info-icon.blue,
+    html[data-bs-theme="dark"] .recommendation-number {
+        color: #60a5fa;
+        background: rgba(59, 130, 246, .14);
+    }
+
+    html[data-bs-theme="dark"] .heading-icon.purple,
+    html[data-bs-theme="dark"] .info-icon.purple,
+    html[data-bs-theme="dark"] .mechanic-avatar {
+        color: #b8a8ff;
+        background: rgba(112, 89, 255, .13);
+    }
+
+    html[data-bs-theme="dark"] .heading-icon.orange,
+    html[data-bs-theme="dark"] .info-icon.orange {
+        color: #f6cf62;
+        background: rgba(255, 193, 7, .13);
+    }
+
+    html[data-bs-theme="dark"] .heading-icon.green,
+    html[data-bs-theme="dark"] .info-icon.green {
+        color: #65d69a;
+        background: rgba(25, 135, 84, .17);
+    }
+
+    html[data-bs-theme="dark"] .heading-icon.ai {
+        color: #8ab9ff;
+        background: linear-gradient( 135deg, rgba(59, 130, 246, .15), rgba(112, 89, 255, .14) );
+    }
+
+
+    /* CARDS */
+
+    html[data-bs-theme="dark"] .content-card {
+        background: #181d25;
+        border-color: #2b3440;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .18);
+    }
+
+    html[data-bs-theme="dark"] .card-heading h4 {
+        color: #f1f5f9;
+    }
+
+    html[data-bs-theme="dark"] .card-heading p {
+        color: #8793a3;
+    }
+
+
+    /* INFO */
+
+    html[data-bs-theme="dark"] .info-box,
+    html[data-bs-theme="dark"] .symptom-box,
+    html[data-bs-theme="dark"] .recommendation-item,
+    html[data-bs-theme="dark"] .current-assignment,
+    html[data-bs-theme="dark"] .mechanic-comments {
+        background: #141920;
+        border-color: #303946;
+    }
+
+        html[data-bs-theme="dark"] .info-box span:not(.priority-badge),
+        html[data-bs-theme="dark"] .info-box small {
+            color: #8793a3;
+        }
+
+        html[data-bs-theme="dark"] .info-box strong,
+        html[data-bs-theme="dark"] .assigned-mechanic strong,
+        html[data-bs-theme="dark"] .recommendation-label {
+            color: #e5edf6;
+        }
+
+    html[data-bs-theme="dark"] .symptom-box,
+    html[data-bs-theme="dark"] .recommendation-content p,
+    html[data-bs-theme="dark"] .mechanic-comments {
+        color: #b8c2ce;
+    }
+
+    html[data-bs-theme="dark"] .assigned-mechanic span {
+        color: #8793a3;
+    }
+
+
+    /* AI */
+
+    html[data-bs-theme="dark"] .ai-generated-badge {
+        color: #60a5fa;
+        background: rgba(59, 130, 246, .14);
+    }
+
+    html[data-bs-theme="dark"] .recommendation-label i {
+        color: #60a5fa;
+    }
+
+
+    /* FORM */
+
+    html[data-bs-theme="dark"] .assignment-form .form-label {
+        color: #b8c2ce;
+    }
+
+    html[data-bs-theme="dark"] .select-wrapper .form-select {
+        color: #e5edf6;
+        background-color: #10151c;
+        border-color: #36404d;
+    }
+
+        html[data-bs-theme="dark"] .select-wrapper .form-select option {
+            color: #e5edf6;
+            background: #181d25;
+        }
+
+
+    /* PRIORITY */
+
+    html[data-bs-theme="dark"] .priority-badge.high {
+        color: #ff8b96;
+        background: rgba(220, 53, 69, .15);
+    }
+
+    html[data-bs-theme="dark"] .priority-badge.medium {
+        color: #f6cf62;
+        background: rgba(255, 193, 7, .13);
+    }
+
+    html[data-bs-theme="dark"] .priority-badge.low {
+        color: #65d69a;
+        background: rgba(25, 135, 84, .17);
+    }
+
+
+    /* STATUS */
+
+    html[data-bs-theme="dark"] .status-badge.assignment {
+        color: #f6cf62;
+        background: rgba(255, 193, 7, .13);
+    }
+
+    html[data-bs-theme="dark"] .status-badge.review {
+        color: #60a5fa;
+        background: rgba(59, 130, 246, .14);
+    }
+
+    html[data-bs-theme="dark"] .status-badge.confirmed {
+        color: #65d69a;
+        background: rgba(25, 135, 84, .17);
+    }
+
+    html[data-bs-theme="dark"] .status-badge.modified {
+        color: #67d4e7;
+        background: rgba(13, 202, 240, .12);
+    }
+
+    html[data-bs-theme="dark"] .status-badge.default-status {
+        color: #aeb8c5;
+        background: #252c36;
+    }
+
+
+    /* WARNING */
+
+    html[data-bs-theme="dark"] .reassign-warning {
+        color: #f6cf62;
+        background: rgba(255, 193, 7, .09);
+        border-color: rgba(255, 193, 7, .2);
+    }
+
+
+    /* COMPLETED */
+
+    html[data-bs-theme="dark"] .review-complete {
+        background: rgba(25, 135, 84, .11);
+        border-color: rgba(25, 135, 84, .25);
+    }
+
+        html[data-bs-theme="dark"] .review-complete strong {
+            color: #65d69a;
+        }
+
+        html[data-bs-theme="dark"] .review-complete p {
+            color: #92bda6;
+        }
+
+
+    /* REVIEW */
+
+    html[data-bs-theme="dark"] .section-label,
+    html[data-bs-theme="dark"] .review-date {
+        color: #8793a3;
+    }
+
+    html[data-bs-theme="dark"] .review-date {
+        border-color: #303946;
+    }
+
+        html[data-bs-theme="dark"] .review-date strong {
+            color: #cbd5e1;
+        }
+
+    html[data-bs-theme="dark"] .review-decision.confirmed {
+        color: #65d69a;
+        background: rgba(25, 135, 84, .17);
+    }
+
+    html[data-bs-theme="dark"] .review-decision.modified {
+        color: #67d4e7;
+        background: rgba(13, 202, 240, .12);
+    }
+
+
+    /* =========================================================
+           RESPONSIVE
+           ========================================================= */
+
+    @@media (max-width: 1199px) {
+
+        .assignment-card {
+            position: static;
+        }
+    }
+
+
+    @@media (max-width: 767px) {
+
+        .ai-details-page .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .details-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .header-main {
+            align-items: flex-start;
+        }
+
+        .details-header h2 {
+            font-size: 24px;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .recommendation-heading {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .content-card {
+            padding: 18px;
+        }
+    }
+
+
+    @@media (max-width: 480px) {
+
+        .header-icon {
+            width: 43px;
+            height: 43px;
+        }
+
+        .details-header h2 {
+            font-size: 21px;
+        }
+
+        .recommendation-item {
+            gap: 9px;
+            padding: 12px;
+        }
+    }
+
+</style>

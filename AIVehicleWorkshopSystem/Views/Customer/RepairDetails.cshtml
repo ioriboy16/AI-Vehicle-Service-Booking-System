@@ -1,0 +1,668 @@
+﻿@model AIVehicleWorkshopSystem.Models.Repair
+@using AIVehicleWorkshopSystem.Models
+
+@{
+    ViewData["Title"] = "Repair Details";
+
+    var progressHistory =
+        ViewBag.ProgressHistory as List<RepairProgress>
+        ?? new List<RepairProgress>();
+
+    var unreadChatCount = (int)(ViewBag.UnreadChatCount ?? 0);
+
+    var progressPercentage = Model.RepairStatus switch
+    {
+        "Assigned" => 25,
+        "In Progress" => 65,
+        "Completed" => 100,
+        _ => 10
+    };
+
+    var statusClass = Model.RepairStatus switch
+    {
+        "Assigned" => "assigned",
+        "In Progress" => "progress",
+        "Completed" => "completed",
+        _ => "default"
+    };
+}
+
+
+<div class="repair-detail-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="repair-detail-header">
+
+        <div>
+
+            <a asp-controller="Customer"
+               asp-action="RepairTracking"
+               class="repair-back-link">
+
+                <i class="bi bi-arrow-left"></i>
+                Repair Tracking
+
+            </a>
+
+            <div class="repair-title-row">
+
+                <h1>
+                    Repair #@Model.RepairId
+                </h1>
+
+                <span class="repair-detail-status @statusClass">
+
+                    <span class="status-dot"></span>
+
+                    @Model.RepairStatus
+
+                </span>
+
+            </div>
+
+
+            <div class="repair-header-vehicle">
+
+                <i class="bi bi-car-front"></i>
+
+                <span>
+                    @Model.Appointment?.Vehicle?.Brand
+                    @Model.Appointment?.Vehicle?.Model
+                </span>
+
+                <span class="repair-header-separator">•</span>
+
+                <strong>
+                    @Model.Appointment?.Vehicle?.PlateNumber
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <a asp-controller="Chat"
+           asp-action="RepairChat"
+           asp-route-repairId="@Model.RepairId"
+           class="btn btn-primary repair-header-chat">
+
+            <i class="bi bi-chat-dots me-1"></i>
+            Open Repair Chat
+
+            @if (unreadChatCount > 0)
+            {
+                <span class="badge bg-danger ms-1">
+                    @unreadChatCount
+                </span>
+            }
+
+        </a>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         OVERVIEW
+         ===================================================== -->
+
+    <div class="repair-overview-grid">
+
+
+        <!-- STATUS -->
+
+        <div class="repair-detail-card repair-status-card">
+
+            <div class="repair-detail-card-heading">
+
+                <div>
+                    <span class="repair-detail-label">
+                        REPAIR STATUS
+                    </span>
+
+                    <h3>
+                        Current Progress
+                    </h3>
+                </div>
+
+                <div class="repair-status-icon @statusClass">
+                    <i class="bi bi-tools"></i>
+                </div>
+
+            </div>
+
+
+            <div class="repair-current-status">
+
+                <div class="repair-current-status-row">
+
+                    <div>
+                        <span>Current Status</span>
+
+                        <strong>
+                            @Model.RepairStatus
+                        </strong>
+                    </div>
+
+                    <span class="repair-percentage">
+                        @progressPercentage%
+                    </span>
+
+                </div>
+
+
+                <div class="repair-detail-progress">
+
+                    <div class="repair-detail-progress-bar"
+                         style="width: @progressPercentage%">
+                    </div>
+
+                </div>
+
+
+                <div class="repair-detail-progress-labels">
+
+                    <span class="@(progressPercentage >= 25 ? "active" : "")">
+                        Assigned
+                    </span>
+
+                    <span class="@(progressPercentage >= 65 ? "active" : "")">
+                        In Progress
+                    </span>
+
+                    <span class="@(progressPercentage >= 100 ? "active" : "")">
+                        Completed
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- TIMESTAMPS -->
+
+            <div class="repair-time-grid">
+
+                <div>
+                    <span>Created</span>
+
+                    <strong>
+                        @(Model.CreatedAt.ToString("dd MMM yyyy"))
+                    </strong>
+
+                    <small>
+                        @(Model.CreatedAt.ToString("h:mm tt"))
+                    </small>
+                </div>
+
+
+                <div>
+                    <span>Started</span>
+
+                    @if (Model.StartedAt.HasValue)
+                    {
+                        <strong>
+                            @(Model.StartedAt.Value.ToString("dd MMM yyyy"))
+                        </strong>
+
+                        <small>
+                            @(Model.StartedAt.Value.ToString("h:mm tt"))
+                        </small>
+                    }
+                    else
+                    {
+                        <strong class="repair-not-available">
+                            Not started
+                        </strong>
+                    }
+
+                </div>
+
+
+                <div>
+                    <span>Completed</span>
+
+                    @if (Model.CompletedAt.HasValue)
+                    {
+                        <strong>
+                            @(Model.CompletedAt.Value.ToString("dd MMM yyyy"))
+                        </strong>
+
+                        <small>
+                            @(Model.CompletedAt.Value.ToString("h:mm tt"))
+                        </small>
+                    }
+                    else
+                    {
+                        <strong class="repair-not-available">
+                            Not completed
+                        </strong>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- SERVICE DETAILS -->
+
+        <div class="repair-detail-card">
+
+            <div class="repair-detail-card-heading">
+
+                <div>
+                    <span class="repair-detail-label">
+                        SERVICE
+                    </span>
+
+                    <h3>
+                        Service Information
+                    </h3>
+                </div>
+
+                <div class="repair-heading-icon">
+                    <i class="bi bi-wrench-adjustable"></i>
+                </div>
+
+            </div>
+
+
+            <div class="repair-service-list">
+
+
+                <div class="repair-service-row">
+
+                    <span>
+                        <i class="bi bi-car-front"></i>
+                        Vehicle
+                    </span>
+
+                    <strong>
+                        @Model.Appointment?.Vehicle?.Brand
+                        @Model.Appointment?.Vehicle?.Model
+                    </strong>
+
+                </div>
+
+
+                <div class="repair-service-row">
+
+                    <span>
+                        <i class="bi bi-credit-card-2-front"></i>
+                        Plate Number
+                    </span>
+
+                    <strong>
+                        @Model.Appointment?.Vehicle?.PlateNumber
+                    </strong>
+
+                </div>
+
+
+                <div class="repair-service-row">
+
+                    <span>
+                        <i class="bi bi-person-gear"></i>
+                        Mechanic
+                    </span>
+
+                    <strong>
+                        @ViewBag.MechanicUsername
+                    </strong>
+
+                </div>
+
+
+                <div class="repair-service-row">
+
+                    <span>
+                        <i class="bi bi-gear"></i>
+                        Service
+                    </span>
+
+                    <strong>
+                        @Model.Appointment?.ServiceType
+                    </strong>
+
+                </div>
+
+
+                <div class="repair-service-row">
+
+                    <span>
+                        <i class="bi bi-calendar3"></i>
+                        Appointment
+                    </span>
+
+                    @if (Model.Appointment != null)
+                    {
+                        <strong>
+                            @(Model.Appointment.AppointmentDate.ToString("dd MMM yyyy"))
+                            ·
+                            @(DateTime.Today.Add(Model.Appointment.AppointmentTime).ToString("h:mm tt"))
+                        </strong>
+                    }
+                    else
+                    {
+                        <strong>-</strong>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         CUSTOMER COMPLAINT
+         ===================================================== -->
+
+    <div class="repair-complaint-bar">
+
+        <div class="repair-complaint-icon">
+            <i class="bi bi-chat-left-text"></i>
+        </div>
+
+        <div>
+
+            <span>
+                CUSTOMER COMPLAINT
+            </span>
+
+            <p>
+                @if (!string.IsNullOrWhiteSpace(Model.Appointment?.CustomerComplaint))
+                {
+                    @Model.Appointment.CustomerComplaint
+                }
+                else
+                {
+                    <text>No complaint was provided.</text>
+                }
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         WORKSHOP FINDINGS
+         ===================================================== -->
+
+    <div class="repair-detail-card repair-workshop-card">
+
+        <div class="repair-detail-card-heading">
+
+            <div>
+                <span class="repair-detail-label">
+                    WORKSHOP UPDATE
+                </span>
+
+                <h3>
+                    Diagnosis & Repair Work
+                </h3>
+            </div>
+
+            <span class="repair-last-update">
+                Updated @(Model.UpdatedAt.ToString("dd MMM yyyy, h:mm tt"))
+            </span>
+
+        </div>
+
+
+        <div class="repair-findings-grid">
+
+
+            <!-- ISSUE FOUND -->
+
+            <div class="repair-finding">
+
+                <div class="repair-finding-header">
+
+                    <div class="repair-finding-icon issue">
+                        <i class="bi bi-search"></i>
+                    </div>
+
+                    <div>
+                        <span>DIAGNOSIS</span>
+                        <h4>Issue Found</h4>
+                    </div>
+
+                </div>
+
+
+                @if (!string.IsNullOrWhiteSpace(Model.Diagnosis))
+                {
+                    <p>
+                        @Model.Diagnosis
+                    </p>
+                }
+                else
+                {
+                    <p class="repair-empty-text">
+                        No issue has been recorded yet.
+                    </p>
+                }
+
+            </div>
+
+
+
+            <!-- ACTION TAKEN -->
+
+            <div class="repair-finding">
+
+                <div class="repair-finding-header">
+
+                    <div class="repair-finding-icon action">
+                        <i class="bi bi-wrench"></i>
+                    </div>
+
+                    <div>
+                        <span>REPAIR WORK</span>
+                        <h4>Action Taken</h4>
+                    </div>
+
+                </div>
+
+
+                @if (!string.IsNullOrWhiteSpace(Model.RepairNotes))
+                {
+                    <p>
+                        @Model.RepairNotes
+                    </p>
+                }
+                else
+                {
+                    <p class="repair-empty-text">
+                        No repair action has been recorded yet.
+                    </p>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         REPAIR HISTORY
+         ===================================================== -->
+
+    <div class="repair-detail-card repair-history-card">
+
+        <div class="repair-detail-card-heading">
+
+            <div>
+                <span class="repair-detail-label">
+                    ACTIVITY
+                </span>
+
+                <h3>
+                    Repair Timeline
+                </h3>
+            </div>
+
+            <span class="repair-history-count">
+                @progressHistory.Count
+                @(progressHistory.Count == 1 ? "Update" : "Updates")
+            </span>
+
+        </div>
+
+
+        @if (!progressHistory.Any())
+        {
+            <div class="repair-history-empty">
+
+                <i class="bi bi-clock-history"></i>
+
+                <div>
+                    <strong>No repair updates yet</strong>
+
+                    <span>
+                        Workshop progress will appear here.
+                    </span>
+                </div>
+
+            </div>
+        }
+        else
+        {
+            <div class="repair-timeline">
+
+                @foreach (var progress in progressHistory)
+                {
+                    var timelineClass = progress.Status switch
+                    {
+                        "Assigned" => "assigned",
+                        "In Progress" => "progress",
+                        "Completed" => "completed",
+                        _ => "update"
+                    };
+
+                    <div class="repair-timeline-item">
+
+                        <div class="repair-timeline-marker @timelineClass">
+                            <span></span>
+                        </div>
+
+
+                        <div class="repair-timeline-content">
+
+                            <div class="repair-timeline-top">
+
+                                <div>
+
+                                    <span class="repair-timeline-status @timelineClass">
+
+                                        @if (progress.Status == "Assigned")
+                                        {
+                                            <i class="bi bi-person-check"></i>
+                                            <text>Assigned</text>
+                                        }
+                                        else if (progress.Status == "In Progress")
+                                        {
+                                            <i class="bi bi-tools"></i>
+                                            <text>In Progress</text>
+                                        }
+                                        else if (progress.Status == "Completed")
+                                        {
+                                            <i class="bi bi-check-circle"></i>
+                                            <text>Completed</text>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-arrow-repeat"></i>
+                                            <text>Workshop Update</text>
+                                        }
+
+                                    </span>
+
+                                </div>
+
+
+                                <time>
+                                    @(progress.CreatedAt.ToString("dd MMM yyyy, h:mm tt"))
+                                </time>
+
+                            </div>
+
+
+                            @if (!string.IsNullOrWhiteSpace(progress.Description))
+                            {
+                                <p>
+                                    @progress.Description
+                                </p>
+                            }
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+        }
+
+    </div>
+
+
+
+    <!-- =====================================================
+         BOTTOM
+         ===================================================== -->
+
+    <div class="repair-detail-footer">
+
+        <a asp-controller="Customer"
+           asp-action="RepairTracking"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Repair Tracking
+
+        </a>
+
+
+        <span>
+            <i class="bi bi-clock me-1"></i>
+
+            Last updated
+            <strong>
+                @(Model.UpdatedAt.ToString("dd MMM yyyy, h:mm tt"))
+            </strong>
+        </span>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <script>
+        setInterval(function () {
+
+            // Avoid refreshing while the user is interacting
+            // with another browser tab.
+            if (!document.hidden) {
+                window.location.reload();
+            }
+
+        }, 5000);
+    </script>
+
+}

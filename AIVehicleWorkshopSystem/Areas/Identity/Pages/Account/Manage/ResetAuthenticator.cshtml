@@ -1,0 +1,236 @@
+﻿@page
+@model ResetAuthenticatorModel
+
+@{
+    ViewData["Title"] = "Reset Authenticator";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+
+<!-- PAGE HEADER -->
+
+<div class="account-page-header">
+
+    <div class="account-page-icon account-page-icon-danger">
+        <i class="bi bi-arrow-repeat"></i>
+    </div>
+
+    <div>
+        <p class="account-eyebrow mb-1">
+            ACCOUNT SECURITY
+        </p>
+
+        <h2 class="fw-bold mb-1">
+            Reset Authenticator
+        </h2>
+
+        <p class="text-muted mb-0">
+            Replace the authenticator key currently connected
+            to your Serish AutoCare account.
+        </p>
+    </div>
+
+</div>
+
+
+<!-- DANGER WARNING -->
+
+<div class="reset-auth-warning">
+
+    <div class="reset-auth-warning-icon">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+    </div>
+
+    <div>
+
+        <span class="reset-auth-warning-label">
+            SECURITY WARNING
+        </span>
+
+        <h5>
+            Your current authenticator will stop working
+        </h5>
+
+        <p>
+            Resetting your authenticator creates a new security key.
+            Codes generated using your current authenticator setup
+            will no longer be valid.
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- WHAT HAPPENS -->
+
+<div class="reset-auth-card">
+
+    <div class="reset-auth-card-header">
+
+        <div>
+            <h5>What happens when you reset?</h5>
+
+            <p>
+                Make sure you understand these changes before continuing.
+            </p>
+        </div>
+
+        <i class="bi bi-shield-exclamation"></i>
+
+    </div>
+
+
+    <div class="reset-auth-list">
+
+
+        <!-- STEP 1 -->
+
+        <div class="reset-auth-item">
+
+            <div class="reset-auth-number">
+                1
+            </div>
+
+            <div>
+                <strong>
+                    Two-factor authentication is temporarily disabled
+                </strong>
+
+                <span>
+                    2FA will be disabled while you configure
+                    your new authenticator key.
+                </span>
+            </div>
+
+        </div>
+
+
+        <!-- STEP 2 -->
+
+        <div class="reset-auth-item">
+
+            <div class="reset-auth-number">
+                2
+            </div>
+
+            <div>
+                <strong>
+                    Your existing authenticator key is replaced
+                </strong>
+
+                <span>
+                    Verification codes generated using the old
+                    authenticator setup will stop working.
+                </span>
+            </div>
+
+        </div>
+
+
+        <!-- STEP 3 -->
+
+        <div class="reset-auth-item">
+
+            <div class="reset-auth-number">
+                3
+            </div>
+
+            <div>
+                <strong>
+                    A new authenticator must be configured
+                </strong>
+
+                <span>
+                    You will be redirected to the authenticator
+                    setup page to scan a new QR code.
+                </span>
+            </div>
+
+        </div>
+
+
+        <!-- STEP 4 -->
+
+        <div class="reset-auth-item">
+
+            <div class="reset-auth-number">
+                4
+            </div>
+
+            <div>
+                <strong>
+                    Verify the new authenticator
+                </strong>
+
+                <span>
+                    Enter a verification code from your
+                    authenticator app to enable 2FA again.
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- CONFIRMATION -->
+
+<div class="reset-auth-confirmation">
+
+    <div class="reset-auth-confirmation-icon">
+        <i class="bi bi-phone"></i>
+    </div>
+
+    <div>
+        <strong>
+            Have your authenticator app ready
+        </strong>
+
+        <p>
+            After resetting, continue immediately with the new
+            authenticator setup to restore two-factor protection.
+        </p>
+    </div>
+
+</div>
+
+
+<!-- ACTION BUTTONS -->
+
+<div class="reset-auth-actions">
+
+    <a asp-page="./TwoFactorAuthentication"
+       class="btn btn-outline-secondary">
+
+        <i class="bi bi-arrow-left me-1"></i>
+        Cancel
+
+    </a>
+
+
+    <form id="reset-authenticator-form"
+          method="post"
+          class="m-0">
+
+        <button id="reset-authenticator-button"
+                class="btn btn-danger"
+                type="submit">
+
+            <i class="bi bi-arrow-repeat me-1"></i>
+            Reset Authenticator
+
+        </button>
+
+    </form>
+
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

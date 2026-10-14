@@ -1,0 +1,229 @@
+﻿@model AIVehicleWorkshopSystem.Models.Appointment
+
+@{
+    ViewData["Title"] = "Edit Appointment";
+}
+
+<section class="py-5 bg-light min-vh-100">
+    <div class="container">
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                <div class="mb-4">
+
+                    <p class="text-primary fw-bold small mb-2">
+                        SERVICE APPOINTMENT
+                    </p>
+
+                    <h1 class="fw-bold mb-2">
+                        Edit Appointment
+                    </h1>
+
+                    <p class="text-muted mb-0">
+                        Update your pending service appointment.
+                    </p>
+
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4">
+
+                    <div class="card-body p-4 p-md-5">
+
+                        <form asp-controller="Appointment"
+                              asp-action="Edit"
+                              asp-route-id="@Model.AppointmentId"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <input asp-for="AppointmentId"
+                                   type="hidden" />
+
+                            <div asp-validation-summary="ModelOnly"
+                                 class="alert alert-danger">
+                            </div>
+
+                            <div class="row g-4">
+
+                                <!-- VEHICLE -->
+                                <div class="col-12">
+
+                                    <label asp-for="VehicleId"
+                                           class="form-label fw-semibold">
+                                        Vehicle
+                                    </label>
+
+                                    <select asp-for="VehicleId"
+                                            asp-items="ViewBag.Vehicles"
+                                            class="form-select">
+
+                                        <option value="">
+                                            -- Select your vehicle --
+                                        </option>
+
+                                    </select>
+
+                                    <span asp-validation-for="VehicleId"
+                                          class="text-danger small">
+                                    </span>
+
+                                </div>
+
+                                <!-- DATE -->
+                                <div class="col-md-6">
+
+                                    <label asp-for="AppointmentDate"
+                                           class="form-label fw-semibold">
+                                    </label>
+
+                                    <input asp-for="AppointmentDate"
+                                           type="date"
+                                           class="form-control"
+                                           min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+
+                                    <span asp-validation-for="AppointmentDate"
+                                          class="text-danger small">
+                                    </span>
+
+                                </div>
+
+                                <!-- TIME -->
+                                <div class="col-md-6">
+
+                                    <label asp-for="AppointmentTime"
+                                           class="form-label fw-semibold">
+                                    </label>
+
+                                    <input asp-for="AppointmentTime"
+                                           type="time"
+                                           class="form-control" />
+
+                                    <span asp-validation-for="AppointmentTime"
+                                          class="text-danger small">
+                                    </span>
+
+                                </div>
+
+                                <!-- SERVICE TYPE -->
+                                <div class="col-12">
+
+                                    <label asp-for="ServiceType"
+                                           class="form-label fw-semibold">
+                                    </label>
+
+                                    <select asp-for="ServiceType"
+                                            class="form-select">
+
+                                        <option value="">
+                                            -- Select service type --
+                                        </option>
+
+                                        <option value="Regular Service">
+                                            Regular Service
+                                        </option>
+
+                                        <option value="Oil Change">
+                                            Oil Change
+                                        </option>
+
+                                        <option value="Brake Service">
+                                            Brake Service
+                                        </option>
+
+                                        <option value="Air Conditioning Service">
+                                            Air Conditioning Service
+                                        </option>
+
+                                        <option value="Tyre Service">
+                                            Tyre Service
+                                        </option>
+
+                                        <option value="Battery Service">
+                                            Battery Service
+                                        </option>
+
+                                        <option value="Engine Diagnosis">
+                                            Engine Diagnosis
+                                        </option>
+
+                                        <option value="General Inspection">
+                                            General Inspection
+                                        </option>
+
+                                        <option value="Other">
+                                            Other
+                                        </option>
+
+                                    </select>
+
+                                    <span asp-validation-for="ServiceType"
+                                          class="text-danger small">
+                                    </span>
+
+                                </div>
+
+                                <!-- COMPLAINT -->
+                                <div class="col-12">
+
+                                    <label asp-for="CustomerComplaint"
+                                           class="form-label fw-semibold">
+                                        Vehicle Problem / Complaint
+                                    </label>
+
+                                    <textarea asp-for="CustomerComplaint"
+                                              class="form-control"
+                                              rows="5"
+                                              placeholder="Describe the vehicle problem or service request."></textarea>
+
+                                    <span asp-validation-for="CustomerComplaint"
+                                          class="text-danger small">
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                            <div class="alert alert-light border mt-4 mb-0">
+
+                                <small class="text-muted">
+                                    Only appointments with
+                                    <strong>Pending</strong>
+                                    status can be edited.
+                                </small>
+
+                            </div>
+
+                            <hr class="my-4" />
+
+                            <div class="d-flex flex-column flex-sm-row
+                                        justify-content-between gap-3">
+
+                                <a asp-controller="Appointment"
+                                   asp-action="Details"
+                                   asp-route-id="@Model.AppointmentId"
+                                   class="btn btn-outline-secondary px-4">
+                                    Cancel
+                                </a>
+
+                                <button type="submit"
+                                        class="btn btn-primary px-4">
+                                    Save Changes
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

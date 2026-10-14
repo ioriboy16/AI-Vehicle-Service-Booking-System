@@ -1,0 +1,387 @@
+﻿@model IEnumerable<AIVehicleWorkshopSystem.Models.SupportConversation>
+@using AIVehicleWorkshopSystem.Models
+
+@{
+    ViewData["Title"] = "Customer Messages";
+
+    var latestMessages =
+        ViewBag.LatestMessages as Dictionary<int, SupportMessage?>
+        ?? new Dictionary<int, SupportMessage?>();
+
+    var unreadCounts =
+        ViewBag.UnreadCounts as Dictionary<int, int>
+        ?? new Dictionary<int, int>();
+
+    var totalUnread = unreadCounts.Values.Sum();
+}
+
+
+<div class="admin-support-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="admin-support-header">
+
+        <div>
+            <div class="admin-support-title-row">
+
+                <div class="admin-support-title-icon">
+                    <i class="bi bi-chat-left-text"></i>
+                </div>
+
+                <div>
+                    <h1>Customer Messages</h1>
+
+                    <p>
+                        View and respond to customer support enquiries.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="admin-support-summary">
+
+            <span class="admin-support-summary-label">
+                Unread
+            </span>
+
+            <strong>
+                @totalUnread
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         TOOLBAR
+         ===================================================== -->
+
+    <div class="admin-support-toolbar">
+
+        <div class="admin-support-search">
+
+            <i class="bi bi-search"></i>
+
+            <input type="text"
+                   id="customerMessageSearch"
+                   placeholder="Search customer or message..." />
+
+        </div>
+
+
+        <div class="admin-support-count">
+
+            <i class="bi bi-inbox"></i>
+
+            <span>
+                @Model.Count()
+                @(Model.Count() == 1 ? "conversation" : "conversations")
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CONVERSATIONS
+         ===================================================== -->
+
+    <div class="admin-support-card">
+
+        @if (!Model.Any())
+        {
+            <div class="admin-support-empty">
+
+                <div class="admin-support-empty-icon">
+                    <i class="bi bi-chat-square-dots"></i>
+                </div>
+
+                <h3>No customer messages</h3>
+
+                <p>
+                    Customer support conversations will appear here
+                    when customers contact the administration team.
+                </p>
+
+            </div>
+        }
+        else
+        {
+            <div id="customerConversationList"
+                 class="admin-support-list">
+
+                @foreach (var conversation in Model)
+                {
+                    latestMessages.TryGetValue(
+                    conversation.ConversationId,
+                    out var latestMessage);
+
+                    unreadCounts.TryGetValue(
+                    conversation.ConversationId,
+                    out var unreadCount);
+
+
+                    var customerName =
+                    conversation.Customer?.FullName
+                    ?? conversation.Customer?.UserName
+                    ?? conversation.Customer?.Email
+                    ?? "Unknown Customer";
+
+
+                    var customerEmail =
+                    conversation.Customer?.Email
+                    ?? "-";
+
+
+                    var initials = "?";
+
+                    if (!string.IsNullOrWhiteSpace(customerName))
+                    {
+                        var nameParts =
+                        customerName
+                        .Split(
+                        ' ',
+                        StringSplitOptions.RemoveEmptyEntries);
+
+                        if (nameParts.Length >= 2)
+                        {
+                            initials =
+                            $"{nameParts[0][0]}{nameParts[1][0]}"
+                            .ToUpper();
+                        }
+                        else if (nameParts.Length == 1)
+                        {
+                            initials =
+                            nameParts[0][0]
+                            .ToString()
+                            .ToUpper();
+                        }
+                    }
+
+
+                    var latestText =
+                    "Conversation started";
+
+                    if (latestMessage != null)
+                    {
+                        if (!string.IsNullOrWhiteSpace(
+                        latestMessage.Message))
+                        {
+                            latestText =
+                            latestMessage.Message;
+                        }
+                        else if (!string.IsNullOrWhiteSpace(
+                        latestMessage.AttachmentFileName))
+                        {
+                            latestText =
+                            $"Attachment: {latestMessage.AttachmentFileName}";
+                        }
+                    }
+
+
+                    var searchText =
+                    $"{customerName} {customerEmail} {latestText}"
+                    .ToLowerInvariant();
+
+
+                    <a asp-controller="SupportChat"
+                       asp-action="Conversation"
+                       asp-route-id="@conversation.ConversationId"
+                       class="admin-support-conversation @(unreadCount > 0 ? "unread" : "")"
+                       data-search="@searchText">
+
+
+                        <!-- AVATAR -->
+
+                        <div class="admin-support-avatar">
+                            @initials
+                        </div>
+
+
+                        <!-- CONTENT -->
+
+                        <div class="admin-support-conversation-content">
+
+                            <div class="admin-support-conversation-top">
+
+                                <div class="admin-support-customer">
+
+                                    <strong>
+                                        @customerName
+                                    </strong>
+
+                                    @if (unreadCount > 0)
+                                    {
+                                        <span class="admin-support-new">
+                                            New
+                                        </span>
+                                    }
+
+                                </div>
+
+
+                                <span class="admin-support-time">
+
+                                    @if (latestMessage != null)
+                                    {
+                                        @(latestMessage.SentAt.ToString("dd MMM, h:mm tt"))
+                                                        }
+                                    else
+                                    {
+                                        @(conversation.CreatedAt.ToString("dd MMM"))
+                                                        }
+
+                                </span>
+
+                            </div>
+
+
+                            <div class="admin-support-email">
+                                @customerEmail
+                            </div>
+
+
+                            <div class="admin-support-conversation-bottom">
+
+                                <div class="admin-support-preview">
+
+                                    @if (latestMessage != null &&
+                                                                !string.IsNullOrWhiteSpace(
+                                                                latestMessage.AttachmentPath))
+                                    {
+                                        <i class="bi bi-paperclip"></i>
+                                    }
+
+                                    <span>
+                                        @latestText
+                                    </span>
+
+                                </div>
+
+
+                                <div class="admin-support-conversation-actions">
+
+                                    @if (unreadCount > 0)
+                                    {
+                                        <span class="admin-support-unread-count">
+                                            @(unreadCount > 99 ? "99+" : unreadCount)
+                                        </span>
+                                    }
+
+                                    <i class="bi bi-chevron-right"></i>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </a>
+                }
+
+            </div>
+
+
+            <div id="customerMessageNoResults"
+                 class="admin-support-no-results d-none">
+
+                <i class="bi bi-search"></i>
+
+                <strong>No conversations found</strong>
+
+                <span>
+                    Try a different customer name or message.
+                </span>
+
+            </div>
+        }
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <script>
+
+        const searchInput =
+            document.getElementById(
+                "customerMessageSearch");
+
+        const conversationList =
+            document.getElementById(
+                "customerConversationList");
+
+        const noResults =
+            document.getElementById(
+                "customerMessageNoResults");
+
+
+        if (searchInput &&
+            conversationList) {
+
+            searchInput.addEventListener(
+                "input",
+                function () {
+
+                    const searchValue =
+                        this.value
+                            .trim()
+                            .toLowerCase();
+
+
+                    const conversations =
+                        conversationList
+                            .querySelectorAll(
+                                ".admin-support-conversation");
+
+
+                    let visibleCount = 0;
+
+
+                    conversations.forEach(
+                        function (conversation) {
+
+                            const searchText =
+                                conversation.dataset.search
+                                ?? "";
+
+
+                            const visible =
+                                searchText.includes(
+                                    searchValue);
+
+
+                            conversation.style.display =
+                                visible
+                                    ? ""
+                                    : "none";
+
+
+                            if (visible) {
+                                visibleCount++;
+                            }
+
+                        });
+
+
+                    if (noResults) {
+
+                        noResults.classList.toggle(
+                            "d-none",
+                            visibleCount > 0);
+                    }
+
+                });
+        }
+
+    </script>
+}

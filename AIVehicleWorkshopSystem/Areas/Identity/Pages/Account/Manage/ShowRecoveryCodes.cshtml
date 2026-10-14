@@ -1,0 +1,278 @@
+﻿@page
+@model ShowRecoveryCodesModel
+
+@{
+    ViewData["Title"] = "Recovery Codes";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+
+<!-- PAGE HEADER -->
+
+<div class="account-page-header">
+
+    <div class="account-page-icon">
+        <i class="bi bi-key-fill"></i>
+    </div>
+
+    <div>
+        <p class="account-eyebrow mb-1">
+            ACCOUNT SECURITY
+        </p>
+
+        <h2 class="fw-bold mb-1">
+            Save Your Recovery Codes
+        </h2>
+
+        <p class="text-muted mb-0">
+            Keep these codes somewhere safe in case you lose
+            access to your authenticator app.
+        </p>
+    </div>
+
+</div>
+
+
+<!-- IMPORTANT WARNING -->
+
+<div class="recovery-codes-warning">
+
+    <div class="recovery-codes-warning-icon">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+    </div>
+
+    <div>
+
+        <span class="recovery-codes-warning-label">
+            IMPORTANT
+        </span>
+
+        <h5>
+            Save these codes before leaving this page
+        </h5>
+
+        <p>
+            Each recovery code can be used to access your account
+            when your authenticator app is unavailable. Keep them
+            private and store them somewhere secure.
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- RECOVERY CODE CARD -->
+
+<div class="recovery-codes-card">
+
+    <div class="recovery-codes-card-header">
+
+        <div>
+
+            <span class="recovery-codes-card-label">
+                BACKUP ACCESS
+            </span>
+
+            <h5>
+                Your Recovery Codes
+            </h5>
+
+            <p>
+                @Model.RecoveryCodes.Length codes generated
+            </p>
+
+        </div>
+
+
+        <button type="button"
+                class="btn btn-outline-primary btn-sm"
+                id="copyAllRecoveryCodes">
+
+            <i class="bi bi-copy me-1"></i>
+
+            <span id="copyRecoveryText">
+                Copy All Codes
+            </span>
+
+        </button>
+
+    </div>
+
+
+    <!-- CODES -->
+
+    <div class="recovery-codes-grid"
+         id="recoveryCodesContainer">
+
+        @for (var i = 0; i < Model.RecoveryCodes.Length; i++)
+        {
+            <div class="recovery-code-item">
+
+                <span class="recovery-code-number">
+                    @(i + 1)
+                </span>
+
+                <code class="recovery-code-value">
+                    @Model.RecoveryCodes[i]
+                </code>
+
+            </div>
+        }
+
+    </div>
+
+</div>
+
+
+<!-- SECURITY INFORMATION -->
+
+<div class="recovery-security-grid">
+
+    <div class="recovery-security-item">
+
+        <div class="recovery-security-icon">
+            <i class="bi bi-1-circle"></i>
+        </div>
+
+        <div>
+            <strong>
+                Single-use
+            </strong>
+
+            <span>
+                Each code can only be used once.
+            </span>
+        </div>
+
+    </div>
+
+
+    <div class="recovery-security-item">
+
+        <div class="recovery-security-icon">
+            <i class="bi bi-eye-slash"></i>
+        </div>
+
+        <div>
+            <strong>
+                Keep private
+            </strong>
+
+            <span>
+                Never share your recovery codes.
+            </span>
+        </div>
+
+    </div>
+
+
+    <div class="recovery-security-item">
+
+        <div class="recovery-security-icon">
+            <i class="bi bi-shield-lock"></i>
+        </div>
+
+        <div>
+            <strong>
+                Backup access
+            </strong>
+
+            <span>
+                Use them if your authenticator is unavailable.
+            </span>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ACTION -->
+
+<div class="recovery-codes-actions">
+
+    <a asp-page="./TwoFactorAuthentication"
+       class="btn btn-primary">
+
+        <i class="bi bi-check-lg me-1"></i>
+
+        I've Saved My Codes
+
+    </a>
+
+</div>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const copyButton =
+                document.getElementById("copyAllRecoveryCodes");
+
+            const copyText =
+                document.getElementById("copyRecoveryText");
+
+
+            if (!copyButton) {
+                return;
+            }
+
+
+            copyButton.addEventListener("click", async function () {
+
+                const codeElements =
+                    document.querySelectorAll(".recovery-code-value");
+
+                const codes =
+                    Array.from(codeElements)
+                        .map(element => element.textContent.trim())
+                        .join("\n");
+
+
+                try {
+
+                    await navigator.clipboard.writeText(codes);
+
+                    copyText.textContent = "Copied!";
+
+                    copyButton.classList.remove("btn-outline-primary");
+                    copyButton.classList.add("btn-success");
+
+
+                    setTimeout(function () {
+
+                        copyText.textContent = "Copy All Codes";
+
+                        copyButton.classList.remove("btn-success");
+                        copyButton.classList.add("btn-outline-primary");
+
+                    }, 2000);
+
+                }
+                catch {
+
+                    copyText.textContent = "Unable to Copy";
+
+                    setTimeout(function () {
+
+                        copyText.textContent = "Copy All Codes";
+
+                    }, 2000);
+
+                }
+
+            });
+
+        });
+
+    </script>
+
+}

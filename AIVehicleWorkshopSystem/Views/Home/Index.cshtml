@@ -1,8 +1,377 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-75 py-5">
+
+            <div class="col-lg-7">
+
+                <span class="badge rounded-pill bg-primary px-3 py-2 mb-3">
+                    AI-Powered Vehicle Service System
+                </span>
+
+                <h1 class="display-4 fw-bold mb-4">
+                    Smarter Vehicle Service,
+                    <span class="text-primary">
+                        Better Customer Experience
+                    </span>
+                </h1>
+
+                <p class="lead text-muted mb-4">
+                    Book service appointments, track vehicle repair progress,
+                    communicate with workshop staff and receive AI-assisted
+                    diagnostic recommendations through one centralized platform.
+                </p>
+
+                <div class="d-flex flex-wrap gap-3">
+
+                    @if (User.Identity != null &&
+                                        User.Identity.IsAuthenticated)
+                    {
+                        <a asp-controller="Customer"
+                           asp-action="Dashboard"
+                           class="btn btn-primary btn-lg px-4">
+                            Go to Dashboard
+                        </a>
+
+                        <a asp-controller="Appointment"
+                           asp-action="Create"
+                           class="btn btn-outline-dark btn-lg px-4">
+                            Book Appointment
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-area="Identity"
+                           asp-page="/Account/Register"
+                           class="btn btn-primary btn-lg px-4">
+                            Get Started
+                        </a>
+
+                        <a asp-area="Identity"
+                           asp-page="/Account/Login"
+                           class="btn btn-outline-dark btn-lg px-4">
+                            Login
+                        </a>
+                    }
+
+                </div>
+
+                <div class="row mt-5 g-3">
+
+                    <div class="col-sm-4">
+                        <div class="hero-stat">
+                            <h3 class="fw-bold mb-1">24/7</h3>
+
+                            <p class="text-muted mb-0">
+                                Online booking access
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <div class="hero-stat">
+                            <h3 class="fw-bold mb-1">
+                                Real-Time
+                            </h3>
+
+                            <p class="text-muted mb-0">
+                                Repair progress updates
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <div class="hero-stat">
+                            <h3 class="fw-bold mb-1">AI</h3>
+
+                            <p class="text-muted mb-0">
+                                Diagnostic assistance
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-5 mt-5 mt-lg-0">
+
+                <div class="feature-panel shadow-lg">
+
+                    <div class="feature-panel-header">
+
+                        <span class="feature-icon">
+                            🚗
+                        </span>
+
+                        <div>
+                            <p class="text-muted mb-1">
+                                Welcome to
+                            </p>
+
+                            <h3 class="fw-bold mb-0">
+                                Serish AutoCare
+                            </h3>
+                        </div>
+
+                    </div>
+
+                    <div class="feature-item">
+
+                        <div class="feature-number">
+                            01
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                Book Appointment
+                            </h5>
+
+                            <p class="text-muted mb-0">
+                                Select your vehicle, service type
+                                and preferred schedule.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="feature-item">
+
+                        <div class="feature-number">
+                            02
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                Track Repair Progress
+                            </h5>
+
+                            <p class="text-muted mb-0">
+                                Follow every stage of the repair
+                                process online.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="feature-item">
+
+                        <div class="feature-number">
+                            03
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                Receive Digital Invoice
+                            </h5>
+
+                            <p class="text-muted mb-0">
+                                View service details, costs and
+                                digital receipts.
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section id="features"
+         class="features-section py-5">
+
+    <div class="container py-4">
+
+        <div class="text-center mb-5">
+
+            <span class="section-label">
+                SYSTEM FEATURES
+            </span>
+
+            <h2 class="fw-bold mt-2">
+                Everything You Need in One Platform
+            </h2>
+
+            <p class="text-muted mx-auto section-description">
+                The system improves communication, transparency
+                and service management between customers and
+                workshop staff.
+            </p>
+
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-md-6 col-lg-3">
+
+                <div class="service-card h-100">
+
+                    <div class="service-icon">
+                        📅
+                    </div>
+
+                    <h5 class="fw-bold">
+                        Online Booking
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Customers can schedule vehicle servicing
+                        without relying entirely on WhatsApp or
+                        phone calls.
+                    </p>
+
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+
+                <div class="service-card h-100">
+
+                    <div class="service-icon">
+                        🔧
+                    </div>
+
+                    <h5 class="fw-bold">
+                        Repair Tracking
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Customers can monitor vehicle repair
+                        progress from inspection until completion.
+                    </p>
+
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+
+                <div class="service-card h-100">
+
+                    <div class="service-icon">
+                        🤖
+                    </div>
+
+                    <h5 class="fw-bold">
+                        AI Recommendation
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        The system provides preliminary diagnostic
+                        suggestions based on reported vehicle
+                        symptoms.
+                    </p>
+
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+
+                <div class="service-card h-100">
+
+                    <div class="service-icon">
+                        🧾
+                    </div>
+
+                    <h5 class="fw-bold">
+                        Digital Invoice
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Customers can access service invoices and
+                        receipts directly from their accounts.
+                    </p>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section id="workflow"
+         class="workflow-section py-5">
+
+    <div class="container py-4">
+
+        <div class="row align-items-center">
+
+            <div class="col-lg-5">
+
+                <span class="section-label">
+                    HOW IT WORKS
+                </span>
+
+                <h2 class="fw-bold mt-2 mb-3">
+                    A Simple Process from Booking to Completion
+                </h2>
+
+                <p class="text-muted">
+                    The platform creates a more organized and
+                    transparent vehicle service workflow for both
+                    customers and workshop staff.
+                </p>
+
+            </div>
+
+            <div class="col-lg-7 mt-4 mt-lg-0">
+
+                <div class="workflow-step">
+
+                    <span>1</span>
+
+                    <div>
+                        <h5 class="fw-bold mb-1">
+                            Register Your Vehicle
+                        </h5>
+
+                        <p class="text-muted mb-0">
+                            Add vehicle information such as plate
+                            number, brand and model.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="workflow-step">
+
+                    <span>2</span>
+
+                    <div>
+                        <h5 class="fw-bold mb-1">
+                            Book a Service Appointment
+                        </h5>
+
+                        <p class="text-muted mb-0">
+                            Choose a preferred date, service type
+                            and explain the vehicle issue.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="workflow-step">
+
+                    <span>3</span>
+
+                    <div>
+                        <h5 class="fw-bold mb-1">
+                            Track Repair and Receive Invoice
+                        </h5>
+
+                        <p class="text-muted mb-0">
+                            Monitor repair progress and access the
+                            final digital invoice.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>

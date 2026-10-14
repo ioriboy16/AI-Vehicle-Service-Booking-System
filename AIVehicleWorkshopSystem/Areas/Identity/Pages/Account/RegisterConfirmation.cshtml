@@ -1,0 +1,316 @@
+﻿@page
+@model RegisterConfirmationModel
+@{
+    ViewData["Title"] = "Check Your Email";
+}
+
+<div class="auth-page">
+    <div class="auth-card">
+
+        <div class="auth-icon">
+            <i class="bi bi-envelope-check"></i>
+        </div>
+
+        <h1>Check Your Email</h1>
+
+        <p class="auth-subtitle">
+            Your account has been created successfully.
+            We've sent a verification link to your email address.
+        </p>
+
+        <div class="email-box">
+            <div class="email-icon">
+                <i class="bi bi-envelope"></i>
+            </div>
+
+            <div class="email-content">
+                <span>Verification email sent to</span>
+                <strong>@Model.Email</strong>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <i class="bi bi-info-circle-fill"></i>
+
+            <div>
+                <strong>What's next?</strong>
+                <span>
+                    Open the verification email and click the confirmation
+                    link to activate your Serish AutoCare account.
+                </span>
+            </div>
+        </div>
+
+        <div class="warning-box">
+            <i class="bi bi-clock"></i>
+
+            <div>
+                <strong>Didn't receive the email?</strong>
+                <span>
+                    Please wait a few moments and check your spam or junk folder.
+                </span>
+            </div>
+        </div>
+
+        <a asp-page="./ResendEmailConfirmation"
+           class="btn-resend">
+            <i class="bi bi-arrow-clockwise"></i>
+            Resend Verification Email
+        </a>
+
+        <div class="back-login">
+            <a asp-page="./Login">
+                <i class="bi bi-arrow-left"></i>
+                Back to Login
+            </a>
+        </div>
+
+        <div class="security-note">
+            <i class="bi bi-shield-check"></i>
+            <span>Email verification protects your Serish AutoCare account</span>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .auth-page {
+        min-height: calc(100vh - 140px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+        background: #f8f9fa;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 520px;
+        padding: 45px 40px 35px;
+        background: #ffffff;
+        border: 1px solid #e9ecef;
+        border-radius: 18px;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+    }
+
+    .auth-icon {
+        width: 82px;
+        height: 82px;
+        margin: 0 auto 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #e8f5ee;
+        border-radius: 50%;
+    }
+
+        .auth-icon i {
+            color: #198754;
+            font-size: 38px;
+        }
+
+    .auth-card h1 {
+        margin-bottom: 12px;
+        color: #212529;
+        font-size: 28px;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .auth-subtitle {
+        max-width: 420px;
+        margin: 0 auto 26px;
+        color: #6c757d;
+        font-size: 15px;
+        line-height: 1.7;
+        text-align: center;
+    }
+
+    .email-box {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+        padding: 15px 16px;
+        background: #f8f9fa;
+        border: 1px solid #e3e6e9;
+        border-radius: 12px;
+        text-align: left;
+    }
+
+    .email-icon {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #0d6efd;
+        font-size: 19px;
+        background: #e8f1ff;
+        border-radius: 10px;
+        flex-shrink: 0;
+    }
+
+    .email-content {
+        min-width: 0;
+    }
+
+        .email-content span {
+            display: block;
+            margin-bottom: 2px;
+            color: #8a8f94;
+            font-size: 12px;
+        }
+
+        .email-content strong {
+            display: block;
+            overflow-wrap: anywhere;
+            color: #212529;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+    .info-box,
+    .warning-box {
+        display: flex;
+        gap: 13px;
+        padding: 15px 16px;
+        text-align: left;
+        border-radius: 12px;
+    }
+
+    .info-box {
+        margin-bottom: 12px;
+        background: #f4f8ff;
+        border: 1px solid #dbe8ff;
+    }
+
+    .warning-box {
+        margin-bottom: 24px;
+        background: #fff9ed;
+        border: 1px solid #f5e5bc;
+    }
+
+        .info-box > i,
+        .warning-box > i {
+            margin-top: 2px;
+            font-size: 19px;
+            flex-shrink: 0;
+        }
+
+    .info-box > i {
+        color: #0d6efd;
+    }
+
+    .warning-box > i {
+        color: #d89500;
+    }
+
+    .info-box strong,
+    .warning-box strong {
+        display: block;
+        margin-bottom: 3px;
+        color: #343a40;
+        font-size: 13px;
+    }
+
+    .info-box span,
+    .warning-box span {
+        display: block;
+        color: #6c757d;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .btn-resend {
+        width: 100%;
+        min-height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 9px;
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        background: #212529;
+        border-radius: 10px;
+        transition: 0.2s ease;
+    }
+
+        .btn-resend:hover {
+            color: #ffffff;
+            background: #000000;
+            transform: translateY(-1px);
+        }
+
+    .back-login {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+        .back-login a {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: #495057;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+            .back-login a:hover {
+                color: #0d6efd;
+            }
+
+    .security-note {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 7px;
+        margin-top: 24px;
+        padding-top: 20px;
+        color: #8a8f94;
+        font-size: 12px;
+        text-align: center;
+        border-top: 1px solid #eeeeee;
+    }
+
+        .security-note i {
+            color: #198754;
+            flex-shrink: 0;
+        }
+
+    @@media (max-width: 576px) {
+        .auth-page {
+            padding: 25px 15px;
+            align-items: flex-start;
+        }
+
+        .auth-card {
+            padding: 35px 22px 28px;
+            border-radius: 15px;
+        }
+
+        .auth-icon {
+            width: 72px;
+            height: 72px;
+        }
+
+            .auth-icon i {
+                font-size: 32px;
+            }
+
+        .auth-card h1 {
+            font-size: 24px;
+        }
+
+        .auth-subtitle {
+            font-size: 14px;
+        }
+
+        .email-box {
+            align-items: flex-start;
+        }
+    }
+</style>

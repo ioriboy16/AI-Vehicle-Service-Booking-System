@@ -1,0 +1,1824 @@
+﻿@model IEnumerable<AIVehicleWorkshopSystem.Models.Repair>
+
+@{
+    ViewData["Title"] = "Repair Management";
+
+    var mechanicNames =
+        ViewBag.MechanicNames as Dictionary<string, string>
+        ?? new Dictionary<string, string>();
+
+    var unreadChatCounts =
+        ViewBag.UnreadChatCounts as Dictionary<int, int>
+        ?? new Dictionary<int, int>();
+
+    var totalRepairs = Model?.Count() ?? 0;
+
+    var assignedRepairs =
+        Model?.Count(r => r.RepairStatus == "Assigned") ?? 0;
+
+    var inProgressRepairs =
+        Model?.Count(r => r.RepairStatus == "In Progress") ?? 0;
+
+    var completedRepairs =
+        Model?.Count(r => r.RepairStatus == "Completed") ?? 0;
+}
+
+
+<div class="repair-management-page">
+
+    <div class="container py-4 py-lg-5">
+
+        <!-- =====================================================
+             PAGE HEADER
+             ===================================================== -->
+
+        <div class="repair-page-header">
+
+            <div>
+
+                <div class="page-label">
+                    <i class="bi bi-wrench-adjustable-circle-fill"></i>
+                    WORKSHOP MANAGEMENT
+                </div>
+
+                <h2>
+                    Repair Management
+                </h2>
+
+                <p>
+                    Monitor workshop repairs, assigned mechanics and customer communication.
+                </p>
+
+            </div>
+
+
+            <a asp-controller="Admin"
+               asp-action="Dashboard"
+               class="dashboard-button">
+
+                <i class="bi bi-arrow-left"></i>
+                Back to Dashboard
+
+            </a>
+
+        </div>
+
+
+        @if (Model == null || !Model.Any())
+        {
+            <!-- =================================================
+                 EMPTY STATE
+                 ================================================= -->
+
+            <div class="empty-repair-card">
+
+                <div class="empty-icon">
+                    <i class="bi bi-wrench-adjustable"></i>
+                </div>
+
+                <h4>
+                    No Repair Records
+                </h4>
+
+                <p>
+                    Repair records will appear here after an approved
+                    appointment is converted into a repair.
+                </p>
+
+            </div>
+        }
+        else
+        {
+            <!-- =================================================
+                 SUMMARY CARDS
+                 ================================================= -->
+
+            <div class="row g-3 mb-4">
+
+                <!-- TOTAL -->
+                <div class="col-6 col-xl-3">
+
+                    <div class="summary-card">
+
+                        <div class="summary-icon total">
+                            <i class="bi bi-wrench-adjustable"></i>
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Total Repairs
+                            </span>
+
+                            <strong>
+                                @totalRepairs
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ASSIGNED -->
+                <div class="col-6 col-xl-3">
+
+                    <div class="summary-card">
+
+                        <div class="summary-icon assigned">
+                            <i class="bi bi-person-check"></i>
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Assigned
+                            </span>
+
+                            <strong class="assigned-number">
+                                @assignedRepairs
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- IN PROGRESS -->
+                <div class="col-6 col-xl-3">
+
+                    <div class="summary-card">
+
+                        <div class="summary-icon progress">
+                            <i class="bi bi-gear-fill"></i>
+                        </div>
+
+                        <div>
+
+                            <span>
+                                In Progress
+                            </span>
+
+                            <strong class="progress-number">
+                                @inProgressRepairs
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- COMPLETED -->
+                <div class="col-6 col-xl-3">
+
+                    <div class="summary-card">
+
+                        <div class="summary-icon completed">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Completed
+                            </span>
+
+                            <strong class="completed-number">
+                                @completedRepairs
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 MAIN REPAIR CARD
+                 ================================================= -->
+
+            <div class="repair-card">
+
+
+                <!-- CARD HEADER -->
+                <div class="repair-card-header">
+
+                    <div class="repair-card-title">
+
+                        <div class="card-title-icon">
+                            <i class="bi bi-tools"></i>
+                        </div>
+
+                        <div>
+
+                            <h4>
+                                Workshop Repairs
+                            </h4>
+
+                            <p>
+                                Search, filter and communicate regarding repair jobs.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="record-count">
+
+                        <strong>
+                            @totalRepairs
+                        </strong>
+
+                        <span>
+                            Records
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     SEARCH & FILTER
+                     ================================================= -->
+
+                <div class="repair-toolbar">
+
+                    <div class="toolbar-left">
+
+
+                        <!-- SEARCH -->
+                        <div class="repair-search">
+
+                            <i class="bi bi-search"></i>
+
+                            <input type="text"
+                                   id="repairSearch"
+                                   placeholder="Search repair, vehicle, plate, mechanic or service..."
+                                   autocomplete="off" />
+
+                            <button type="button"
+                                    id="clearRepairSearch"
+                                    class="clear-search"
+                                    aria-label="Clear search">
+
+                                <i class="bi bi-x-lg"></i>
+
+                            </button>
+
+                        </div>
+
+
+                        <!-- STATUS FILTER -->
+                        <select id="repairStatusFilter"
+                                class="repair-filter">
+
+                            <option value="all">
+                                All Status
+                            </option>
+
+                            <option value="assigned">
+                                Assigned
+                            </option>
+
+                            <option value="in progress">
+                                In Progress
+                            </option>
+
+                            <option value="completed">
+                                Completed
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- COUNT -->
+                    <div class="result-count">
+
+                        Showing
+
+                        <strong id="visibleRepairCount">
+                            @totalRepairs
+                        </strong>
+
+                        of
+
+                        <strong>
+                            @totalRepairs
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     TABLE
+                     ================================================= -->
+
+                <div class="table-responsive repair-table-wrapper"
+                     id="repairTableWrapper">
+
+                    <table class="table repair-table align-middle mb-0">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Repair
+                                </th>
+
+                                <th>
+                                    Vehicle
+                                </th>
+
+                                <th>
+                                    Mechanic
+                                </th>
+
+                                <th>
+                                    Service
+                                </th>
+
+                                <th class="text-center">
+                                    Status
+                                </th>
+
+                                <th>
+                                    Created
+                                </th>
+
+                                <th class="text-end">
+                                    Communication
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var repair in Model)
+                            {
+                                var mechanicName =
+                                mechanicNames.ContainsKey(repair.MechanicId)
+                                ? mechanicNames[repair.MechanicId]
+                                : "Unknown Mechanic";
+
+                                var unreadCount =
+                                unreadChatCounts.ContainsKey(repair.RepairId)
+                                ? unreadChatCounts[repair.RepairId]
+                                : 0;
+
+                                var vehicleName =
+                                repair.Appointment?.Vehicle != null
+                                ? $"{repair.Appointment.Vehicle.Brand} {repair.Appointment.Vehicle.Model}"
+                                : "";
+
+                                var plateNumber =
+                                repair.Appointment?.Vehicle?.PlateNumber ?? "";
+
+                                var serviceType =
+                                repair.Appointment?.ServiceType ?? "";
+
+                                var repairStatus =
+                                repair.RepairStatus ?? "";
+
+                                <tr class="repair-row"
+                                    data-repair="@repair.RepairId"
+                                    data-vehicle="@vehicleName"
+                                    data-plate="@plateNumber"
+                                    data-mechanic="@mechanicName"
+                                    data-service="@serviceType"
+                                    data-status="@repairStatus.ToLower()">
+
+
+                                    <!-- REPAIR -->
+                                    <td>
+
+                                        <div class="repair-id">
+
+                                            <div class="repair-id-icon">
+                                                <i class="bi bi-wrench-adjustable"></i>
+                                            </div>
+
+                                            <div>
+
+                                                <span>
+                                                    REPAIR
+                                                </span>
+
+                                                <strong>
+                                                    #@repair.RepairId
+                                                </strong>
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- VEHICLE -->
+                                    <td>
+
+                                        @if (repair.Appointment?.Vehicle != null)
+                                        {
+                                            <div class="vehicle-cell">
+
+                                                <div class="vehicle-icon">
+                                                    <i class="bi bi-car-front-fill"></i>
+                                                </div>
+
+                                                <div>
+
+                                                    <strong>
+                                                        @repair.Appointment.Vehicle.Brand
+                                                        @repair.Appointment.Vehicle.Model
+                                                    </strong>
+
+                                                    <span>
+                                                        @repair.Appointment.Vehicle.PlateNumber
+                                                    </span>
+
+                                                </div>
+
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="unavailable">
+                                                Vehicle unavailable
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- MECHANIC -->
+                                    <td>
+
+                                        <div class="mechanic-cell">
+
+                                            <div class="mechanic-icon">
+                                                <i class="bi bi-person-gear"></i>
+                                            </div>
+
+                                            <div>
+
+                                                <strong>
+                                                    @mechanicName
+                                                </strong>
+
+                                                <span>
+                                                    Assigned Mechanic
+                                                </span>
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- SERVICE -->
+                                    <td>
+
+                                        <div class="service-cell">
+
+                                            <i class="bi bi-tools"></i>
+
+                                            <span>
+                                                @(repair.Appointment?.ServiceType ?? "-")
+                                            </span>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- STATUS -->
+                                    <td class="text-center">
+
+                                        @if (repair.RepairStatus == "Completed")
+                                        {
+                                            <span class="status-badge completed">
+
+                                                <i class="bi bi-check-circle-fill"></i>
+                                                Completed
+
+                                            </span>
+                                        }
+                                        else if (repair.RepairStatus == "In Progress")
+                                        {
+                                            <span class="status-badge progress">
+
+                                                <i class="bi bi-gear-fill"></i>
+                                                In Progress
+
+                                            </span>
+                                        }
+                                        else if (repair.RepairStatus == "Assigned")
+                                        {
+                                            <span class="status-badge assigned">
+
+                                                <i class="bi bi-person-check-fill"></i>
+                                                Assigned
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-badge default-status">
+                                                @repair.RepairStatus
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- CREATED -->
+                                    <td>
+
+                                        <div class="created-cell">
+
+                                            <strong>
+                                                @repair.CreatedAt.ToString("dd MMM yyyy")
+                                            </strong>
+
+                                            <span>
+
+                                                <i class="bi bi-clock"></i>
+
+                                                @repair.CreatedAt.ToString("hh:mm tt")
+
+                                            </span>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- CHAT -->
+                                    <td class="text-end">
+
+                                        <a asp-controller="Chat"
+                                           asp-action="RepairChat"
+                                           asp-route-repairId="@repair.RepairId"
+                                           class="chat-button">
+
+                                            <i class="bi bi-chat-dots-fill"></i>
+
+                                            <span>
+                                                Open Chat
+                                            </span>
+
+
+                                            @if (unreadCount > 0)
+                                            {
+                                                <span class="unread-badge">
+                                                    @unreadCount
+                                                </span>
+                                            }
+
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- =================================================
+                     NO SEARCH RESULTS
+                     ================================================= -->
+
+                <div id="repairNoResults"
+                     class="no-results">
+
+                    <div class="no-results-icon">
+                        <i class="bi bi-search"></i>
+                    </div>
+
+                    <h5>
+                        No repairs found
+                    </h5>
+
+                    <p>
+                        Try changing your search keyword or repair status filter.
+                    </p>
+
+                    <button type="button"
+                            id="resetRepairFilters"
+                            class="reset-button">
+
+                        Reset Filters
+
+                    </button>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>
+
+
+<style>
+
+    /* =========================================================
+           PAGE
+           ========================================================= */
+
+    .repair-management-page {
+        min-height: 100vh;
+        background: #f6f8fb;
+    }
+
+        .repair-management-page > .container {
+            max-width: 1250px;
+        }
+
+
+    /* =========================================================
+           PAGE HEADER
+           ========================================================= */
+
+    .repair-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    .page-label {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 6px;
+        color: #0d6efd;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .7px;
+    }
+
+    .repair-page-header h2 {
+        margin: 0 0 5px;
+        color: #252d38;
+        font-size: 34px;
+        font-weight: 750;
+    }
+
+    .repair-page-header p {
+        margin: 0;
+        color: #87909b;
+        font-size: 14px;
+    }
+
+
+    /* DASHBOARD BUTTON */
+
+    .dashboard-button {
+        min-height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 9px 16px;
+        color: #5f6975;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        background: #ffffff;
+        border: 1px solid #dce1e6;
+        border-radius: 9px;
+        transition: .15s ease;
+        white-space: nowrap;
+    }
+
+        .dashboard-button:hover {
+            color: #0d6efd;
+            background: #f8fbff;
+            border-color: #b9d3ff;
+        }
+
+
+    /* =========================================================
+           SUMMARY
+           ========================================================= */
+
+    .summary-card {
+        min-height: 110px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 20px;
+        background: #ffffff;
+        border: 1px solid #e5e9ee;
+        border-radius: 14px;
+        box-shadow: 0 3px 14px rgba(0, 0, 0, .025);
+    }
+
+    .summary-icon {
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 18px;
+        border-radius: 11px;
+    }
+
+        .summary-icon.total {
+            color: #0d6efd;
+            background: #eaf2ff;
+        }
+
+        .summary-icon.assigned {
+            color: #6554c0;
+            background: #f0edff;
+        }
+
+        .summary-icon.progress {
+            color: #9b7000;
+            background: #fff6d9;
+        }
+
+        .summary-icon.completed {
+            color: #198754;
+            background: #eaf8f0;
+        }
+
+    .summary-card span {
+        display: block;
+        margin-bottom: 3px;
+        color: #8b949f;
+        font-size: 11px;
+    }
+
+    .summary-card strong {
+        display: block;
+        color: #303945;
+        font-size: 23px;
+        line-height: 1.2;
+    }
+
+    .summary-card .assigned-number {
+        color: #6554c0;
+    }
+
+    .summary-card .progress-number {
+        color: #9b7000;
+    }
+
+    .summary-card .completed-number {
+        color: #198754;
+    }
+
+
+    /* =========================================================
+           MAIN CARD
+           ========================================================= */
+
+    .repair-card {
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid #e5e9ee;
+        border-radius: 16px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .035);
+    }
+
+
+    /* =========================================================
+           CARD HEADER
+           ========================================================= */
+
+    .repair-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 22px 24px;
+        border-bottom: 1px solid #edf0f3;
+    }
+
+    .repair-card-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .card-title-icon {
+        width: 41px;
+        height: 41px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #0d6efd;
+        font-size: 16px;
+        background: #eaf2ff;
+        border-radius: 10px;
+    }
+
+    .repair-card-header h4 {
+        margin: 0 0 2px;
+        color: #303945;
+        font-size: 17px;
+        font-weight: 750;
+    }
+
+    .repair-card-header p {
+        margin: 0;
+        color: #929ba6;
+        font-size: 11px;
+    }
+
+    .record-count {
+        min-width: 70px;
+        padding: 9px 13px;
+        text-align: center;
+        background: #f6f8fa;
+        border-radius: 9px;
+    }
+
+        .record-count strong {
+            display: block;
+            color: #303945;
+            font-size: 16px;
+        }
+
+        .record-count span {
+            display: block;
+            color: #929ba6;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+
+    /* =========================================================
+           TOOLBAR
+           ========================================================= */
+
+    .repair-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 15px 18px;
+        background: #fafbfc;
+        border-bottom: 1px solid #edf0f3;
+    }
+
+    .toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+    }
+
+
+    /* SEARCH */
+
+    .repair-search {
+        position: relative;
+        width: 100%;
+        max-width: 470px;
+    }
+
+        .repair-search > i {
+            position: absolute;
+            top: 50%;
+            left: 14px;
+            z-index: 2;
+            color: #8c96a2;
+            font-size: 13px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .repair-search input {
+            width: 100%;
+            height: 42px;
+            padding: 7px 37px 7px 39px;
+            color: #414b56;
+            font-size: 12px;
+            background: #ffffff;
+            border: 1px solid #dfe4ea;
+            border-radius: 8px;
+            outline: none;
+            transition: .15s ease;
+        }
+
+            .repair-search input::placeholder {
+                color: #9ba4ae;
+            }
+
+            .repair-search input:focus,
+            .repair-filter:focus {
+                border-color: #86b7fe;
+                box-shadow: 0 0 0 3px rgba(13, 110, 253, .07);
+            }
+
+    .clear-search {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        display: none;
+        padding: 2px;
+        color: #8a949f;
+        font-size: 11px;
+        background: transparent;
+        border: 0;
+        transform: translateY(-50%);
+    }
+
+        .clear-search.show {
+            display: block;
+        }
+
+
+    /* FILTER */
+
+    .repair-filter {
+        width: 155px;
+        height: 42px;
+        padding: 6px 30px 6px 12px;
+        color: #505a65;
+        font-size: 12px;
+        background-color: #ffffff;
+        border: 1px solid #dfe4ea;
+        border-radius: 8px;
+        outline: none;
+        cursor: pointer;
+    }
+
+    .result-count {
+        flex-shrink: 0;
+        color: #8b949f;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+        .result-count strong {
+            color: #505a65;
+        }
+
+
+    /* =========================================================
+           TABLE
+           ========================================================= */
+
+    .repair-table-wrapper {
+        padding: 0 10px 10px;
+    }
+
+    .repair-table {
+        font-size: 13px;
+    }
+
+        .repair-table thead th {
+            padding: 15px 10px;
+            color: #7e8894;
+            font-size: 10px;
+            font-weight: 750;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            background: #fafbfc;
+            border-bottom: 1px solid #e9edf1;
+            white-space: nowrap;
+        }
+
+        .repair-table tbody td {
+            padding: 14px 10px;
+            color: #4e5864;
+            border-color: #edf0f3;
+            vertical-align: middle;
+        }
+
+        .repair-table tbody tr {
+            transition: .15s ease;
+        }
+
+            .repair-table tbody tr:hover td {
+                background: #fafcff;
+            }
+
+
+    /* =========================================================
+           REPAIR ID
+           ========================================================= */
+
+    .repair-id {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .repair-id-icon {
+        width: 33px;
+        height: 33px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #0d6efd;
+        background: #edf4ff;
+        border-radius: 8px;
+    }
+
+    .repair-id span {
+        display: block;
+        color: #929ba6;
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: .5px;
+    }
+
+    .repair-id strong {
+        display: block;
+        color: #3e4853;
+        font-size: 12px;
+    }
+
+
+    /* =========================================================
+           VEHICLE / MECHANIC
+           ========================================================= */
+
+    .vehicle-cell,
+    .mechanic-cell {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
+
+    .vehicle-icon,
+    .mechanic-icon {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border-radius: 8px;
+    }
+
+    .vehicle-icon {
+        color: #0d6efd;
+        background: #edf4ff;
+    }
+
+    .mechanic-icon {
+        color: #6554c0;
+        background: #f0edff;
+    }
+
+    .vehicle-cell strong,
+    .mechanic-cell strong {
+        display: block;
+        max-width: 170px;
+        overflow: hidden;
+        color: #37414c;
+        font-size: 12px;
+        font-weight: 650;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .vehicle-cell span,
+    .mechanic-cell span {
+        display: block;
+        margin-top: 2px;
+        color: #929ba6;
+        font-size: 9px;
+    }
+
+    .unavailable {
+        color: #929ba6;
+        font-size: 11px;
+    }
+
+
+    /* =========================================================
+           SERVICE
+           ========================================================= */
+
+    .service-cell {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        min-width: 110px;
+        color: #58636f;
+        font-size: 12px;
+    }
+
+        .service-cell i {
+            color: #8b949f;
+        }
+
+
+    /* =========================================================
+           STATUS
+           ========================================================= */
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 6px 10px;
+        font-size: 10px;
+        font-weight: 750;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+
+        .status-badge.assigned {
+            color: #5542a8;
+            background: #efecff;
+        }
+
+        .status-badge.progress {
+            color: #856100;
+            background: #fff3cd;
+        }
+
+        .status-badge.completed {
+            color: #157347;
+            background: #e7f7ee;
+        }
+
+        .status-badge.default-status {
+            color: #0d6efd;
+            background: #eaf2ff;
+        }
+
+
+    /* =========================================================
+           CREATED
+           ========================================================= */
+
+    .created-cell strong {
+        display: block;
+        color: #46505c;
+        font-size: 12px;
+        font-weight: 650;
+        white-space: nowrap;
+    }
+
+    .created-cell span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 3px;
+        color: #929ba6;
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+           CHAT BUTTON
+           ========================================================= */
+
+    .chat-button {
+        min-height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 7px 11px;
+        color: #0d6efd;
+        font-size: 11px;
+        font-weight: 650;
+        text-decoration: none;
+        background: #ffffff;
+        border: 1px solid #cfe0ff;
+        border-radius: 8px;
+        transition: .15s ease;
+        white-space: nowrap;
+    }
+
+        .chat-button:hover {
+            color: #ffffff;
+            background: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+    .unread-badge {
+        min-width: 19px;
+        height: 19px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 5px;
+        color: #ffffff;
+        font-size: 9px;
+        font-weight: 750;
+        background: #dc3545;
+        border-radius: 20px;
+    }
+
+    .chat-button:hover .unread-badge {
+        background: #ffffff;
+        color: #dc3545;
+    }
+
+
+    /* =========================================================
+           NO RESULTS
+           ========================================================= */
+
+    .no-results {
+        display: none;
+        padding: 50px 20px;
+        text-align: center;
+    }
+
+        .no-results.show {
+            display: block;
+        }
+
+    .no-results-icon,
+    .empty-icon {
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 13px;
+        color: #8e98a4;
+        font-size: 21px;
+        background: #f3f5f7;
+        border-radius: 50%;
+    }
+
+    .no-results h5,
+    .empty-repair-card h4 {
+        margin-bottom: 5px;
+        color: #39434e;
+        font-size: 16px;
+        font-weight: 750;
+    }
+
+    .no-results p,
+    .empty-repair-card p {
+        margin: 0 auto;
+        color: #929ba6;
+        font-size: 12px;
+    }
+
+    .reset-button {
+        margin-top: 13px;
+        padding: 8px 14px;
+        color: #0d6efd;
+        font-size: 11px;
+        font-weight: 650;
+        background: transparent;
+        border: 1px solid #cfe0ff;
+        border-radius: 7px;
+    }
+
+        .reset-button:hover {
+            color: #ffffff;
+            background: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+    .empty-repair-card {
+        padding: 60px 20px;
+        text-align: center;
+        background: #ffffff;
+        border: 1px solid #e5e9ee;
+        border-radius: 16px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .035);
+    }
+
+
+    /* =========================================================
+           DARK MODE
+           ========================================================= */
+
+    html[data-bs-theme="dark"] .repair-management-page {
+        background: #101318 !important;
+        color: #e5e7eb;
+    }
+
+    html[data-bs-theme="dark"] .repair-page-header h2 {
+        color: #f1f5f9;
+    }
+
+    html[data-bs-theme="dark"] .repair-page-header p {
+        color: #8f9aaa;
+    }
+
+    html[data-bs-theme="dark"] .dashboard-button {
+        color: #b7c0cc;
+        background: #181d25;
+        border-color: #333d49;
+    }
+
+
+    /* SUMMARY */
+
+    html[data-bs-theme="dark"] .summary-card,
+    html[data-bs-theme="dark"] .repair-card,
+    html[data-bs-theme="dark"] .empty-repair-card {
+        background: #181d25;
+        border-color: #2b3440;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .18);
+    }
+
+        html[data-bs-theme="dark"] .summary-card span {
+            color: #8793a3;
+        }
+
+        html[data-bs-theme="dark"] .summary-card strong:not(.assigned-number):not(.progress-number):not(.completed-number) {
+            color: #f1f5f9;
+        }
+
+    html[data-bs-theme="dark"] .summary-icon.total,
+    html[data-bs-theme="dark"] .card-title-icon,
+    html[data-bs-theme="dark"] .repair-id-icon,
+    html[data-bs-theme="dark"] .vehicle-icon {
+        color: #60a5fa;
+        background: rgba(59, 130, 246, .14);
+    }
+
+    html[data-bs-theme="dark"] .summary-icon.assigned,
+    html[data-bs-theme="dark"] .mechanic-icon {
+        color: #b8a8ff;
+        background: rgba(112, 89, 255, .13);
+    }
+
+    html[data-bs-theme="dark"] .summary-icon.progress {
+        color: #f6cf62;
+        background: rgba(255, 193, 7, .13);
+    }
+
+    html[data-bs-theme="dark"] .summary-icon.completed {
+        color: #65d69a;
+        background: rgba(25, 135, 84, .17);
+    }
+
+
+    /* HEADER / TOOLBAR */
+
+    html[data-bs-theme="dark"] .repair-card-header {
+        border-color: #303946;
+    }
+
+        html[data-bs-theme="dark"] .repair-card-header h4 {
+            color: #f1f5f9;
+        }
+
+        html[data-bs-theme="dark"] .repair-card-header p {
+            color: #8793a3;
+        }
+
+    html[data-bs-theme="dark"] .record-count {
+        background: #222832;
+    }
+
+        html[data-bs-theme="dark"] .record-count strong {
+            color: #f1f5f9;
+        }
+
+        html[data-bs-theme="dark"] .record-count span {
+            color: #8793a3;
+        }
+
+    html[data-bs-theme="dark"] .repair-toolbar {
+        background: #141920;
+        border-color: #303946;
+    }
+
+
+    /* SEARCH */
+
+    html[data-bs-theme="dark"] .repair-search input,
+    html[data-bs-theme="dark"] .repair-filter {
+        color: #e5edf6;
+        background-color: #10151c;
+        border-color: #36404d;
+    }
+
+        html[data-bs-theme="dark"] .repair-search input::placeholder {
+            color: #697586;
+        }
+
+    html[data-bs-theme="dark"] .repair-search > i,
+    html[data-bs-theme="dark"] .clear-search {
+        color: #8793a3;
+    }
+
+    html[data-bs-theme="dark"] .repair-filter option {
+        color: #e5edf6;
+        background: #181d25;
+    }
+
+    html[data-bs-theme="dark"] .result-count {
+        color: #8793a3;
+    }
+
+        html[data-bs-theme="dark"] .result-count strong {
+            color: #f1f5f9;
+        }
+
+
+    /* TABLE */
+
+    html[data-bs-theme="dark"] .repair-table {
+        --bs-table-bg: #181d25;
+        --bs-table-color: #cbd5e1;
+        --bs-table-border-color: #303946;
+    }
+
+        html[data-bs-theme="dark"] .repair-table thead th {
+            color: #8f9aaa !important;
+            background: #141920 !important;
+            border-color: #303946 !important;
+        }
+
+        html[data-bs-theme="dark"] .repair-table tbody td {
+            color: #cbd5e1 !important;
+            background: #181d25 !important;
+            border-color: #303946 !important;
+        }
+
+        html[data-bs-theme="dark"] .repair-table tbody tr:hover td {
+            background: #1d232c !important;
+        }
+
+    html[data-bs-theme="dark"] .repair-id strong,
+    html[data-bs-theme="dark"] .vehicle-cell strong,
+    html[data-bs-theme="dark"] .mechanic-cell strong,
+    html[data-bs-theme="dark"] .created-cell strong {
+        color: #e5edf6;
+    }
+
+    html[data-bs-theme="dark"] .repair-id span,
+    html[data-bs-theme="dark"] .vehicle-cell span,
+    html[data-bs-theme="dark"] .mechanic-cell span,
+    html[data-bs-theme="dark"] .created-cell span,
+    html[data-bs-theme="dark"] .unavailable {
+        color: #8793a3;
+    }
+
+    html[data-bs-theme="dark"] .service-cell {
+        color: #cbd5e1;
+    }
+
+
+    /* STATUS */
+
+    html[data-bs-theme="dark"] .status-badge.assigned {
+        color: #b8a8ff;
+        background: rgba(112, 89, 255, .13);
+    }
+
+    html[data-bs-theme="dark"] .status-badge.progress {
+        color: #f6cf62;
+        background: rgba(255, 193, 7, .13);
+    }
+
+    html[data-bs-theme="dark"] .status-badge.completed {
+        color: #65d69a;
+        background: rgba(25, 135, 84, .17);
+    }
+
+    html[data-bs-theme="dark"] .status-badge.default-status {
+        color: #60a5fa;
+        background: rgba(59, 130, 246, .14);
+    }
+
+
+    /* CHAT */
+
+    html[data-bs-theme="dark"] .chat-button {
+        color: #60a5fa;
+        background: #141920;
+        border-color: #31558a;
+    }
+
+        html[data-bs-theme="dark"] .chat-button:hover {
+            color: #ffffff;
+            background: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+
+    /* NO RESULTS */
+
+    html[data-bs-theme="dark"] .no-results-icon,
+    html[data-bs-theme="dark"] .empty-icon {
+        color: #8f9aaa;
+        background: #222832;
+    }
+
+    html[data-bs-theme="dark"] .no-results h5,
+    html[data-bs-theme="dark"] .empty-repair-card h4 {
+        color: #e5edf6;
+    }
+
+    html[data-bs-theme="dark"] .no-results p,
+    html[data-bs-theme="dark"] .empty-repair-card p {
+        color: #8793a3;
+    }
+
+
+    /* =========================================================
+           RESPONSIVE
+           ========================================================= */
+
+    @@media (max-width: 991px) {
+
+        .repair-management-page > .container {
+            max-width: 100%;
+        }
+
+        .vehicle-cell strong,
+        .mechanic-cell strong {
+            max-width: 140px;
+        }
+    }
+
+
+    @@media (max-width: 767px) {
+
+        .repair-management-page .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .repair-page-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+            .repair-page-header h2 {
+                font-size: 27px;
+            }
+
+        .dashboard-button {
+            width: 100%;
+        }
+
+        .repair-toolbar {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .toolbar-left {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .repair-search,
+        .repair-filter {
+            width: 100%;
+            max-width: none;
+        }
+
+        .result-count {
+            text-align: right;
+        }
+    }
+
+
+    @@media (max-width: 480px) {
+
+        .summary-card {
+            align-items: flex-start;
+            flex-direction: column;
+            min-height: 115px;
+        }
+
+        .repair-card-header {
+            align-items: flex-start;
+        }
+    }
+
+</style>
+
+
+@section Scripts
+{
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchInput =
+                document.getElementById("repairSearch");
+
+            const statusFilter =
+                document.getElementById("repairStatusFilter");
+
+            const clearButton =
+                document.getElementById("clearRepairSearch");
+
+            const resetButton =
+                document.getElementById("resetRepairFilters");
+
+            const visibleCount =
+                document.getElementById("visibleRepairCount");
+
+            const tableWrapper =
+                document.getElementById("repairTableWrapper");
+
+            const noResults =
+                document.getElementById("repairNoResults");
+
+            const rows =
+                Array.from(
+                    document.querySelectorAll(".repair-row")
+                );
+
+
+            if (!searchInput ||
+                !statusFilter ||
+                rows.length === 0) {
+
+                return;
+            }
+
+
+            function filterRepairs() {
+
+                const search =
+                    searchInput.value
+                        .trim()
+                        .toLowerCase();
+
+                const status =
+                    statusFilter.value
+                        .trim()
+                        .toLowerCase();
+
+                let count = 0;
+
+
+                rows.forEach(function (row) {
+
+                    const searchableText = [
+
+                        row.dataset.repair || "",
+                        row.dataset.vehicle || "",
+                        row.dataset.plate || "",
+                        row.dataset.mechanic || "",
+                        row.dataset.service || ""
+
+                    ]
+                    .join(" ")
+                    .toLowerCase();
+
+
+                    const matchesSearch =
+                        search === "" ||
+                        searchableText.includes(search);
+
+
+                    const matchesStatus =
+                        status === "all" ||
+                        (row.dataset.status || "") === status;
+
+
+                    const show =
+                        matchesSearch &&
+                        matchesStatus;
+
+
+                    row.style.display =
+                        show ? "" : "none";
+
+
+                    if (show) {
+                        count++;
+                    }
+
+                });
+
+
+                if (visibleCount) {
+                    visibleCount.textContent = count;
+                }
+
+
+                if (clearButton) {
+
+                    clearButton.classList.toggle(
+                        "show",
+                        searchInput.value.length > 0
+                    );
+
+                }
+
+
+                if (count === 0) {
+
+                    if (tableWrapper) {
+                        tableWrapper.style.display = "none";
+                    }
+
+                    if (noResults) {
+                        noResults.classList.add("show");
+                    }
+
+                }
+                else {
+
+                    if (tableWrapper) {
+                        tableWrapper.style.display = "";
+                    }
+
+                    if (noResults) {
+                        noResults.classList.remove("show");
+                    }
+
+                }
+
+            }
+
+
+            /* LIVE SEARCH */
+            searchInput.addEventListener(
+                "input",
+                filterRepairs
+            );
+
+
+            /* STATUS FILTER */
+            statusFilter.addEventListener(
+                "change",
+                filterRepairs
+            );
+
+
+            /* CLEAR SEARCH */
+            if (clearButton) {
+
+                clearButton.addEventListener(
+                    "click",
+                    function () {
+
+                        searchInput.value = "";
+
+                        searchInput.focus();
+
+                        filterRepairs();
+
+                    }
+                );
+
+            }
+
+
+            /* RESET */
+            if (resetButton) {
+
+                resetButton.addEventListener(
+                    "click",
+                    function () {
+
+                        searchInput.value = "";
+
+                        statusFilter.value = "all";
+
+                        filterRepairs();
+
+                    }
+                );
+
+            }
+
+
+            filterRepairs();
+
+        });
+
+    </script>
+}

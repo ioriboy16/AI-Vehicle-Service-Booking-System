@@ -1,0 +1,403 @@
+﻿@model IEnumerable<AIVehicleWorkshopSystem.Models.Notification>
+
+@{
+    ViewData["Title"] = "Notifications";
+
+    var notifications = Model.ToList();
+    var totalCount = notifications.Count;
+    var unreadCount = notifications.Count(n => !n.IsRead);
+    var readCount = notifications.Count(n => n.IsRead);
+}
+
+<div class="notification-page">
+
+    @if (TempData["NotificationSuccess"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4"
+             role="alert">
+
+            <i class="bi bi-check-circle-fill me-2"></i>
+
+            @TempData["NotificationSuccess"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close">
+            </button>
+        </div>
+    }
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+    <div class="notification-page-header">
+
+        <div>
+            <div class="notification-page-title-row">
+                <div class="notification-page-title-icon">
+                    <i class="bi bi-bell-fill"></i>
+                </div>
+
+                <div>
+                    <h2>Notifications</h2>
+
+                    <p>
+                        Stay updated with your appointments, repairs,
+                        messages and other workshop activities.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        @if (unreadCount > 0)
+        {
+            <form id="markAllReadForm"
+                  asp-controller="Notification"
+                  asp-action="MarkAllAsRead"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <button type="submit"
+                        id="markAllReadButton"
+                        class="btn btn-outline-primary notification-mark-all-page">
+
+                    <i class="bi bi-check2-all"></i>
+                    Mark All as Read
+
+                </button>
+
+            </form>
+        }
+
+    </div>
+
+
+    <!-- =====================================================
+         SUMMARY
+         ===================================================== -->
+    <div class="notification-summary-grid">
+
+        <!-- ALL -->
+        <div class="notification-summary-card">
+
+            <div class="notification-summary-icon">
+                <i class="bi bi-bell"></i>
+            </div>
+
+            <div>
+                <span class="notification-summary-label">
+                    All Notifications
+                </span>
+
+                <strong>
+                    @totalCount
+                </strong>
+            </div>
+
+        </div>
+
+
+        <!-- UNREAD -->
+        <div class="notification-summary-card">
+
+            <div class="notification-summary-icon unread">
+                <i class="bi bi-envelope"></i>
+            </div>
+
+            <div>
+                <span class="notification-summary-label">
+                    Unread
+                </span>
+
+                <strong>
+                    @unreadCount
+                </strong>
+            </div>
+
+        </div>
+
+
+        <!-- READ -->
+        <div class="notification-summary-card">
+
+            <div class="notification-summary-icon read">
+                <i class="bi bi-check2-circle"></i>
+            </div>
+
+            <div>
+                <span class="notification-summary-label">
+                    Read
+                </span>
+
+                <strong>
+                    @readCount
+                </strong>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         NOTIFICATION LIST
+         ===================================================== -->
+    <div class="notification-page-section">
+
+        <div class="notification-page-section-header">
+
+            <div>
+                <h5>Recent Notifications</h5>
+
+                <span>
+                    Your latest workshop activities and updates
+                </span>
+            </div>
+
+            @if (unreadCount > 0)
+            {
+                <div class="notification-unread-summary">
+                    <span></span>
+                    @unreadCount unread
+                </div>
+            }
+
+        </div>
+
+
+        @if (!notifications.Any())
+        {
+            <!-- EMPTY STATE -->
+            <div class="notification-page-empty">
+
+                <div class="notification-page-empty-icon">
+                    <i class="bi bi-bell-slash"></i>
+                </div>
+
+                <h5>No notifications yet</h5>
+
+                <p>
+                    When something important happens with your
+                    appointments, repairs or messages, it will appear here.
+                </p>
+
+            </div>
+        }
+        else
+        {
+            <div class="notification-page-list">
+
+                @foreach (var notification in notifications)
+                {
+                    var iconClass = "bi-bell";
+                    var typeClass = "general";
+                    var typeLabel = "Notification";
+
+                    switch (notification.Type)
+                    {
+                        case "Appointment":
+                            iconClass = "bi-calendar-check";
+                            typeClass = "appointment";
+                            typeLabel = "Appointment";
+                            break;
+
+                        case "Repair":
+                            iconClass = "bi-tools";
+                            typeClass = "repair";
+                            typeLabel = "Repair";
+                            break;
+
+                        case "AIDiagnostic":
+                            iconClass = "bi-stars";
+                            typeClass = "ai";
+                            typeLabel = "AI Diagnostic";
+                            break;
+
+                        case "Invoice":
+                            iconClass = "bi-receipt";
+                            typeClass = "invoice";
+                            typeLabel = "Invoice";
+                            break;
+
+                        case "Payment":
+                            iconClass = "bi-credit-card";
+                            typeClass = "payment";
+                            typeLabel = "Payment";
+                            break;
+
+                        case "Chat":
+                            iconClass = "bi-chat-dots";
+                            typeClass = "chat";
+                            typeLabel = "Repair Chat";
+                            break;
+
+                        case "SupportChat":
+                            iconClass = "bi-headset";
+                            typeClass = "support";
+                            typeLabel = "Support";
+                            break;
+                    }
+
+                    <a asp-controller="Notification"
+                       asp-action="Open"
+                       asp-route-id="@notification.NotificationId"
+                       class="notification-page-item
+                                      @(!notification.IsRead ? "unread" : "")">
+
+                        <!-- ICON -->
+                        <div class="notification-page-item-icon @typeClass">
+
+                            <i class="bi @iconClass"></i>
+
+                        </div>
+
+
+                        <!-- CONTENT -->
+                        <div class="notification-page-item-content">
+
+                            <div class="notification-page-item-top">
+
+                                <div class="notification-page-item-title">
+
+                                    <span>
+                                        @notification.Title
+                                    </span>
+
+                                    @if (!notification.IsRead)
+                                    {
+                                        <span class="notification-new-badge">
+                                            New
+                                        </span>
+                                    }
+
+                                </div>
+
+                                <div class="notification-page-item-date">
+
+                                    <i class="bi bi-clock"></i>
+
+                                    @notification.CreatedAt.ToString(
+                                    "dd MMM yyyy, hh:mm tt"
+                                                        )
+
+                        </div>
+
+                    </div>
+
+
+                    <p>
+                        @notification.Message
+                    </p>
+
+
+                    <div class="notification-page-item-bottom">
+
+                        <span class="notification-type-label @typeClass">
+                            @typeLabel
+                        </span>
+
+                        <span class="notification-open-label">
+                            View details
+                            <i class="bi bi-arrow-right"></i>
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </a>
+                        }
+
+            </div>
+        }
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const form =
+                document.getElementById("markAllReadForm");
+
+            const button =
+                document.getElementById("markAllReadButton");
+
+            if (!form) {
+                return;
+            }
+
+            form.addEventListener("submit", async function (event) {
+
+                event.preventDefault();
+
+                const token =
+                    form.querySelector(
+                        'input[name="__RequestVerificationToken"]'
+                    )?.value;
+
+                if (!token) {
+                    console.error(
+                        "Anti-forgery token was not found."
+                    );
+
+                    return;
+                }
+
+                if (button) {
+                    button.disabled = true;
+
+                    button.innerHTML =
+                        '<span class="spinner-border spinner-border-sm me-2"></span>' +
+                        'Marking...';
+                }
+
+                try {
+
+                    const response = await fetch(
+                        form.action,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "X-CSRF-TOKEN": token,
+                                "X-Requested-With": "XMLHttpRequest"
+                            },
+
+                            credentials: "same-origin"
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(
+                            "Unable to mark notifications as read."
+                        );
+                    }
+
+                    window.location.reload();
+                }
+                catch (error) {
+
+                    console.error(error);
+
+                    if (button) {
+                        button.disabled = false;
+
+                        button.innerHTML =
+                            '<i class="bi bi-check2-all"></i> ' +
+                            'Mark All as Read';
+                    }
+
+                    alert(
+                        "Unable to mark all notifications as read. Please try again."
+                    );
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,1396 @@
+﻿@using AIVehicleWorkshopSystem.Models
+
+@{
+    ViewData["Title"] = "Customer Dashboard";
+
+    var nextAppointment =
+        ViewBag.NextAppointment as Appointment;
+
+    var currentRepair =
+        ViewBag.CurrentRepair as Repair;
+
+    var latestProgress =
+        ViewBag.LatestRepairProgress as RepairProgress;
+
+    var repairProgress = 0;
+
+    if (currentRepair != null)
+    {
+        repairProgress = currentRepair.RepairStatus switch
+        {
+            "Assigned" => 25,
+            "In Progress" => 65,
+            "Completed" => 100,
+            _ => 15
+        };
+    }
+}
+
+
+<div class="customer-dashboard">
+
+    <!-- =====================================================
+         WELCOME HERO
+         ===================================================== -->
+
+    <section class="customer-welcome">
+
+        <div class="customer-welcome-content">
+
+            <span class="customer-dashboard-eyebrow">
+                CUSTOMER PORTAL
+            </span>
+
+            <h1>
+                Welcome back,
+                <span>@ViewBag.CustomerName</span>
+            </h1>
+
+            <p>
+                Here's an overview of your vehicles,
+                appointments and service progress.
+            </p>
+
+        </div>
+
+
+        <div class="customer-welcome-actions">
+
+            <a asp-controller="Appointment"
+               asp-action="Create"
+               class="btn btn-light">
+
+                <i class="bi bi-calendar-plus me-2"></i>
+                Book Appointment
+
+            </a>
+
+            <a asp-controller="Vehicle"
+               asp-action="Create"
+               class="btn customer-hero-secondary">
+
+                <i class="bi bi-plus-lg me-1"></i>
+                Register Vehicle
+
+            </a>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         SUMMARY
+         ===================================================== -->
+
+    <div class="customer-stat-grid">
+
+
+        <!-- VEHICLES -->
+
+        <a asp-controller="Vehicle"
+           asp-action="Index"
+           class="customer-stat-card">
+
+            <div class="customer-stat-icon stat-blue">
+                <i class="bi bi-car-front"></i>
+            </div>
+
+            <div class="customer-stat-info">
+
+                <span>My Vehicles</span>
+
+                <strong>
+                    @ViewBag.TotalVehicles
+                </strong>
+
+                <small>
+                    Registered vehicles
+                </small>
+
+            </div>
+
+            <i class="bi bi-chevron-right customer-stat-arrow"></i>
+
+        </a>
+
+
+        <!-- APPOINTMENTS -->
+
+        <a asp-controller="Appointment"
+           asp-action="Index"
+           class="customer-stat-card">
+
+            <div class="customer-stat-icon stat-purple">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+
+            <div class="customer-stat-info">
+
+                <span>Upcoming</span>
+
+                <strong>
+                    @ViewBag.UpcomingAppointments
+                </strong>
+
+                <small>
+                    Appointments
+                </small>
+
+            </div>
+
+            <i class="bi bi-chevron-right customer-stat-arrow"></i>
+
+        </a>
+
+
+        <!-- REPAIRS -->
+
+        <a asp-controller="Customer"
+           asp-action="RepairTracking"
+           class="customer-stat-card">
+
+            <div class="customer-stat-icon stat-orange">
+                <i class="bi bi-tools"></i>
+            </div>
+
+            <div class="customer-stat-info">
+
+                <span>Active Repairs</span>
+
+                <strong>
+                    @ViewBag.RepairsInProgress
+                </strong>
+
+                <small>
+                    Currently in progress
+                </small>
+
+            </div>
+
+            <i class="bi bi-chevron-right customer-stat-arrow"></i>
+
+        </a>
+
+
+        <!-- INVOICES -->
+
+        <a asp-controller="Customer"
+           asp-action="Invoices"
+           class="customer-stat-card">
+
+            <div class="customer-stat-icon stat-green">
+                <i class="bi bi-receipt"></i>
+            </div>
+
+            <div class="customer-stat-info">
+
+                <span>Pending Invoices</span>
+
+                <strong>
+                    @ViewBag.PendingInvoices
+                </strong>
+
+                <small>
+                    Require attention
+                </small>
+
+            </div>
+
+            <i class="bi bi-chevron-right customer-stat-arrow"></i>
+
+        </a>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         MAIN DASHBOARD
+         ===================================================== -->
+
+    <div class="customer-dashboard-grid">
+
+
+        <!-- =================================================
+             LEFT SIDE
+             ================================================= -->
+
+        <div class="customer-dashboard-main">
+
+
+            <!-- CURRENT REPAIR -->
+
+            <div class="customer-dashboard-card">
+
+                <div class="customer-card-heading">
+
+                    <div>
+
+                        <span class="customer-section-label">
+                            CURRENT SERVICE
+                        </span>
+
+                        <h3>
+                            Repair Progress
+                        </h3>
+
+                    </div>
+
+
+                    <a asp-controller="Customer"
+                       asp-action="RepairTracking">
+
+                        View all
+
+                        <i class="bi bi-arrow-right"></i>
+
+                    </a>
+
+                </div>
+
+
+                @if (currentRepair != null)
+                {
+                    <div class="current-repair">
+
+
+                        <!-- VEHICLE -->
+
+                        <div class="current-repair-top">
+
+                            <div class="repair-vehicle">
+
+                                <div class="repair-vehicle-icon">
+                                    <i class="bi bi-car-front-fill"></i>
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        @currentRepair.Appointment?.Vehicle?.Brand
+                                        @currentRepair.Appointment?.Vehicle?.Model
+                                    </strong>
+
+                                    <span>
+                                        @currentRepair.Appointment?.Vehicle?.PlateNumber
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <span class="repair-status-badge">
+                                <span></span>
+                                @currentRepair.RepairStatus
+                            </span>
+
+                        </div>
+
+
+                        <!-- PROGRESS -->
+
+                        <div class="repair-progress-area">
+
+                            <div class="repair-progress-heading">
+
+                                <span>
+                                    Service progress
+                                </span>
+
+                                <strong>
+                                    @repairProgress%
+                                </strong>
+
+                            </div>
+
+
+                            <div class="repair-progress-track">
+
+                                <div class="repair-progress-value"
+                                     style="width: @repairProgress%">
+                                </div>
+
+                            </div>
+
+
+                            <div class="repair-progress-labels">
+
+                                <span>Assigned</span>
+
+                                <span>In Progress</span>
+
+                                <span>Completed</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- LATEST UPDATE -->
+                        @if (latestProgress != null)
+                        {
+                            <div class="repair-latest-update">
+
+                                <div class="repair-update-icon">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
+
+                                <div>
+
+                                    <span>
+                                        Latest Update
+                                    </span>
+
+                                    <strong>
+                                        @latestProgress.Status
+                                    </strong>
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                                                latestProgress.Description))
+                                    {
+                                        <p>
+                                            @latestProgress.Description
+                                        </p>
+                                    }
+
+                                    <small>
+                                        @(latestProgress.CreatedAt.ToString("dd MMM yyyy, h:mm tt"))
+                                    </small>
+
+                                </div>
+
+                            </div>
+                        }
+
+
+                        <div class="repair-card-actions">
+
+                            <a asp-controller="Customer"
+                               asp-action="RepairDetails"
+                               asp-route-id="@currentRepair.RepairId"
+                               class="btn btn-primary btn-sm">
+
+                                <i class="bi bi-eye me-1"></i>
+                                View Progress
+
+                            </a>
+
+
+                            <a asp-controller="Chat"
+                               asp-action="RepairChat"
+                               asp-route-repairId="@currentRepair.RepairId"
+                               class="btn btn-outline-secondary btn-sm">
+
+                                <i class="bi bi-chat-dots me-1"></i>
+                                Message Workshop
+
+                            </a>
+
+                        </div>
+
+                    </div>
+                }
+                else
+                {
+                    <div class="customer-empty-state">
+
+                        <div class="customer-empty-icon">
+                            <i class="bi bi-tools"></i>
+                        </div>
+
+                        <h5>
+                            No active repair
+                        </h5>
+
+                        <p>
+                            You currently don't have a vehicle
+                            being serviced.
+                        </p>
+
+                        <a asp-controller="Appointment"
+                           asp-action="Create"
+                           class="btn btn-outline-primary btn-sm">
+
+                            Book a Service
+
+                        </a>
+
+                    </div>
+                }
+
+            </div>
+
+
+
+            <!-- NEXT APPOINTMENT -->
+
+            <div class="customer-dashboard-card">
+
+                <div class="customer-card-heading">
+
+                    <div>
+                        <span class="customer-section-label">
+                            SCHEDULE
+                        </span>
+
+                        <h3>
+                            Next Appointment
+                        </h3>
+                    </div>
+
+                    <a asp-controller="Appointment"
+                       asp-action="Index">
+
+                        View all
+                        <i class="bi bi-arrow-right"></i>
+
+                    </a>
+
+                </div>
+
+
+                @if (nextAppointment != null)
+                {
+                    <div class="next-appointment">
+
+                        <!-- DATE -->
+
+                        <div class="appointment-date-box">
+
+                            <span>
+                                @nextAppointment.AppointmentDate.ToString("MMM").ToUpper()
+                            </span>
+
+                            <strong>
+                                @nextAppointment.AppointmentDate.Day
+                            </strong>
+
+                            <small>
+                                @nextAppointment.AppointmentDate.ToString("yyyy")
+                            </small>
+
+                        </div>
+
+
+                        <!-- APPOINTMENT INFO -->
+
+                        <div class="appointment-main-info">
+
+                            <span class="appointment-service">
+                                @nextAppointment.ServiceType
+                            </span>
+
+                            <h4>
+                                @nextAppointment.Vehicle?.Brand @nextAppointment.Vehicle?.Model
+                            </h4>
+
+                            <div class="appointment-meta">
+
+                                <span>
+                                    <i class="bi bi-car-front"></i>
+                                    @nextAppointment.Vehicle?.PlateNumber
+                                </span>
+
+                                <span>
+                                    <i class="bi bi-clock"></i>
+                                    @DateTime.Today.Add(nextAppointment.AppointmentTime).ToString("h:mm tt")
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- STATUS + ACTION -->
+
+                        <div class="appointment-status-area">
+
+                            <span class="appointment-status">
+                                @nextAppointment.AppointmentStatus
+                            </span>
+
+                            <a asp-controller="Appointment"
+                               asp-action="Details"
+                               asp-route-id="@nextAppointment.AppointmentId"
+                               class="btn btn-outline-primary btn-sm">
+
+                                Details
+
+                            </a>
+
+                        </div>
+
+                    </div>
+                }
+                else
+                {
+                    <div class="customer-empty-state compact">
+
+                        <div class="customer-empty-icon">
+                            <i class="bi bi-calendar2-plus"></i>
+                        </div>
+
+                        <h5>
+                            No upcoming appointment
+                        </h5>
+
+                        <p>
+                            Schedule your next vehicle service when you're ready.
+                        </p>
+
+                        <a asp-controller="Appointment"
+                           asp-action="Create"
+                           class="btn btn-outline-primary btn-sm">
+
+                            Book Appointment
+
+                        </a>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             RIGHT SIDE
+             ================================================= -->
+
+        <aside class="customer-dashboard-side">
+
+
+            <!-- QUICK ACTIONS -->
+
+            <div class="customer-dashboard-card">
+
+                <div class="customer-card-heading">
+
+                    <div>
+
+                        <span class="customer-section-label">
+                            SHORTCUTS
+                        </span>
+
+                        <h3>
+                            Quick Actions
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div class="customer-quick-actions">
+
+
+                    <a asp-controller="Appointment"
+                       asp-action="Create">
+
+                        <span class="quick-action-icon">
+                            <i class="bi bi-calendar-plus"></i>
+                        </span>
+
+                        <span class="quick-action-text">
+
+                            <strong>
+                                Book Appointment
+                            </strong>
+
+                            <small>
+                                Schedule vehicle service
+                            </small>
+
+                        </span>
+
+                        <i class="bi bi-chevron-right"></i>
+
+                    </a>
+
+
+                    <a asp-controller="Vehicle"
+                       asp-action="Index">
+
+                        <span class="quick-action-icon">
+                            <i class="bi bi-car-front"></i>
+                        </span>
+
+                        <span class="quick-action-text">
+
+                            <strong>
+                                My Vehicles
+                            </strong>
+
+                            <small>
+                                Manage registered vehicles
+                            </small>
+
+                        </span>
+
+                        <i class="bi bi-chevron-right"></i>
+
+                    </a>
+
+
+                    <a asp-controller="Customer"
+                       asp-action="AIDiagnosis">
+
+                        <span class="quick-action-icon">
+                            <i class="bi bi-stars"></i>
+                        </span>
+
+                        <span class="quick-action-text">
+
+                            <strong>
+                                AI Diagnosis
+                            </strong>
+
+                            <small>
+                                Check vehicle symptoms
+                            </small>
+
+                        </span>
+
+                        <i class="bi bi-chevron-right"></i>
+
+                    </a>
+
+
+                    <a asp-controller="Customer"
+                       asp-action="RepairTracking">
+
+                        <span class="quick-action-icon">
+                            <i class="bi bi-tools"></i>
+                        </span>
+
+                        <span class="quick-action-text">
+
+                            <strong>
+                                Repair Tracking
+                            </strong>
+
+                            <small>
+                                Follow service progress
+                            </small>
+
+                        </span>
+
+                        <i class="bi bi-chevron-right"></i>
+
+                    </a>
+
+
+                    <a asp-controller="Customer"
+                       asp-action="Invoices">
+
+                        <span class="quick-action-icon">
+                            <i class="bi bi-receipt"></i>
+                        </span>
+
+                        <span class="quick-action-text">
+
+                            <strong>
+                                My Invoices
+                            </strong>
+
+                            <small>
+                                View billing information
+                            </small>
+
+                        </span>
+
+                        <i class="bi bi-chevron-right"></i>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 CONTACT SUPPORT SLIDER
+            ================================================== -->
+
+            <div class="support-slider">
+
+                <!-- SLIDER HEADER -->
+                <div class="support-slider-top">
+
+                    <div class="support-slider-dots">
+
+                        <button type="button"
+                                class="support-dot active"
+                                data-support-slide="0"
+                                aria-label="Mechanic chat">
+                        </button>
+
+                        <button type="button"
+                                class="support-dot"
+                                data-support-slide="1"
+                                aria-label="Admin support chat">
+                        </button>
+
+                    </div>
+
+
+                    <div class="support-slider-controls">
+
+                        <button type="button"
+                                id="supportPrevious"
+                                aria-label="Previous">
+
+                            <i class="bi bi-chevron-left"></i>
+
+                        </button>
+
+                        <button type="button"
+                                id="supportNext"
+                                aria-label="Next">
+
+                            <i class="bi bi-chevron-right"></i>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SLIDER VIEWPORT -->
+                <div class="support-slider-viewport"
+                     id="supportSliderViewport">
+
+                    <div class="support-slider-track"
+                         id="supportSliderTrack">
+
+
+                        <!-- =============================================
+                             SLIDE 1 - MECHANIC
+                        ============================================== -->
+                        <div class="support-slide">
+
+                            <div class="customer-support-card mechanic-support">
+
+                                <div class="customer-support-icon">
+                                    <i class="bi bi-headset"></i>
+                                </div>
+
+
+                                <div class="support-card-content">
+
+                                    <span>
+                                        NEED AN UPDATE?
+                                    </span>
+
+                                    <h4>
+                                        Contact your mechanic
+                                    </h4>
+
+                                    <p>
+                                        If you have an active repair,
+                                        use repair chat to communicate directly
+                                        with the assigned mechanic.
+                                    </p>
+
+                                </div>
+
+
+                                @if (currentRepair != null)
+                                {
+                                    <a asp-controller="Chat"
+                                       asp-action="RepairChat"
+                                       asp-route-repairId="@currentRepair.RepairId"
+                                       class="support-action-button">
+
+                                        <i class="bi bi-chat-dots"></i>
+
+                                        Open Repair Chat
+
+                                    </a>
+                                }
+                                else
+                                {
+                                    <div class="support-unavailable">
+
+                                        <i class="bi bi-info-circle"></i>
+
+                                        Repair chat becomes available when
+                                        you have an active repair.
+
+                                    </div>
+                                }
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =============================================
+                             SLIDE 2 - ADMIN SUPPORT
+                        ============================================== -->
+                        <div class="support-slide">
+
+                            <div class="customer-support-card admin-support">
+
+                                <div class="customer-support-icon">
+                                    <i class="bi bi-chat-square-text"></i>
+                                </div>
+
+
+                                <div class="support-card-content">
+
+                                    <span>
+                                        NEED HELP?
+                                    </span>
+
+                                    <h4>
+                                        Contact Admin Support
+                                    </h4>
+
+                                    <p>
+                                        Have questions about appointments,
+                                        invoices, your account or general services?
+                                        Chat directly with our admin team.
+                                    </p>
+
+                                </div>
+
+
+                                <a asp-controller="Support"
+                                   asp-action="Index"
+                                   class="support-action-button">
+
+                                    <i class="bi bi-chat-dots"></i>
+
+                                    Open Support Chat
+
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- MOBILE LABEL -->
+                <div class="support-swipe-hint">
+
+                    <i class="bi bi-arrow-left-right"></i>
+
+                    Swipe to view support options
+
+                </div>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+</div>
+
+<style>
+
+/* =========================================================
+   CUSTOMER SUPPORT SLIDER
+========================================================== */
+
+.support-slider {
+    position: relative;
+    overflow: hidden;
+    background: #1c2a43;
+    border-radius: 15px;
+}
+
+
+/* =========================================================
+   SLIDER TOP
+========================================================== */
+
+.support-slider-top {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    left: 15px;
+    z-index: 10;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   DOTS
+========================================================== */
+
+.support-slider-dots {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    pointer-events: auto;
+}
+
+.support-dot {
+    width: 6px;
+    height: 6px;
+
+    padding: 0;
+
+    background: rgba(255, 255, 255, 0.35);
+
+    border: none;
+    border-radius: 20px;
+
+    transition: all 0.25s ease;
+}
+
+.support-dot.active {
+    width: 18px;
+    background: #ffffff;
+}
+
+
+/* =========================================================
+   CONTROLS
+========================================================== */
+
+.support-slider-controls {
+    display: flex;
+    gap: 5px;
+    pointer-events: auto;
+}
+
+.support-slider-controls button {
+    width: 27px;
+    height: 27px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 0;
+
+    color: #ffffff;
+    font-size: 10px;
+
+    background: rgba(255, 255, 255, 0.10);
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 7px;
+
+    transition: 0.15s ease;
+}
+
+.support-slider-controls button:hover {
+    background: rgba(255, 255, 255, 0.20);
+}
+
+
+/* =========================================================
+   SLIDER
+========================================================== */
+
+.support-slider-viewport {
+    width: 100%;
+    overflow: hidden;
+
+    touch-action: pan-y;
+}
+
+.support-slider-track {
+    display: flex;
+    width: 100%;
+
+    transition: transform 0.35s ease;
+}
+
+.support-slide {
+    min-width: 100%;
+}
+
+
+/* =========================================================
+   SUPPORT CARD
+========================================================== */
+
+.support-slider .customer-support-card {
+    min-height: 255px;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 55px 18px 18px;
+
+    background: transparent;
+    border: none;
+    border-radius: 0;
+}
+
+
+/* ICON */
+
+.support-slider .customer-support-icon {
+    width: 37px;
+    height: 37px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-bottom: 15px;
+
+    color: #ffffff;
+
+    background: rgba(255, 255, 255, 0.10);
+
+    border-radius: 9px;
+}
+
+
+/* CONTENT */
+
+.support-card-content {
+    flex: 1;
+}
+
+.support-card-content > span {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #82adff;
+
+    font-size: 8px;
+    font-weight: 800;
+
+    letter-spacing: 1px;
+}
+
+.support-card-content h4 {
+    margin-bottom: 6px;
+
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.support-card-content p {
+    margin-bottom: 17px;
+
+    color: #d1d9e6;
+
+    font-size: 10px;
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   ADMIN SLIDE
+========================================================== */
+
+.admin-support .customer-support-icon {
+    color: #ffffff;
+    background: rgba(83, 210, 153, 0.15);
+}
+
+.admin-support .support-card-content > span {
+    color: #72dca8;
+}
+
+
+/* =========================================================
+   ACTION BUTTON
+========================================================== */
+
+.support-action-button {
+    min-height: 31px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    gap: 6px;
+
+    width: 100%;
+
+    color: #18243a;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    text-decoration: none;
+
+    background: #ffffff;
+
+    border-radius: 5px;
+
+    transition: all 0.15s ease;
+}
+
+.support-action-button:hover {
+    color: #0d6efd;
+    background: #f4f7fb;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   UNAVAILABLE
+========================================================== */
+
+.support-unavailable {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 6px;
+
+    padding: 9px 10px;
+
+    color: #bdc8d8;
+
+    font-size: 9px;
+    line-height: 1.45;
+
+    background: rgba(255, 255, 255, 0.07);
+
+    border-radius: 6px;
+}
+
+.support-unavailable i {
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   SWIPE HINT
+========================================================== */
+
+.support-swipe-hint {
+    display: none;
+
+    padding: 8px 15px;
+
+    color: rgba(255, 255, 255, 0.55);
+
+    font-size: 8px;
+    text-align: center;
+
+    background: rgba(0, 0, 0, 0.08);
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================== */
+
+@@media (max-width: 767px) {
+
+    .support-slider-controls {
+        display: none;
+    }
+
+    .support-swipe-hint {
+        display: block;
+    }
+
+    .support-slider .customer-support-card {
+        min-height: 245px;
+    }
+
+}
+
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const track =
+            document.getElementById("supportSliderTrack");
+
+        const viewport =
+            document.getElementById("supportSliderViewport");
+
+        const previousButton =
+            document.getElementById("supportPrevious");
+
+        const nextButton =
+            document.getElementById("supportNext");
+
+        const dots =
+            document.querySelectorAll(".support-dot");
+
+        if (!track || !viewport) {
+            return;
+        }
+
+
+        let currentSlide = 0;
+        const totalSlides = 2;
+
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+
+        function showSlide(index) {
+
+            if (index < 0) {
+                index = totalSlides - 1;
+            }
+
+            if (index >= totalSlides) {
+                index = 0;
+            }
+
+            currentSlide = index;
+
+            track.style.transform =
+                `translateX(-${currentSlide * 100}%)`;
+
+            dots.forEach((dot, dotIndex) => {
+
+                dot.classList.toggle(
+                    "active",
+                    dotIndex === currentSlide
+                );
+
+            });
+        }
+
+
+        /* =============================================
+           ARROW BUTTONS
+        ============================================== */
+
+        if (previousButton) {
+
+            previousButton.addEventListener(
+                "click",
+                function () {
+
+                    showSlide(currentSlide - 1);
+
+                }
+            );
+
+        }
+
+
+        if (nextButton) {
+
+            nextButton.addEventListener(
+                "click",
+                function () {
+
+                    showSlide(currentSlide + 1);
+
+                }
+            );
+
+        }
+
+
+        /* =============================================
+           DOT NAVIGATION
+        ============================================== */
+
+        dots.forEach((dot) => {
+
+            dot.addEventListener(
+                "click",
+                function () {
+
+                    const slide =
+                        parseInt(
+                            this.dataset.supportSlide
+                        );
+
+                    showSlide(slide);
+
+                }
+            );
+
+        });
+
+
+        /* =============================================
+           MOBILE SWIPE
+        ============================================== */
+
+        viewport.addEventListener(
+            "touchstart",
+            function (event) {
+
+                touchStartX =
+                    event.changedTouches[0].screenX;
+
+            },
+            {
+                passive: true
+            }
+        );
+
+
+        viewport.addEventListener(
+            "touchend",
+            function (event) {
+
+                touchEndX =
+                    event.changedTouches[0].screenX;
+
+                handleSwipe();
+
+            },
+            {
+                passive: true
+            }
+        );
+
+
+        function handleSwipe() {
+
+            const swipeDistance =
+                touchStartX - touchEndX;
+
+            const minimumSwipeDistance = 40;
+
+
+            /* SWIPE LEFT */
+            if (swipeDistance > minimumSwipeDistance) {
+
+                showSlide(currentSlide + 1);
+
+            }
+
+
+            /* SWIPE RIGHT */
+            else if (
+                swipeDistance < -minimumSwipeDistance
+            ) {
+
+                showSlide(currentSlide - 1);
+
+            }
+
+        }
+
+
+        showSlide(0);
+
+    });
+</script>

@@ -1,51 +1,2156 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - AIVehicleWorkshopSystem</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/AIVehicleWorkshopSystem.styles.css" asp-append-version="true" />
-</head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AIVehicleWorkshopSystem</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                    <partial name="_LoginPartial" />
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+﻿@using Microsoft.AspNetCore.Identity
+@using AIVehicleWorkshopSystem.Models
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - AIVehicleWorkshopSystem - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+
+    var currentController =
+        ViewContext.RouteData.Values["controller"]?.ToString();
+
+    var currentAction =
+        ViewContext.RouteData.Values["action"]?.ToString();
+
+    string IsActive(string controller, string action = "")
+    {
+        var controllerMatch =
+            string.Equals(
+                currentController,
+                controller,
+                StringComparison.OrdinalIgnoreCase);
+
+        if (!controllerMatch)
+        {
+            return "";
+        }
+
+        if (string.IsNullOrEmpty(action))
+        {
+            return "active";
+        }
+
+        return string.Equals(
+            currentAction,
+            action,
+            StringComparison.OrdinalIgnoreCase)
+            ? "active"
+            : "";
+    }
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<script>
+    (function () {
+
+        const isAuthenticated =
+            @(isAuthenticated.ToString().ToLower());
+
+        // Public website always Light
+        if (!isAuthenticated) {
+
+            document.documentElement.setAttribute(
+                "data-bs-theme",
+                "light"
+            );
+
+            return;
+        }
+
+        const savedTheme =
+            localStorage.getItem(
+                "serishTheme"
+            ) || "system";
+
+        let resolvedTheme =
+            savedTheme;
+
+        if (savedTheme === "system") {
+
+            resolvedTheme =
+                window.matchMedia(
+                    "(prefers-color-scheme: dark)"
+                ).matches
+                    ? "dark"
+                    : "light";
+        }
+
+        document.documentElement.setAttribute(
+            "data-bs-theme",
+            resolvedTheme
+        );
+
+        document.documentElement.setAttribute(
+            "data-serish-theme",
+            savedTheme
+        );
+
+    })();
+</script>
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <!-- =========================
+    PWA
+    ========================= -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <meta name="theme-color"
+          content="#212529" />
+
+    <!-- iPhone / iPad PWA -->
+    <meta name="apple-mobile-web-app-capable"
+          content="yes" />
+
+    <meta name="apple-mobile-web-app-status-bar-style"
+          content="default" />
+
+    <meta name="apple-mobile-web-app-title"
+          content="Serish AutoCare" />
+
+    <link rel="apple-touch-icon"
+          href="/icons/icon-192.png" />
+
+    <title>
+        @ViewData["Title"] - Serish AutoCare
+    </title>
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/AIVehicleWorkshopSystem.styles.css"
+          asp-append-version="true" />
+
+</head>
+
+<body class="@(isAuthenticated ? "app-layout" : "")">
+
+
+    @if (isAuthenticated)
+    {
+        <!-- =====================================================
+             AUTHENTICATED APPLICATION LAYOUT
+             ===================================================== -->
+
+        <div class="app-shell">
+
+            <!-- MOBILE OVERLAY -->
+            <div id="sidebarOverlay"
+                 class="sidebar-overlay">
+            </div>
+
+
+            <!-- =================================================
+                 SIDEBAR
+                 ================================================= -->
+            <aside id="appSidebar"
+                   class="app-sidebar">
+
+                <!-- SIDEBAR HEADER -->
+                <div class="sidebar-header">
+
+                    <a class="sidebar-brand"
+                       asp-controller="@(User.IsInRole("Admin")
+                                                               ? "Admin"
+                                                               : User.IsInRole("Mechanic")
+                                                                   ? "Mechanic"
+                                                                   : "Customer")"
+                   asp-action="Dashboard">
+
+                        <div class="sidebar-logo">
+                            <i class="bi bi-wrench-adjustable-circle-fill"></i>
+                        </div>
+
+                        <div class="sidebar-brand-text">
+                            <span class="brand-main">
+                                Serish
+                            </span>
+
+                            <span class="brand-sub">
+                                AutoCare
+                            </span>
+                        </div>
+
+                    </a>
+
+
+                    <button type="button"
+                            id="sidebarToggle"
+                            class="sidebar-toggle"
+                            aria-label="Toggle sidebar">
+
+                        <i class="bi bi-list"></i>
+
+                    </button>
+
+                </div>
+
+
+                <!-- =================================================
+                     NAVIGATION
+                     ================================================= -->
+                <nav class="sidebar-navigation">
+
+
+                    @* ==========================
+                   ADMIN MENU
+                   ========================== *@
+
+                @if (User.IsInRole("Admin"))
+                    {
+                        <div class="sidebar-section-label">
+                            MANAGEMENT
+                        </div>
+
+                        <a class="sidebar-link @IsActive("Admin", "Dashboard")"
+                           asp-controller="Admin"
+                           asp-action="Dashboard"
+                           title="Dashboard">
+
+                            <i class="bi bi-grid-1x2-fill"></i>
+
+                            <span>Dashboard</span>
+
+                        </a>
+
+
+                        <a class="sidebar-link @IsActive("Admin", "ServiceHistory")"
+                           asp-controller="Admin"
+                           asp-action="ServiceHistory"
+                           title="Service History">
+
+                            <i class="bi bi-clock-history"></i>
+
+                            <span>Service History</span>
+
+                        </a>
+
+
+                        <a class="sidebar-link @IsActive("Admin", "Appointments")"
+                           asp-controller="Admin"
+                           asp-action="Appointments"
+                           title="Appointments">
+
+                            <i class="bi bi-calendar-check"></i>
+
+                            <span>Appointments</span>
+
+                        </a>
+
+
+                        <a class="sidebar-link @IsActive("Admin", "Repairs")"
+                           asp-controller="Admin"
+                           asp-action="Repairs"
+                           title="Repairs">
+
+                            <i class="bi bi-tools"></i>
+
+                            <span>Repairs</span>
+
+                        </a>
+
+
+                        <a class="sidebar-link @IsActive("Admin", "AIDiagnostics")"
+                           asp-controller="Admin"
+                           asp-action="AIDiagnostics"
+                           title="AI Diagnostics">
+
+                            <i class="bi bi-stars"></i>
+
+                            <span>AI Diagnostics</span>
+
+                        </a>
+
+
+                        <a class="sidebar-link @IsActive("Admin", "Users")"
+                           asp-controller="Admin"
+                           asp-action="Users"
+                           title="Users">
+
+                            <i class="bi bi-people-fill"></i>
+
+                            <span>Users</span>
+
+                        </a>
+
+
+                        <a class="sidebar-link @IsActive("Admin", "Invoices")"
+                           asp-controller="Admin"
+                           asp-action="Invoices"
+                           title="Invoices">
+
+                            <i class="bi bi-receipt"></i>
+
+                            <span>Invoices</span>
+
+                        </a>
+
+                        <a class="sidebar-link @IsActive("Admin", "CustomerMessages")"
+                           asp-controller="Admin"
+                           asp-action="CustomerMessages"
+                           title="Customer Messages">
+
+                            <i class="bi bi-chat-left-text"></i>
+
+                            <span>Customer Messages</span>
+
+                        </a>
+                    }
+
+
+                    @* ==========================
+                   MECHANIC MENU
+                   ========================== *@
+
+                    else if (User.IsInRole("Mechanic"))
+                    {
+                        <div class="sidebar-section-label">
+                            WORKSPACE
+                        </div>
+
+
+                        <a class="sidebar-link @IsActive("Mechanic", "Dashboard")"
+                           asp-controller="Mechanic"
+                           asp-action="Dashboard"
+                           title="Dashboard">
+
+                            <i class="bi bi-grid-1x2-fill"></i>
+
+                            <span>Dashboard</span>
+
+                        </a>
+
+
+                        <a class="sidebar-link @IsActive("Mechanic", "Repairs")"
+                           asp-controller="Mechanic"
+                           asp-action="Repairs"
+                           title="My Repairs">
+
+                            <i class="bi bi-tools"></i>
+
+                            <span>My Repairs</span>
+
+                        </a>
+
+
+                        <a class="sidebar-link @IsActive("Mechanic", "AIDiagnosticReview")"
+                           asp-controller="Mechanic"
+                           asp-action="AIDiagnosticReview"
+                           title="AI Diagnostic Review">
+
+                            <i class="bi bi-stars"></i>
+
+                            <span>AI Diagnostic Review</span>
+
+                        </a>
+                    }
+
+
+                    @* ==========================
+                   CUSTOMER MENU
+                   ========================== *@
+
+                    else if (User.IsInRole("Customer"))
+                    {
+                        <div class="sidebar-section-label">
+                            MY WORKSHOP
+                        </div>
+
+
+                        <a class="sidebar-link @IsActive("Customer", "Dashboard")"
+                           asp-controller="Customer"
+                           asp-action="Dashboard"
+                           title="Dashboard">
+
+                            <i class="bi bi-grid-1x2-fill"></i>
+
+                            <span>Dashboard</span>
+
+                        </a>
+
+
+                        <a class="sidebar-link @IsActive("Vehicle")"
+                           asp-controller="Vehicle"
+                           asp-action="Index"
+                           title="My Vehicles">
+
+                            <i class="bi bi-car-front-fill"></i>
+
+                            <span>My Vehicles</span>
+
+                        </a>
+
+
+                        <a class="sidebar-link @IsActive("Appointment", "Create")"
+                           asp-controller="Appointment"
+                           asp-action="Create"
+                           title="Book Appointment">
+
+                            <i class="bi bi-calendar-plus"></i>
+
+                            <span>Book Appointment</span>
+
+                        </a>
+
+
+                        <a class="sidebar-link @IsActive("Appointment", "Index")"
+                           asp-controller="Appointment"
+                           asp-action="Index"
+                           title="My Appointments">
+
+                            <i class="bi bi-calendar-check"></i>
+
+                            <span>My Appointments</span>
+
+                        </a>
+
+
+                        <a class="sidebar-link @IsActive("Customer", "RepairTracking")"
+                           asp-controller="Customer"
+                           asp-action="RepairTracking"
+                           title="Repair Tracking">
+
+                            <i class="bi bi-geo-alt-fill"></i>
+
+                            <span>Repair Tracking</span>
+
+                        </a>
+
+
+                        <a class="sidebar-link @IsActive("Customer", "AIDiagnosis")"
+                           asp-controller="Customer"
+                           asp-action="AIDiagnosis"
+                           title="AI Diagnosis">
+
+                            <i class="bi bi-stars"></i>
+
+                            <span>AI Diagnosis</span>
+
+                        </a>
+
+
+                        <a class="sidebar-link @IsActive("Customer", "Invoices")"
+                           asp-controller="Customer"
+                           asp-action="Invoices"
+                           title="Invoices">
+
+                            <i class="bi bi-receipt"></i>
+
+                            <span>Invoices</span>
+
+                        </a>
+
+                        <a asp-controller="SupportChat"
+                           asp-action="Index"
+                           class="sidebar-link">
+
+                            <i class="bi bi-headset"></i>
+
+                            <span>
+                                Support Chat
+                            </span>
+
+                        </a>
+                    }
+
+                </nav>
+
+
+                <!-- =================================================
+                     ACCOUNT / LOGOUT
+                     ================================================= -->
+                <div class="sidebar-footer">
+
+                    <!-- NOTIFICATIONS -->
+                    <button type="button"
+                            id="notificationButton"
+                            class="sidebar-link notification-sidebar-button"
+                            title="Notifications">
+
+                        <div class="notification-icon-wrapper">
+                            <i class="bi bi-bell-fill"></i>
+
+                            <span id="notificationBadge"
+                                  class="notification-badge d-none">
+                                0
+                            </span>
+                        </div>
+
+                        <span>Notifications</span>
+
+                    </button>
+
+                    <!-- NOTIFICATION DROPDOWN -->
+                    <div id="notificationPanel"
+                         class="notification-panel">
+
+                        <form id="notificationAntiForgeryForm" class="d-none">
+                            @Html.AntiForgeryToken()
+                        </form>
+
+                        <div class="notification-panel-header">
+
+                            <div>
+                                <h6>Notifications</h6>
+                                <span id="notificationSummary">
+                                    You're all caught up
+                                </span>
+                            </div>
+
+                            <button type="button"
+                                    id="markAllNotificationsRead"
+                                    class="notification-mark-all">
+                                Mark all read
+                            </button>
+
+                        </div>
+
+                        <div id="notificationList"
+                             class="notification-list">
+
+                            <div class="notification-empty">
+                                <i class="bi bi-bell"></i>
+                                <span>No notifications yet</span>
+                            </div>
+
+                        </div>
+
+                        <!-- PUSH NOTIFICATION PERMISSION -->
+                        <div id="pushNotificationSection"
+                             class="px-3 py-2 border-top">
+
+                            <button type="button"
+                                    id="enablePushNotifications"
+                                    class="btn btn-primary btn-sm w-100">
+
+                                <i class="bi bi-bell-fill me-1"></i>
+
+                                Enable Phone Notifications
+
+                            </button>
+
+                            <small id="pushNotificationStatus"
+                                   class="d-block text-muted mt-2 text-center">
+
+                                Get repair and service updates on this device.
+
+                            </small>
+
+                        </div>
+
+                        <!-- VIEW ALL NOTIFICATIONS -->
+
+                        <!-- VIEW ALL NOTIFICATIONS -->
+                        <div class="notification-panel-footer">
+                            <a asp-controller="Notification"
+                               asp-action="Index"
+                               class="notification-view-all">
+
+                                <span>View All Notifications</span>
+                                <i class="bi bi-arrow-right"></i>
+
+                            </a>
+                        </div>
+
+                    </div>
+
+                    
+
+                    <!-- THEME SELECTOR -->
+                    <div class="theme-selector">
+
+                        <div class="theme-selector-title">
+
+                            <i class="bi bi-palette-fill"></i>
+
+                            <span>Appearance</span>
+
+                        </div>
+
+
+                        <div class="theme-options">
+
+                            <button type="button"
+                                    class="theme-option"
+                                    data-theme="light"
+                                    title="Light Mode">
+
+                                <i class="bi bi-sun-fill"></i>
+
+                                <span>Light</span>
+
+                            </button>
+
+
+                            <button type="button"
+                                    class="theme-option"
+                                    data-theme="dark"
+                                    title="Dark Mode">
+
+                                <i class="bi bi-moon-stars-fill"></i>
+
+                                <span>Dark</span>
+
+                            </button>
+
+
+                            <button type="button"
+                                    class="theme-option"
+                                    data-theme="system"
+                                    title="Use System Theme">
+
+                                <i class="bi bi-display"></i>
+
+                                <span>System</span>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <a class="sidebar-user"
+                       asp-area="Identity"
+                       asp-page="/Account/Manage/Index"
+                       title="Manage Account">
+
+                        <div class="sidebar-avatar">
+
+                            <i class="bi bi-person-fill"></i>
+
+                        </div>
+
+                        <div class="sidebar-user-info">
+
+                            <span class="sidebar-user-name">
+                                @User.Identity?.Name
+                            </span>
+
+                            <span class="sidebar-user-role">
+
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <text>Administrator</text>
+                                }
+                                else if (User.IsInRole("Mechanic"))
+                                {
+                                    <text>Mechanic</text>
+                                }
+                                else
+                                {
+                                    <text>Customer</text>
+                                }
+
+                            </span>
+
+                        </div>
+
+                    </a>
+
+
+                    <form asp-area="Identity"
+                          asp-page="/Account/Logout"
+                          asp-route-returnUrl="@Url.Action(
+                                                                          "Index",
+                                                                          "Home",
+                                                                          new { area = "" })">
+
+                    <button type="submit"
+                            class="sidebar-link sidebar-logout"
+                            title="Logout">
+
+                            <i class="bi bi-box-arrow-right"></i>
+
+                            <span>Logout</span>
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </aside>
+
+
+            <!-- =================================================
+                 MAIN APPLICATION CONTENT
+                 ================================================= -->
+            <div id="appContent"
+                 class="app-content">
+
+                <!-- MOBILE TOP BAR -->
+                <div class="mobile-app-header">
+
+                    <button type="button"
+                            id="mobileSidebarToggle"
+                            class="mobile-menu-button">
+
+                        <i class="bi bi-list"></i>
+
+                    </button>
+
+
+                    <div class="mobile-brand">
+
+                        <i class="bi bi-wrench-adjustable-circle-fill"></i>
+
+                        <span>
+                            Serish AutoCare
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <main role="main"
+                      class="app-main">
+
+                    @RenderBody()
+
+                </main>
+
+            </div>
+
         </div>
-    </footer>
+        }
+    else
+    {
+        <!-- =====================================================
+             PUBLIC WEBSITE
+             ===================================================== -->
+
+        <header>
+
+            <nav class="navbar
+                        navbar-expand-lg
+                        navbar-light
+                        bg-white
+                        border-bottom
+                        shadow-sm">
+
+                <div class="container">
+
+                    <a class="navbar-brand fw-bold text-primary"
+                       asp-controller="Home"
+                       asp-action="Index">
+
+                        Serish AutoCare
+
+                    </a>
+
+
+                    <button class="navbar-toggler"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#publicNavbar"
+                            aria-controls="publicNavbar"
+                            aria-expanded="false"
+                            aria-label="Toggle navigation">
+
+                        <span class="navbar-toggler-icon"></span>
+
+                    </button>
+
+
+                    <div class="collapse navbar-collapse"
+                         id="publicNavbar">
+
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Home"
+                                   asp-action="Index">
+
+                                    Home
+
+                                </a>
+
+                            </li>
+
+
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Home"
+                                   asp-action="Index"
+                                   asp-fragment="features">
+
+                                    Features
+
+                                </a>
+
+                            </li>
+
+
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Home"
+                                   asp-action="Index"
+                                   asp-fragment="workflow">
+
+                                    How It Works
+
+                                </a>
+
+                            </li>
+
+                        </ul>
+
+
+                        <partial name="_LoginPartial" />
+
+                    </div>
+
+                </div>
+
+            </nav>
+
+        </header>
+
+
+        <main role="main">
+
+            @RenderBody()
+
+        </main>
+
+
+        <footer class="border-top
+                       footer
+                       text-muted
+                       bg-white">
+
+            <div class="container py-3">
+
+                &copy; @DateTime.Now.Year - Serish AutoCare
+
+            </div>
+
+        </footer>
+    }
+
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@8.0.7/dist/browser/signalr.min.js"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true">
+    </script>
+
+    <!-- PWA Service Worker -->
+    <script>
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", function () {
+                navigator.serviceWorker
+                    .register("/service-worker.js")
+                    .then(function (registration) {
+                        console.log(
+                            "Serish AutoCare service worker registered:",
+                            registration.scope
+                        );
+                    })
+                    .catch(function (error) {
+                        console.error(
+                            "Service worker registration failed:",
+                            error
+                        );
+                    });
+            });
+        }
+    </script>
+
+
+    @if (isAuthenticated)
+    {
+        <script>
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                function () {
+
+                    const sidebar =
+                        document.getElementById("appSidebar");
+
+                    const sidebarToggle =
+                        document.getElementById("sidebarToggle");
+
+                    const mobileToggle =
+                        document.getElementById("mobileSidebarToggle");
+
+                    const overlay =
+                        document.getElementById("sidebarOverlay");
+
+
+                    // =============================================
+                    // DESKTOP SIDEBAR
+                    // =============================================
+
+                    if (sidebarToggle) {
+
+                        sidebarToggle.addEventListener(
+                            "click",
+                            function () {
+
+                                if (window.innerWidth <= 991) {
+
+                                    sidebar.classList.toggle(
+                                        "mobile-open"
+                                    );
+
+                                    overlay.classList.toggle(
+                                        "show"
+                                    );
+
+                                    return;
+                                }
+
+
+                                sidebar.classList.toggle(
+                                    "collapsed"
+                                );
+
+
+                                // Remember sidebar state
+                                if (
+                                    sidebar.classList.contains(
+                                        "collapsed"
+                                    )
+                                ) {
+
+                                    localStorage.setItem(
+                                        "serishSidebar",
+                                        "collapsed"
+                                    );
+
+                                }
+                                else {
+
+                                    localStorage.setItem(
+                                        "serishSidebar",
+                                        "expanded"
+                                    );
+
+                                }
+
+                            }
+                        );
+
+                    }
+
+
+                    // =============================================
+                    // RESTORE DESKTOP STATE
+                    // =============================================
+
+                    if (window.innerWidth > 991) {
+
+                        const savedState =
+                            localStorage.getItem(
+                                "serishSidebar"
+                            );
+
+
+                        if (savedState === "collapsed") {
+
+                            sidebar.classList.add(
+                                "collapsed"
+                            );
+
+                        }
+
+                    }
+
+
+                    // =============================================
+                    // MOBILE SIDEBAR
+                    // =============================================
+
+                    if (mobileToggle) {
+
+                        mobileToggle.addEventListener(
+                            "click",
+                            function () {
+
+                                sidebar.classList.add(
+                                    "mobile-open"
+                                );
+
+                                overlay.classList.add(
+                                    "show"
+                                );
+
+                            }
+                        );
+
+                    }
+
+
+                    if (overlay) {
+
+                        overlay.addEventListener(
+                            "click",
+                            function () {
+
+                                sidebar.classList.remove(
+                                    "mobile-open"
+                                );
+
+                                overlay.classList.remove(
+                                    "show"
+                                );
+
+                            }
+                        );
+
+                    }
+
+
+                    // Close mobile sidebar only after selecting
+// a navigation link.
+//
+// Do NOT close it when the Notifications button
+// is pressed because the notification panel
+// lives inside the sidebar.
+document
+    .querySelectorAll(
+        ".sidebar-link"
+    )
+    .forEach(function (link) {
+
+        link.addEventListener(
+            "click",
+            function () {
+
+                if (
+                    window.innerWidth <= 991 &&
+                    link.id !== "notificationButton"
+                ) {
+
+                    sidebar.classList.remove(
+                        "mobile-open"
+                    );
+
+                    overlay.classList.remove(
+                        "show"
+                    );
+
+                }
+
+            }
+        );
+
+    });
+
+
+                    // =============================================
+                    // WINDOW RESIZE
+                    // =============================================
+
+                    window.addEventListener(
+                        "resize",
+                        function () {
+
+                            if (
+                                window.innerWidth > 991
+                            ) {
+
+                                sidebar.classList.remove(
+                                    "mobile-open"
+                                );
+
+                                overlay.classList.remove(
+                                    "show"
+                                );
+
+                            }
+
+                        }
+                    );
+
+                                // =============================================
+            // THEME
+            // =============================================
+
+            const themeButtons =
+                document.querySelectorAll(
+                    ".theme-option"
+                );
+
+            const systemTheme =
+                window.matchMedia(
+                    "(prefers-color-scheme: dark)"
+                );
+
+
+            function resolveTheme(theme) {
+
+                if (theme === "system") {
+
+                    return systemTheme.matches
+                        ? "dark"
+                        : "light";
+
+                }
+
+                return theme;
+            }
+
+
+            function applyTheme(theme) {
+
+                const resolvedTheme =
+                    resolveTheme(theme);
+
+
+                document.documentElement.setAttribute(
+                    "data-bs-theme",
+                    resolvedTheme
+                );
+
+
+                document.documentElement.setAttribute(
+                    "data-serish-theme",
+                    theme
+                );
+
+
+                localStorage.setItem(
+                    "serishTheme",
+                    theme
+                );
+
+
+                themeButtons.forEach(
+                    function (button) {
+
+                        button.classList.toggle(
+                            "active",
+                            button.dataset.theme === theme
+                        );
+
+                    }
+                );
+
+            }
+
+
+            const savedTheme =
+                localStorage.getItem(
+                    "serishTheme"
+                ) || "system";
+
+
+            applyTheme(savedTheme);
+
+
+            themeButtons.forEach(
+                function (button) {
+
+                    button.addEventListener(
+                        "click",
+                        function () {
+
+                            applyTheme(
+                                button.dataset.theme
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+
+            // If user selected System,
+            // automatically follow Windows / phone changes
+            systemTheme.addEventListener(
+                "change",
+                function () {
+
+                    const currentTheme =
+                        localStorage.getItem(
+                            "serishTheme"
+                        ) || "system";
+
+
+                    if (currentTheme === "system") {
+
+                        applyTheme("system");
+
+                    }
+
+                }
+            );
+
+                }
+            );
+
+        </script>
+    }
+
+    @if (isAuthenticated)
+    {
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+
+                // =====================================================
+                // NOTIFICATION SYSTEM
+                // =====================================================
+
+                const notificationButton =
+                    document.getElementById("notificationButton");
+
+                const notificationPanel =
+                    document.getElementById("notificationPanel");
+
+                const notificationBadge =
+                    document.getElementById("notificationBadge");
+
+                const notificationList =
+                    document.getElementById("notificationList");
+
+                const notificationSummary =
+                    document.getElementById("notificationSummary");
+
+                const markAllButton =
+                    document.getElementById("markAllNotificationsRead");
+
+                                // =====================================================
+            // WEB PUSH NOTIFICATIONS
+            // =====================================================
+
+            const enablePushButton =
+                document.getElementById("enablePushNotifications");
+
+            const pushNotificationStatus =
+                document.getElementById("pushNotificationStatus");
+
+
+            // Convert VAPID Base64 URL key to Uint8Array
+            function urlBase64ToUint8Array(base64String) {
+
+                const padding =
+                    "=".repeat((4 - base64String.length % 4) % 4);
+
+                const base64 =
+                    (base64String + padding)
+                        .replace(/-/g, "+")
+                        .replace(/_/g, "/");
+
+                const rawData =
+                    window.atob(base64);
+
+                return Uint8Array.from(
+                    [...rawData].map(
+                        character => character.charCodeAt(0)
+                    )
+                );
+            }
+
+
+            // Update button based on current permission
+            function updatePushButtonState() {
+
+                if (!enablePushButton) {
+                    return;
+                }
+
+
+                // Browser does not support Web Push
+                if (
+                    !("serviceWorker" in navigator) ||
+                    !("PushManager" in window) ||
+                    !("Notification" in window)
+                ) {
+
+                    enablePushButton.disabled = true;
+
+                    enablePushButton.innerHTML =
+                        '<i class="bi bi-x-circle me-1"></i>' +
+                        'Notifications Not Supported';
+
+                    if (pushNotificationStatus) {
+                        pushNotificationStatus.textContent =
+                            "Push notifications are not supported on this device.";
+                    }
+
+                    return;
+                }
+
+
+                // Permission already denied
+                if (Notification.permission === "denied") {
+
+                    enablePushButton.disabled = true;
+
+                    enablePushButton.innerHTML =
+                        '<i class="bi bi-bell-slash-fill me-1"></i>' +
+                        'Notifications Blocked';
+
+                    if (pushNotificationStatus) {
+                        pushNotificationStatus.textContent =
+                            "Notifications are blocked in your device settings.";
+                    }
+
+                    return;
+                }
+
+
+                // Permission already granted
+                if (Notification.permission === "granted") {
+
+                    enablePushButton.innerHTML =
+                        '<i class="bi bi-check-circle-fill me-1"></i>' +
+                        'Notifications Enabled';
+
+                    if (pushNotificationStatus) {
+                        pushNotificationStatus.textContent =
+                            "Push notifications are allowed on this device.";
+                    }
+
+                    return;
+                }
+
+
+                // Permission not requested yet
+                enablePushButton.innerHTML =
+                    '<i class="bi bi-bell-fill me-1"></i>' +
+                    'Enable Phone Notifications';
+
+                if (pushNotificationStatus) {
+                    pushNotificationStatus.textContent =
+                        "Get repair and service updates on this device.";
+                }
+            }
+
+
+            // Register this device with the server
+            async function enablePushNotifications() {
+
+                if (!enablePushButton) {
+                    return;
+                }
+
+
+                if (
+                    !("serviceWorker" in navigator) ||
+                    !("PushManager" in window) ||
+                    !("Notification" in window)
+                ) {
+
+                    updatePushButtonState();
+                    return;
+                }
+
+
+                try {
+
+                    enablePushButton.disabled = true;
+
+                    if (pushNotificationStatus) {
+                        pushNotificationStatus.textContent =
+                            "Setting up notifications...";
+                    }
+
+
+                    // Must be triggered from the button click.
+                    const permission =
+                        await Notification.requestPermission();
+
+
+                    if (permission !== "granted") {
+
+                        updatePushButtonState();
+
+                        enablePushButton.disabled =
+                            permission === "denied";
+
+                        return;
+                    }
+
+
+                    // Wait until our existing PWA service worker is ready.
+                    const registration =
+                        await navigator.serviceWorker.ready;
+
+
+                    // Get PUBLIC VAPID key from ASP.NET.
+                    const keyResponse =
+                        await fetch(
+                            "/Notification/GetVapidPublicKey",
+                            {
+                                method: "GET",
+                                credentials: "same-origin"
+                            }
+                        );
+
+
+                    if (!keyResponse.ok) {
+
+                        throw new Error(
+                            "Unable to obtain the VAPID public key."
+                        );
+                    }
+
+
+                    const keyData =
+                        await keyResponse.json();
+
+
+                    if (!keyData.publicKey) {
+
+                        throw new Error(
+                            "VAPID public key was not returned."
+                        );
+                    }
+
+
+                    // Check whether this browser already has
+                    // a push subscription.
+                    let subscription =
+                        await registration.pushManager
+                            .getSubscription();
+
+
+                    if (!subscription) {
+
+                        subscription =
+                            await registration.pushManager.subscribe({
+                                userVisibleOnly: true,
+
+                                applicationServerKey:
+                                    urlBase64ToUint8Array(
+                                        keyData.publicKey
+                                    )
+                            });
+                    }
+
+
+                    // Convert browser PushSubscription
+                    // into normal JSON.
+                    const subscriptionJson =
+                        subscription.toJSON();
+
+
+                    if (
+                        !subscriptionJson.endpoint ||
+                        !subscriptionJson.keys ||
+                        !subscriptionJson.keys.p256dh ||
+                        !subscriptionJson.keys.auth
+                    ) {
+
+                        throw new Error(
+                            "Browser returned an invalid push subscription."
+                        );
+                    }
+
+
+                    // Save subscription in our database.
+                    const saveResponse =
+                        await fetch(
+                            "/Notification/Subscribe",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                credentials: "same-origin",
+
+                                body: JSON.stringify({
+                                    endpoint:
+                                        subscriptionJson.endpoint,
+
+                                    keys: {
+                                        p256dh:
+                                            subscriptionJson.keys.p256dh,
+
+                                        auth:
+                                            subscriptionJson.keys.auth
+                                    }
+                                })
+                            }
+                        );
+
+
+                    if (!saveResponse.ok) {
+
+                        throw new Error(
+                            "Unable to save the push subscription."
+                        );
+                    }
+
+
+                    enablePushButton.disabled = false;
+
+                    enablePushButton.innerHTML =
+                        '<i class="bi bi-check-circle-fill me-1"></i>' +
+                        'Notifications Enabled';
+
+
+                    if (pushNotificationStatus) {
+
+                        pushNotificationStatus.textContent =
+                            "This device is registered for Serish AutoCare notifications.";
+                    }
+
+
+                    console.log(
+                        "Serish AutoCare push notifications enabled."
+                    );
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "Unable to enable push notifications:",
+                        error
+                    );
+
+
+                    enablePushButton.disabled = false;
+
+
+                    if (pushNotificationStatus) {
+
+                        pushNotificationStatus.textContent =
+                            "Unable to enable notifications. Please try again.";
+                    }
+                }
+            }
+
+
+            // User gesture is important for notification permission.
+            if (enablePushButton) {
+
+                enablePushButton.addEventListener(
+                    "click",
+                    enablePushNotifications
+                );
+            }
+
+
+            updatePushButtonState();
+
+
+                if (!notificationButton ||
+                    !notificationPanel ||
+                    !notificationBadge ||
+                    !notificationList) {
+
+                    return;
+                }
+
+
+                // =====================================================
+                // HTML ESCAPE
+                // =====================================================
+
+                function escapeHtml(value) {
+
+                    if (!value) {
+                        return "";
+                    }
+
+                    const div = document.createElement("div");
+
+                    div.textContent = value;
+
+                    return div.innerHTML;
+                }
+
+
+                // =====================================================
+                // NOTIFICATION ICON
+                // =====================================================
+
+                function getNotificationIcon(type) {
+
+                    const normalizedType =
+                        (type || "").toLowerCase();
+
+                    if (normalizedType.includes("repair")) {
+                        return "bi-tools";
+                    }
+
+                    if (normalizedType.includes("appointment")) {
+                        return "bi-calendar-check";
+                    }
+
+                    if (normalizedType.includes("invoice") ||
+                        normalizedType.includes("payment")) {
+                        return "bi-receipt";
+                    }
+
+                    if (normalizedType.includes("chat") ||
+                        normalizedType.includes("message") ||
+                        normalizedType.includes("support")) {
+                        return "bi-chat-left-text";
+                    }
+
+                    if (normalizedType.includes("ai") ||
+                        normalizedType.includes("diagnostic")) {
+                        return "bi-stars";
+                    }
+
+                    return "bi-bell";
+                }
+
+
+                // =====================================================
+                // RELATIVE TIME
+                // =====================================================
+
+                function getRelativeTime(dateValue) {
+
+                    const date = new Date(dateValue);
+
+                    if (Number.isNaN(date.getTime())) {
+                        return "";
+                    }
+
+                    const now = new Date();
+
+                    const seconds =
+                        Math.floor((now - date) / 1000);
+
+
+                    if (seconds < 60) {
+                        return "Just now";
+                    }
+
+
+                    const minutes =
+                        Math.floor(seconds / 60);
+
+                    if (minutes < 60) {
+                        return `${minutes} min ago`;
+                    }
+
+
+                    const hours =
+                        Math.floor(minutes / 60);
+
+                    if (hours < 24) {
+                        return `${hours} hr ago`;
+                    }
+
+
+                    const days =
+                        Math.floor(hours / 24);
+
+                    if (days < 7) {
+                        return `${days} day${days > 1 ? "s" : ""} ago`;
+                    }
+
+
+                    return date.toLocaleDateString();
+                }
+
+
+                // =====================================================
+                // BADGE
+                // =====================================================
+
+                function updateNotificationBadge(count) {
+
+                    const unreadCount =
+                        Number(count) || 0;
+
+
+                    if (unreadCount <= 0) {
+
+                        notificationBadge.textContent = "0";
+
+                        notificationBadge.classList.add("d-none");
+
+                        if (notificationSummary) {
+                            notificationSummary.textContent =
+                                "You're all caught up";
+                        }
+
+                        return;
+                    }
+
+
+                    notificationBadge.textContent =
+                        unreadCount > 99
+                            ? "99+"
+                            : unreadCount;
+
+
+                    notificationBadge.classList.remove("d-none");
+
+
+                    if (notificationSummary) {
+
+                        notificationSummary.textContent =
+                            `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}`;
+                    }
+                }
+
+
+                // =====================================================
+                // CREATE NOTIFICATION HTML
+                // =====================================================
+
+                function createNotificationItem(notification) {
+
+                    const item =
+                        document.createElement("div");
+
+
+                    item.className =
+                        "notification-item" +
+                        (notification.isRead ? "" : " unread");
+
+
+                    item.dataset.notificationId =
+                        notification.notificationId;
+
+
+                    if (notification.relatedUrl) {
+
+                        item.dataset.relatedUrl =
+                            notification.relatedUrl;
+                    }
+
+
+                    const icon =
+                        getNotificationIcon(notification.type);
+
+
+                    item.innerHTML = `
+                        <div class="notification-item-icon">
+                            <i class="bi ${icon}"></i>
+                        </div>
+
+                        <div class="notification-item-content">
+
+                            <div class="notification-item-title">
+
+                                <span>
+                                    ${escapeHtml(notification.title)}
+                                </span>
+
+                                ${
+                                    notification.isRead
+                                        ? ""
+                                        : '<span class="notification-unread-dot"></span>'
+                                }
+
+                            </div>
+
+                            <div class="notification-item-message">
+                                ${escapeHtml(notification.message)}
+                            </div>
+
+                            <div class="notification-item-time">
+                                ${escapeHtml(
+                                    getRelativeTime(notification.createdAt)
+                                )}
+                            </div>
+
+                        </div>
+                    `;
+
+
+                    item.addEventListener(
+                        "click",
+                        async function () {
+
+                            await openNotification(
+                                notification.notificationId,
+                                notification.relatedUrl
+                            );
+                        }
+                    );
+
+
+                    return item;
+                }
+
+
+                // =====================================================
+                // RENDER LIST
+                // =====================================================
+
+                function renderNotifications(notifications) {
+
+                    notificationList.innerHTML = "";
+
+
+                    if (!notifications ||
+                        notifications.length === 0) {
+
+                        notificationList.innerHTML = `
+                            <div class="notification-empty">
+                                <i class="bi bi-bell"></i>
+                                <span>No notifications yet</span>
+                            </div>
+                        `;
+
+                        return;
+                    }
+
+
+                    notifications.forEach(
+                        function (notification) {
+
+                            notificationList.appendChild(
+                                createNotificationItem(notification)
+                            );
+                        }
+                    );
+                }
+
+
+                // =====================================================
+                // LOAD FROM DATABASE
+                // =====================================================
+
+                async function loadNotifications() {
+
+                    try {
+
+                        const response =
+                            await fetch(
+                                "/Notification/GetNotifications",
+                                {
+                                    method: "GET",
+                                    credentials: "same-origin"
+                                }
+                            );
+
+
+                        if (!response.ok) {
+                            return;
+                        }
+
+
+                        const data =
+                            await response.json();
+
+
+                        updateNotificationBadge(
+                            data.unreadCount
+                        );
+
+
+                        renderNotifications(
+                            data.notifications
+                        );
+
+                    }
+                    catch (error) {
+
+                        console.error(
+                            "Unable to load notifications:",
+                            error
+                        );
+                    }
+                }
+
+
+                // =====================================================
+                // ANTI-FORGERY TOKEN
+                // =====================================================
+
+                            function getAntiForgeryToken() {
+
+                const token =
+                    document.querySelector(
+                        '#notificationAntiForgeryForm input[name="__RequestVerificationToken"]'
+                    );
+
+                return token
+                    ? token.value
+                    : "";
+            }
+
+
+                // =====================================================
+                // OPEN + MARK ONE AS READ
+                // =====================================================
+
+                async function openNotification(
+                    notificationId,
+                    relatedUrl) {
+
+                    try {
+
+                        const formData =
+                            new FormData();
+
+
+                        formData.append(
+                            "notificationId",
+                            notificationId
+                        );
+
+
+                        const response =
+                            await fetch(
+                                "/Notification/MarkAsRead",
+                                {
+                                    method: "POST",
+
+                                                headers: {
+                "X-CSRF-TOKEN": getAntiForgeryToken(),
+                "X-Requested-With": "XMLHttpRequest"
+            },
+
+                                    body: formData,
+
+                                    credentials: "same-origin"
+                                }
+                            );
+
+
+                        if (!response.ok) {
+                            return;
+                        }
+
+
+                        if (relatedUrl) {
+
+                            window.location.href =
+                                relatedUrl;
+
+                            return;
+                        }
+
+
+                        await loadNotifications();
+
+                    }
+                    catch (error) {
+
+                        console.error(
+                            "Unable to mark notification as read:",
+                            error
+                        );
+                    }
+                }
+
+
+                // =====================================================
+                // MARK ALL AS READ
+                // =====================================================
+
+                if (markAllButton) {
+
+                    markAllButton.addEventListener(
+                        "click",
+                        async function (event) {
+
+                            event.stopPropagation();
+
+
+                            try {
+
+                                const response =
+                                    await fetch(
+                                        "/Notification/MarkAllAsRead",
+                                        {
+                                            method: "POST",
+
+                                                      headers: {
+                "X-CSRF-TOKEN": getAntiForgeryToken(),
+                "X-Requested-With": "XMLHttpRequest"
+            },
+
+                                            credentials: "same-origin"
+                                        }
+                                    );
+
+
+                                if (response.ok) {
+
+                                    await loadNotifications();
+                                }
+
+                            }
+                            catch (error) {
+
+                                console.error(
+                                    "Unable to mark all notifications as read:",
+                                    error
+                                );
+                            }
+                        }
+                    );
+                }
+
+
+                // =====================================================
+                // OPEN / CLOSE PANEL
+                // =====================================================
+
+                notificationButton.addEventListener(
+                    "click",
+                    function (event) {
+
+                        event.stopPropagation();
+
+                        notificationPanel.classList.toggle(
+                            "show"
+                        );
+
+
+                        if (
+                            notificationPanel.classList.contains(
+                                "show"
+                            )
+                        ) {
+
+                            loadNotifications();
+                        }
+                    }
+                );
+
+
+                notificationPanel.addEventListener(
+                    "click",
+                    function (event) {
+
+                        event.stopPropagation();
+                    }
+                );
+
+
+                document.addEventListener(
+                    "click",
+                    function () {
+
+                        notificationPanel.classList.remove(
+                            "show"
+                        );
+                    }
+                );
+
+
+                // =====================================================
+                // SIGNALR REAL-TIME
+                // =====================================================
+
+                if (typeof signalR !== "undefined") {
+
+                    const notificationConnection =
+                        new signalR.HubConnectionBuilder()
+                            .withUrl("/notificationHub")
+                            .withAutomaticReconnect()
+                            .build();
+
+
+                    notificationConnection.on(
+                        "ReceiveNotification",
+                        function (notification) {
+
+                            updateNotificationBadge(
+                                notification.unreadCount
+                            );
+
+
+                            // Refresh list from database so the
+                            // database remains the source of truth.
+                            loadNotifications();
+                        }
+                    );
+
+
+                    notificationConnection.on(
+                        "NotificationCountUpdated",
+                        function (unreadCount) {
+
+                            updateNotificationBadge(
+                                unreadCount
+                            );
+                        }
+                    );
+
+
+                    async function startNotificationHub() {
+
+                        try {
+
+                            await notificationConnection.start();
+
+                            console.log(
+                                "Notification SignalR connected."
+                            );
+
+                        }
+                        catch (error) {
+
+                            console.error(
+                                "Notification SignalR connection failed:",
+                                error
+                            );
+
+
+                            setTimeout(
+                                startNotificationHub,
+                                5000
+                            );
+                        }
+                    }
+
+
+                    notificationConnection.onreconnected(
+                        function () {
+
+                            loadNotifications();
+                        }
+                    );
+
+
+                    startNotificationHub();
+                }
+
+
+                // =====================================================
+                // INITIAL LOAD
+                // =====================================================
+
+                loadNotifications();
+
+            });
+        </script>
+    }
+
+    @await RenderSectionAsync(
+    "Scripts",
+        required: false
+        )
+
 </body>
+
 </html>

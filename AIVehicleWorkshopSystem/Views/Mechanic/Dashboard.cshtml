@@ -1,0 +1,337 @@
+﻿@{
+    ViewData["Title"] = "Mechanic Dashboard";
+
+    var assignedRepairs = ViewBag.AssignedRepairs ?? 0;
+    var repairsInProgress = ViewBag.RepairsInProgress ?? 0;
+    var completedRepairs = ViewBag.CompletedRepairs ?? 0;
+}
+
+<div class="mechanic-dashboard">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+    <div class="mechanic-dashboard-header">
+
+        <div>
+            <div class="mechanic-dashboard-eyebrow">
+                <i class="bi bi-tools"></i>
+                MECHANIC WORKSPACE
+            </div>
+
+            <h1>Mechanic Dashboard</h1>
+
+            <p>
+                Manage your assigned vehicle repairs, update repair
+                progress and review AI-assisted diagnostics.
+            </p>
+        </div>
+
+        <div class="mechanic-dashboard-header-actions">
+
+            <a asp-controller="Mechanic"
+               asp-action="Repairs"
+               class="btn btn-primary">
+
+                <i class="bi bi-wrench-adjustable me-1"></i>
+                My Repairs
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUMMARY CARDS
+         ===================================================== -->
+    <div class="mechanic-stat-grid">
+
+        <!-- ASSIGNED -->
+        <a asp-controller="Mechanic"
+           asp-action="Repairs"
+           class="mechanic-stat-card">
+
+            <div class="mechanic-stat-icon assigned">
+                <i class="bi bi-clipboard-check"></i>
+            </div>
+
+            <div class="mechanic-stat-content">
+
+                <span class="mechanic-stat-label">
+                    Assigned Repairs
+                </span>
+
+                <strong>
+                    @assignedRepairs
+                </strong>
+
+                <span class="mechanic-stat-description">
+                    Repairs assigned to you
+                </span>
+
+            </div>
+
+            <div class="mechanic-stat-arrow">
+                <i class="bi bi-arrow-up-right"></i>
+            </div>
+
+        </a>
+
+
+        <!-- IN PROGRESS -->
+        <a asp-controller="Mechanic"
+           asp-action="Repairs"
+           class="mechanic-stat-card">
+
+            <div class="mechanic-stat-icon progress">
+                <i class="bi bi-gear-wide-connected"></i>
+            </div>
+
+            <div class="mechanic-stat-content">
+
+                <span class="mechanic-stat-label">
+                    In Progress
+                </span>
+
+                <strong>
+                    @repairsInProgress
+                </strong>
+
+                <span class="mechanic-stat-description">
+                    Vehicles currently being repaired
+                </span>
+
+            </div>
+
+            <div class="mechanic-stat-arrow">
+                <i class="bi bi-arrow-up-right"></i>
+            </div>
+
+        </a>
+
+
+        <!-- COMPLETED -->
+        <a asp-controller="Mechanic"
+           asp-action="Repairs"
+           class="mechanic-stat-card">
+
+            <div class="mechanic-stat-icon completed">
+                <i class="bi bi-check2-circle"></i>
+            </div>
+
+            <div class="mechanic-stat-content">
+
+                <span class="mechanic-stat-label">
+                    Completed Repairs
+                </span>
+
+                <strong>
+                    @completedRepairs
+                </strong>
+
+                <span class="mechanic-stat-description">
+                    Repair jobs successfully completed
+                </span>
+
+            </div>
+
+            <div class="mechanic-stat-arrow">
+                <i class="bi bi-arrow-up-right"></i>
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         WORKSPACE
+         ===================================================== -->
+    <div class="mechanic-workspace">
+
+        <div class="mechanic-workspace-header">
+
+            <div>
+                <h5>Workshop Tools</h5>
+
+                <p>
+                    Quickly access your main mechanic functions.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="mechanic-action-grid">
+
+            <!-- MY REPAIRS -->
+            <a asp-controller="Mechanic"
+               asp-action="Repairs"
+               class="mechanic-action-card">
+
+                <div class="mechanic-action-icon repairs">
+                    <i class="bi bi-tools"></i>
+                </div>
+
+                <div class="mechanic-action-content">
+
+                    <h6>My Repairs</h6>
+
+                    <p>
+                        View assigned vehicles, start repair work,
+                        record findings and update repair progress.
+                    </p>
+
+                    <span>
+                        Open repairs
+                        <i class="bi bi-arrow-right"></i>
+                    </span>
+
+                </div>
+
+            </a>
+
+
+            <!-- AI DIAGNOSTIC -->
+            <a asp-controller="Mechanic"
+               asp-action="AIDiagnosticReview"
+               class="mechanic-action-card">
+
+                <div class="mechanic-action-icon diagnostic">
+                    <i class="bi bi-stars"></i>
+                </div>
+
+                <div class="mechanic-action-content">
+
+                    <h6>AI Diagnostic Review</h6>
+
+                    <p>
+                        Review AI-assisted diagnostic recommendations
+                        assigned to you and provide mechanic verification.
+                    </p>
+
+                    <span>
+                        Review diagnostics
+                        <i class="bi bi-arrow-right"></i>
+                    </span>
+
+                </div>
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         WORKFLOW INFO
+         ===================================================== -->
+    <div class="mechanic-workflow-card">
+
+        <div class="mechanic-workflow-heading">
+
+            <div class="mechanic-workflow-heading-icon">
+                <i class="bi bi-diagram-3"></i>
+            </div>
+
+            <div>
+                <h5>Repair Workflow</h5>
+
+                <p>
+                    Standard workflow for managing an assigned repair.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="mechanic-workflow-steps">
+
+            <!-- STEP 1 -->
+            <div class="mechanic-workflow-step">
+
+                <div class="mechanic-workflow-number">
+                    1
+                </div>
+
+                <div>
+                    <strong>Assigned</strong>
+
+                    <span>
+                        Review the vehicle and customer complaint.
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="mechanic-workflow-line"></div>
+
+
+            <!-- STEP 2 -->
+            <div class="mechanic-workflow-step">
+
+                <div class="mechanic-workflow-number">
+                    2
+                </div>
+
+                <div>
+                    <strong>In Progress</strong>
+
+                    <span>
+                        Start repair work and record findings.
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="mechanic-workflow-line"></div>
+
+
+            <!-- STEP 3 -->
+            <div class="mechanic-workflow-step">
+
+                <div class="mechanic-workflow-number">
+                    3
+                </div>
+
+                <div>
+                    <strong>Update</strong>
+
+                    <span>
+                        Keep the customer informed of repair progress.
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="mechanic-workflow-line"></div>
+
+
+            <!-- STEP 4 -->
+            <div class="mechanic-workflow-step">
+
+                <div class="mechanic-workflow-number completed">
+                    <i class="bi bi-check-lg"></i>
+                </div>
+
+                <div>
+                    <strong>Completed</strong>
+
+                    <span>
+                        Record the final diagnosis and repair work.
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

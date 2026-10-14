@@ -1,0 +1,1930 @@
+﻿@model IEnumerable<AIVehicleWorkshopSystem.Models.Invoice>
+
+@using AIVehicleWorkshopSystem.Models
+
+@{
+    ViewData["Title"] = "Invoice Management";
+
+    var customerNames =
+        ViewBag.CustomerNames as Dictionary<string, string>
+        ?? new Dictionary<string, string>();
+
+    var readyCustomerNames =
+        ViewBag.ReadyCustomerNames as Dictionary<string, string>
+        ?? new Dictionary<string, string>();
+
+    var completedRepairs =
+        ViewBag.CompletedRepairsReadyForInvoice as List<Repair>
+        ?? new List<Repair>();
+
+    var invoices = Model?.ToList() ?? new List<Invoice>();
+
+    var totalInvoices = invoices.Count;
+
+    var paidInvoices =
+        invoices.Count(i => i.PaymentStatus == "Paid");
+
+    var outstandingInvoices =
+        invoices.Count(i => i.PaymentStatus != "Paid");
+}
+
+
+<style>
+
+    /* =========================================
+           PAGE
+        ========================================= */
+
+    .invoice-page {
+        min-height: 100vh;
+        background: #f7f9fc;
+    }
+
+    .invoice-container {
+        max-width: 1400px;
+    }
+
+    .page-label {
+        font-size: .78rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .page-title {
+        color: #1f2937;
+        font-weight: 700;
+        margin-bottom: .35rem;
+    }
+
+    .page-description {
+        color: #6b7280;
+    }
+
+
+    /* =========================================
+           SUMMARY
+        ========================================= */
+
+    .summary-card {
+        background: #fff;
+        border: 1px solid #edf0f5;
+        border-radius: 14px;
+        padding: 1rem 1.2rem;
+        height: 100%;
+        transition: all .2s ease;
+    }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,.055);
+        }
+
+    .summary-label {
+        color: #6b7280;
+        font-size: .8rem;
+        margin-bottom: .2rem;
+    }
+
+    .summary-value {
+        color: #1f2937;
+        font-size: 1.45rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .summary-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .85rem;
+        font-weight: 700;
+    }
+
+    .icon-ready {
+        background: #eef4ff;
+        color: #0d6efd;
+    }
+
+    .icon-invoice {
+        background: #f3f4f6;
+        color: #4b5563;
+    }
+
+    .icon-paid {
+        background: #eaf8ef;
+        color: #198754;
+    }
+
+    .icon-outstanding {
+        background: #fff4e5;
+        color: #d97706;
+    }
+
+
+    /* =========================================
+           MAIN CARD
+        ========================================= */
+
+    .invoice-card {
+        background: #fff;
+        border: 1px solid #edf0f5;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(0,0,0,.035);
+    }
+
+    .invoice-card-header {
+        padding: 1.2rem 1.4rem;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .card-title-custom {
+        color: #1f2937;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: .2rem;
+    }
+
+    .card-description {
+        color: #8b95a5;
+        font-size: .8rem;
+        margin: 0;
+    }
+
+    .count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+        height: 28px;
+        padding: 0 .65rem;
+        border-radius: 20px;
+        background: #eef4ff;
+        color: #0d6efd;
+        font-size: .78rem;
+        font-weight: 700;
+    }
+
+
+    /* =========================================
+           FILTER AREA
+        ========================================= */
+
+    .filter-area {
+        padding: 1rem 1.4rem;
+        background: #fafbfc;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .filter-label {
+        display: block;
+        color: #6b7280;
+        font-size: .74rem;
+        font-weight: 600;
+        margin-bottom: .4rem;
+    }
+
+    .search-wrapper {
+        position: relative;
+    }
+
+    .search-icon {
+        position: absolute;
+        top: 50%;
+        left: 14px;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        pointer-events: none;
+    }
+
+    .search-input {
+        height: 43px;
+        padding-left: 41px;
+        border-radius: 9px;
+        border: 1px solid #dfe3e8;
+        font-size: .87rem;
+    }
+
+    .filter-select {
+        height: 43px;
+        border-radius: 9px;
+        border: 1px solid #dfe3e8;
+        font-size: .87rem;
+    }
+
+        .search-input:focus,
+        .filter-select:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 .2rem rgba(13,110,253,.08);
+        }
+
+    .clear-btn {
+        height: 43px;
+        border-radius: 9px;
+        font-size: .82rem;
+        font-weight: 600;
+    }
+
+
+    /* =========================================
+           TABLE HEADER INFORMATION
+        ========================================= */
+
+    .result-area {
+        padding: .7rem 1.4rem;
+        border-bottom: 1px solid #edf0f5;
+        color: #8b95a5;
+        font-size: .76rem;
+    }
+
+        .result-area strong {
+            color: #4b5563;
+        }
+
+
+    /* =========================================
+           TABLE
+        ========================================= */
+
+    .invoice-table {
+        margin-bottom: 0;
+    }
+
+        .invoice-table thead th {
+            background: #f8fafc;
+            color: #6b7280;
+            font-size: .75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .025em;
+            white-space: nowrap;
+            padding: .9rem 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .invoice-table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-color: #f0f2f5;
+            color: #4b5563;
+            font-size: .87rem;
+        }
+
+        .invoice-table tbody tr {
+            transition: background-color .15s ease;
+        }
+
+            .invoice-table tbody tr:hover {
+                background: #fafcff;
+            }
+
+
+    /* =========================================
+           IDENTIFIERS
+        ========================================= */
+
+    .id-badge {
+        display: inline-flex;
+        align-items: center;
+        background: #f3f6fb;
+        color: #374151;
+        border-radius: 7px;
+        padding: .35rem .55rem;
+        font-size: .78rem;
+        font-weight: 700;
+    }
+
+    .invoice-number {
+        color: #1f2937;
+        font-weight: 700;
+    }
+
+    .customer-name {
+        color: #374151;
+        font-weight: 600;
+    }
+
+    .vehicle-name {
+        color: #374151;
+        font-weight: 500;
+    }
+
+    .plate-number {
+        color: #8b95a5;
+        font-size: .75rem;
+        margin-top: .1rem;
+    }
+
+
+    /* =========================================
+           MONEY
+        ========================================= */
+
+    .money-value {
+        color: #1f2937;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .balance-zero {
+        color: #198754;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .balance-due {
+        color: #dc3545;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+
+    /* =========================================
+           STATUS
+        ========================================= */
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border-radius: 20px;
+        padding: .38rem .65rem;
+        font-size: .74rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .status-paid {
+        background: #eaf8ef;
+        color: #198754;
+    }
+
+    .status-partial {
+        background: #fff7e6;
+        color: #b76e00;
+    }
+
+    .status-unpaid {
+        background: #fff0f1;
+        color: #dc3545;
+    }
+
+
+    /* =========================================
+           BUTTON
+        ========================================= */
+
+    .table-action-btn {
+        border-radius: 8px;
+        padding: .42rem .75rem;
+        font-size: .78rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+
+    /* =========================================
+           EMPTY STATES
+        ========================================= */
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+    }
+
+    .empty-icon {
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+        background: #f1f5f9;
+        color: #64748b;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+    .empty-title {
+        color: #374151;
+        font-weight: 700;
+        margin-bottom: .3rem;
+    }
+
+    .empty-text {
+        color: #8b95a5;
+        font-size: .85rem;
+        margin: 0;
+    }
+
+    .search-empty-state {
+        display: none;
+    }
+
+
+    /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+    @@media (max-width: 767.98px) {
+
+        .invoice-card-header,
+        .filter-area {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .result-area {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+    }
+
+    /* =========================================
+       DARK MODE - INVOICE MANAGEMENT
+    ========================================= */
+
+    [data-bs-theme="dark"] .invoice-page {
+        background: var(--bs-body-bg);
+    }
+
+    [data-bs-theme="dark"] .page-title,
+    [data-bs-theme="dark"] .summary-value,
+    [data-bs-theme="dark"] .card-title-custom,
+    [data-bs-theme="dark"] .empty-title,
+    [data-bs-theme="dark"] .invoice-number,
+    [data-bs-theme="dark"] .customer-name,
+    [data-bs-theme="dark"] .vehicle-name,
+    [data-bs-theme="dark"] .money-value {
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .page-description,
+    [data-bs-theme="dark"] .summary-label,
+    [data-bs-theme="dark"] .card-description,
+    [data-bs-theme="dark"] .filter-label,
+    [data-bs-theme="dark"] .result-area,
+    [data-bs-theme="dark"] .empty-text,
+    [data-bs-theme="dark"] .plate-number {
+        color: var(--bs-secondary-color);
+    }
+
+    [data-bs-theme="dark"] .summary-card,
+    [data-bs-theme="dark"] .invoice-card,
+    [data-bs-theme="dark"] .invoice-card-header {
+        background: var(--bs-body-bg);
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .filter-area {
+        background: var(--bs-tertiary-bg);
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .result-area {
+        border-color: var(--bs-border-color);
+    }
+
+        [data-bs-theme="dark"] .result-area strong {
+            color: var(--bs-body-color);
+        }
+
+    [data-bs-theme="dark"] .search-input,
+    [data-bs-theme="dark"] .filter-select {
+        background-color: var(--bs-body-bg);
+        border-color: var(--bs-border-color);
+        color: var(--bs-body-color);
+    }
+
+        [data-bs-theme="dark"] .search-input::placeholder {
+            color: var(--bs-secondary-color);
+        }
+
+    [data-bs-theme="dark"] .invoice-table {
+        --bs-table-bg: transparent;
+        --bs-table-color: var(--bs-body-color);
+        --bs-table-border-color: var(--bs-border-color);
+    }
+
+        [data-bs-theme="dark"] .invoice-table thead th {
+            background: var(--bs-tertiary-bg);
+            color: var(--bs-secondary-color);
+            border-color: var(--bs-border-color);
+        }
+
+        [data-bs-theme="dark"] .invoice-table tbody td {
+            color: var(--bs-body-color);
+            border-color: var(--bs-border-color);
+        }
+
+        [data-bs-theme="dark"] .invoice-table tbody tr:hover {
+            background: var(--bs-tertiary-bg);
+        }
+
+            [data-bs-theme="dark"] .invoice-table tbody tr:hover > * {
+                background-color: var(--bs-tertiary-bg);
+            }
+
+    [data-bs-theme="dark"] .id-badge {
+        background: var(--bs-tertiary-bg);
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .empty-icon {
+        background: var(--bs-tertiary-bg);
+        color: var(--bs-secondary-color);
+    }
+
+    [data-bs-theme="dark"] .invoice-table .text-dark {
+        color: var(--bs-body-color) !important;
+    }
+
+    /* Payment status */
+
+    [data-bs-theme="dark"] .status-paid {
+        background: rgba(25, 135, 84, .18);
+        color: #75b798;
+    }
+
+    [data-bs-theme="dark"] .status-partial {
+        background: rgba(255, 193, 7, .16);
+        color: #ffda6a;
+    }
+
+    [data-bs-theme="dark"] .status-unpaid {
+        background: rgba(220, 53, 69, .18);
+        color: #ea868f;
+    }
+
+    [data-bs-theme="dark"] .count-badge {
+        background: rgba(13, 110, 253, .18);
+        color: #6ea8fe;
+    }
+
+
+</style>
+
+
+<section class="invoice-page py-5">
+
+    <div class="container invoice-container">
+
+
+        <!-- =========================================
+             PAGE HEADER
+        ========================================== -->
+
+        <div class="mb-4">
+
+            <div class="page-label text-primary mb-2">
+                Billing & Payments
+            </div>
+
+            <h1 class="page-title">
+                Invoice Management
+            </h1>
+
+            <p class="page-description mb-0">
+                Create, manage and monitor customer invoices for completed repairs.
+            </p>
+
+        </div>
+
+
+        <!-- =========================================
+             SUCCESS
+        ========================================== -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show
+                            border-0 shadow-sm rounded-3"
+                 role="alert">
+
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Close">
+                </button>
+
+            </div>
+        }
+
+
+        <!-- =========================================
+             ERROR
+        ========================================== -->
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show
+                            border-0 shadow-sm rounded-3"
+                 role="alert">
+
+                @TempData["ErrorMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Close">
+                </button>
+
+            </div>
+        }
+
+
+        <!-- =========================================
+             SUMMARY CARDS
+        ========================================== -->
+
+        <div class="row g-3 mb-4">
+
+
+            <!-- READY -->
+
+            <div class="col-6 col-lg-3">
+
+                <div class="summary-card">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <div class="summary-label">
+                                Ready for Invoice
+                            </div>
+
+                            <p class="summary-value">
+                                @completedRepairs.Count
+                            </p>
+
+                        </div>
+
+                        <div class="summary-icon icon-ready">
+                            READY
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- TOTAL -->
+
+            <div class="col-6 col-lg-3">
+
+                <div class="summary-card">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <div class="summary-label">
+                                Total Invoices
+                            </div>
+
+                            <p class="summary-value">
+                                @totalInvoices
+                            </p>
+
+                        </div>
+
+                        <div class="summary-icon icon-invoice">
+                            INV
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- PAID -->
+
+            <div class="col-6 col-lg-3">
+
+                <div class="summary-card">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <div class="summary-label">
+                                Paid
+                            </div>
+
+                            <p class="summary-value">
+                                @paidInvoices
+                            </p>
+
+                        </div>
+
+                        <div class="summary-icon icon-paid">
+                            ✓
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- OUTSTANDING -->
+
+            <div class="col-6 col-lg-3">
+
+                <div class="summary-card">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <div class="summary-label">
+                                Outstanding
+                            </div>
+
+                            <p class="summary-value">
+                                @outstandingInvoices
+                            </p>
+
+                        </div>
+
+                        <div class="summary-icon icon-outstanding">
+                            !
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             READY FOR INVOICE
+        ================================================== -->
+
+        <div class="invoice-card mb-4">
+
+
+            <!-- HEADER -->
+
+            <div class="invoice-card-header">
+
+                <div class="d-flex justify-content-between align-items-center gap-3">
+
+                    <div>
+
+                        <h5 class="card-title-custom">
+                            Ready for Invoice
+                        </h5>
+
+                        <p class="card-description">
+                            Completed repairs that have not been invoiced.
+                        </p>
+
+                    </div>
+
+                    <span class="count-badge">
+                        @completedRepairs.Count
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            @if (!completedRepairs.Any())
+            {
+
+                <!-- EMPTY -->
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        ✓
+                    </div>
+
+                    <h6 class="empty-title">
+                        No repairs waiting for invoice
+                    </h6>
+
+                    <p class="empty-text">
+                        Completed repairs will appear here automatically.
+                    </p>
+
+                </div>
+
+            }
+            else
+            {
+
+                <!-- =========================================
+                     READY SEARCH
+                ========================================== -->
+
+                <div class="filter-area">
+
+                    <div class="row g-3 align-items-end">
+
+                        <div class="col-md-9">
+
+                            <label class="filter-label">
+                                Search Completed Repairs
+                            </label>
+
+                            <div class="search-wrapper">
+
+                                <span class="search-icon">
+                                    🔍
+                                </span>
+
+                                <input type="text"
+                                       id="readySearch"
+                                       class="form-control search-input"
+                                       placeholder="Search repair ID, customer, vehicle or plate number..."
+                                       autocomplete="off" />
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-3">
+
+                            <button type="button"
+                                    id="clearReadyFilter"
+                                    class="btn btn-outline-secondary clear-btn w-100">
+
+                                Clear Search
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- RESULT COUNT -->
+
+                <div class="result-area">
+
+                    Showing
+                    <strong id="readyVisibleCount">
+                        @completedRepairs.Count
+                    </strong>
+
+                    of
+
+                    <strong>
+                        @completedRepairs.Count
+                    </strong>
+
+                    completed repairs
+
+                </div>
+
+
+                <!-- TABLE -->
+
+                <div class="table-responsive">
+
+                    <table class="table invoice-table align-middle">
+
+                        <thead>
+
+                            <tr>
+
+                                <th class="ps-4">
+                                    Repair
+                                </th>
+
+                                <th>
+                                    Customer
+                                </th>
+
+                                <th>
+                                    Vehicle
+                                </th>
+
+                                <th>
+                                    Plate Number
+                                </th>
+
+                                <th>
+                                    Completed
+                                </th>
+
+                                <th class="text-end pe-4">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var repair in completedRepairs)
+                            {
+                                var appointment =
+                                repair.Appointment;
+
+                                var vehicle =
+                                appointment?.Vehicle;
+
+                                var customerName =
+                                "Unknown Customer";
+
+                                if (
+                                appointment != null &&
+                                readyCustomerNames.ContainsKey(
+                                appointment.CustomerId
+                                )
+                                )
+                                {
+                                    customerName =
+                                    readyCustomerNames[
+                                    appointment.CustomerId
+                                    ];
+                                }
+
+                                var vehicleName =
+                                vehicle != null
+                                ? $"{vehicle.Brand} {vehicle.Model}"
+                                : "-";
+
+                                var plateNumber =
+                                vehicle != null
+                                ? vehicle.PlateNumber
+                                : "-";
+
+
+                                <tr class="ready-row"
+                                    data-repair="@repair.RepairId"
+                                    data-customer="@customerName.ToLower()"
+                                    data-vehicle="@vehicleName.ToLower()"
+                                    data-plate="@plateNumber.ToLower()">
+
+
+                                    <!-- REPAIR -->
+
+                                    <td class="ps-4">
+
+                                        <span class="id-badge">
+                                            #@repair.RepairId
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- CUSTOMER -->
+
+                                    <td>
+
+                                        <span class="customer-name">
+                                            @customerName
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- VEHICLE -->
+
+                                    <td>
+
+                                        @if (vehicle != null)
+                                        {
+                                            <span class="vehicle-name">
+                                                @vehicle.Brand @vehicle.Model
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- PLATE -->
+
+                                    <td>
+
+                                        @if (vehicle != null)
+                                        {
+                                            <span class="fw-semibold text-dark">
+                                                @vehicle.PlateNumber
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- COMPLETED -->
+
+                                    <td>
+
+                                        @if (repair.CompletedAt.HasValue)
+                                        {
+                                            <span class="text-nowrap">
+
+                                                @repair.CompletedAt.Value.ToString(
+                                                "dd MMM yyyy"
+                                                                        )
+
+                                </span>
+
+                                <div class="plate-number">
+
+                                    @repair.CompletedAt.Value.ToString(
+                                                                        "hh:mm tt"
+                                                                        )
+
+                                </div>
+                                                                }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- ACTION -->
+
+                                    <td class="text-end pe-4">
+
+                                        <a asp-controller="Admin"
+                                           asp-action="CreateInvoice"
+                                           asp-route-repairId="@repair.RepairId"
+                                           class="btn btn-sm btn-primary table-action-btn">
+
+                                            Create Invoice
+
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- NO SEARCH RESULT -->
+
+                <div id="readyNoResults"
+                     class="empty-state search-empty-state">
+
+                    <div class="empty-icon">
+                        ?
+                    </div>
+
+                    <h6 class="empty-title">
+                        No matching repairs
+                    </h6>
+
+                    <p class="empty-text mb-3">
+                        Try searching with a different customer, vehicle or plate number.
+                    </p>
+
+                    <button type="button"
+                            id="readyEmptyClear"
+                            class="btn btn-sm btn-outline-primary">
+
+                        Clear Search
+
+                    </button>
+
+                </div>
+            }
+
+        </div>
+
+
+
+        <!-- =================================================
+             GENERATED INVOICES
+        ================================================== -->
+
+        <div class="invoice-card">
+
+
+            <!-- HEADER -->
+
+            <div class="invoice-card-header">
+
+                <div class="d-flex justify-content-between align-items-center gap-3">
+
+                    <div>
+
+                        <h5 class="card-title-custom">
+                            Generated Invoices
+                        </h5>
+
+                        <p class="card-description">
+                            Previously generated customer invoices and payment status.
+                        </p>
+
+                    </div>
+
+                    <span class="count-badge">
+                        @totalInvoices
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            @if (!invoices.Any())
+            {
+
+                <!-- EMPTY -->
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        INV
+                    </div>
+
+                    <h6 class="empty-title">
+                        No invoices generated
+                    </h6>
+
+                    <p class="empty-text">
+                        Create an invoice from a completed repair above.
+                    </p>
+
+                </div>
+
+            }
+            else
+            {
+
+                <!-- =========================================
+                     SEARCH & FILTER
+                ========================================== -->
+
+                <div class="filter-area">
+
+                    <div class="row g-3 align-items-end">
+
+
+                        <!-- SEARCH -->
+
+                        <div class="col-lg-6">
+
+                            <label class="filter-label">
+                                Search Invoices
+                            </label>
+
+                            <div class="search-wrapper">
+
+                                <span class="search-icon">
+                                    🔍
+                                </span>
+
+                                <input type="text"
+                                       id="invoiceSearch"
+                                       class="form-control search-input"
+                                       placeholder="Search invoice, customer, vehicle or plate..."
+                                       autocomplete="off" />
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- STATUS -->
+
+                        <div class="col-6 col-lg-3">
+
+                            <label class="filter-label">
+                                Payment Status
+                            </label>
+
+                            <select id="paymentStatusFilter"
+                                    class="form-select filter-select">
+
+                                <option value="">
+                                    All Status
+                                </option>
+
+                                <option value="Paid">
+                                    Paid
+                                </option>
+
+                                <option value="Partially Paid">
+                                    Partially Paid
+                                </option>
+
+                                <option value="Unpaid">
+                                    Unpaid
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- CLEAR -->
+
+                        <div class="col-6 col-lg-3">
+
+                            <button type="button"
+                                    id="clearInvoiceFilter"
+                                    class="btn btn-outline-secondary clear-btn w-100">
+
+                                Clear Filters
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- RESULT COUNT -->
+
+                <div class="result-area">
+
+                    Showing
+
+                    <strong id="invoiceVisibleCount">
+                        @totalInvoices
+                    </strong>
+
+                    of
+
+                    <strong>
+                        @totalInvoices
+                    </strong>
+
+                    invoices
+
+                </div>
+
+
+                <!-- TABLE -->
+
+                <div class="table-responsive">
+
+                    <table class="table invoice-table align-middle">
+
+                        <thead>
+
+                            <tr>
+
+                                <th class="ps-4">
+                                    Invoice
+                                </th>
+
+                                <th>
+                                    Customer
+                                </th>
+
+                                <th>
+                                    Vehicle
+                                </th>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Total
+                                </th>
+
+                                <th>
+                                    Balance
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th class="text-end pe-4">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var invoice in invoices)
+                            {
+                                var appointment =
+                                invoice.Repair?.Appointment;
+
+                                var vehicle =
+                                appointment?.Vehicle;
+
+                                var customerName =
+                                "Unknown Customer";
+
+                                if (
+                                appointment != null &&
+                                customerNames.ContainsKey(
+                                appointment.CustomerId
+                                )
+                                )
+                                {
+                                    customerName =
+                                    customerNames[
+                                    appointment.CustomerId
+                                    ];
+                                }
+
+                                var vehicleName =
+                                vehicle != null
+                                ? $"{vehicle.Brand} {vehicle.Model}"
+                                : "-";
+
+                                var plateNumber =
+                                vehicle != null
+                                ? vehicle.PlateNumber
+                                : "-";
+
+
+                                <tr class="invoice-row"
+                                    data-invoice="@invoice.InvoiceNumber.ToLower()"
+                                    data-customer="@customerName.ToLower()"
+                                    data-vehicle="@vehicleName.ToLower()"
+                                    data-plate="@plateNumber.ToLower()"
+                                    data-status="@invoice.PaymentStatus">
+
+
+                                    <!-- INVOICE -->
+
+                                    <td class="ps-4">
+
+                                        <span class="invoice-number">
+                                            @invoice.InvoiceNumber
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- CUSTOMER -->
+
+                                    <td>
+
+                                        <span class="customer-name">
+                                            @customerName
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- VEHICLE -->
+
+                                    <td>
+
+                                        @if (vehicle != null)
+                                        {
+                                            <div class="vehicle-name">
+                                                @vehicle.Brand @vehicle.Model
+                                            </div>
+
+                                            <div class="plate-number">
+                                                @vehicle.PlateNumber
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- DATE -->
+
+                                    <td>
+
+                                        <span class="text-nowrap">
+                                            @invoice.InvoiceDate.ToString(
+                                            "dd MMM yyyy"
+                                                                        )
+                                </span>
+
+                            </td>
+
+
+                            <!-- TOTAL -->
+
+                            <td>
+
+                                <span class="money-value">
+                                    RM @invoice.TotalAmount.ToString("N2")
+                                </span>
+
+                            </td>
+
+
+                            <!-- BALANCE -->
+
+                            <td>
+
+                                @if (invoice.BalanceAmount <= 0)
+                                        {
+                                            <span class="balance-zero">
+                                                RM @invoice.BalanceAmount.ToString("N2")
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="balance-due">
+                                                RM @invoice.BalanceAmount.ToString("N2")
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- STATUS -->
+
+                                    <td>
+
+                                        @if (invoice.PaymentStatus == "Paid")
+                                        {
+                                            <span class="status-badge status-paid">
+
+                                                <span class="status-dot"></span>
+
+                                                Paid
+
+                                            </span>
+                                        }
+                                        else if (
+                                        invoice.PaymentStatus ==
+                                        "Partially Paid"
+                                        )
+                                        {
+                                            <span class="status-badge status-partial">
+
+                                                <span class="status-dot"></span>
+
+                                                Partially Paid
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-badge status-unpaid">
+
+                                                <span class="status-dot"></span>
+
+                                                Unpaid
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- ACTION -->
+
+                                    <td class="text-end pe-4">
+
+                                        <a asp-controller="Admin"
+                                           asp-action="InvoiceDetails"
+                                           asp-route-id="@invoice.InvoiceId"
+                                           class="btn btn-sm btn-outline-primary table-action-btn">
+
+                                            View
+
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- NO SEARCH RESULT -->
+
+                <div id="invoiceNoResults"
+                     class="empty-state search-empty-state">
+
+                    <div class="empty-icon">
+                        ?
+                    </div>
+
+                    <h6 class="empty-title">
+                        No matching invoices
+                    </h6>
+
+                    <p class="empty-text mb-3">
+                        Try changing your search keyword or payment status.
+                    </p>
+
+                    <button type="button"
+                            id="invoiceEmptyClear"
+                            class="btn btn-sm btn-outline-primary">
+
+                        Clear Filters
+
+                    </button>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+@section Scripts {
+
+    <script>
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+
+                // =========================================
+                // READY FOR INVOICE SEARCH
+                // =========================================
+
+                const readySearch =
+                    document.getElementById("readySearch");
+
+                const readyRows =
+                    document.querySelectorAll(".ready-row");
+
+                const readyVisibleCount =
+                    document.getElementById("readyVisibleCount");
+
+                const readyNoResults =
+                    document.getElementById("readyNoResults");
+
+                const clearReadyFilter =
+                    document.getElementById("clearReadyFilter");
+
+                const readyEmptyClear =
+                    document.getElementById("readyEmptyClear");
+
+
+                function filterReadyRepairs() {
+
+                    if (!readySearch) {
+                        return;
+                    }
+
+
+                    const search =
+                        readySearch.value
+                            .trim()
+                            .toLowerCase();
+
+                    let visible = 0;
+
+
+                    readyRows.forEach(function (row) {
+
+                        const repair =
+                            row.dataset.repair || "";
+
+                        const customer =
+                            row.dataset.customer || "";
+
+                        const vehicle =
+                            row.dataset.vehicle || "";
+
+                        const plate =
+                            row.dataset.plate || "";
+
+
+                        const match =
+                            search === "" ||
+                            repair.includes(search) ||
+                            customer.includes(search) ||
+                            vehicle.includes(search) ||
+                            plate.includes(search);
+
+
+                        if (match) {
+
+                            row.style.display = "";
+
+                            visible++;
+
+                        }
+                        else {
+
+                            row.style.display = "none";
+
+                        }
+
+                    });
+
+
+                    if (readyVisibleCount) {
+
+                        readyVisibleCount.textContent =
+                            visible;
+
+                    }
+
+
+                    if (readyNoResults) {
+
+                        readyNoResults.style.display =
+                            visible === 0
+                                ? "block"
+                                : "none";
+
+                    }
+
+                }
+
+
+                function resetReadySearch() {
+
+                    if (!readySearch) {
+                        return;
+                    }
+
+                    readySearch.value = "";
+
+                    filterReadyRepairs();
+
+                    readySearch.focus();
+
+                }
+
+
+                if (readySearch) {
+
+                    readySearch.addEventListener(
+                        "input",
+                        filterReadyRepairs
+                    );
+
+                }
+
+
+                if (clearReadyFilter) {
+
+                    clearReadyFilter.addEventListener(
+                        "click",
+                        resetReadySearch
+                    );
+
+                }
+
+
+                if (readyEmptyClear) {
+
+                    readyEmptyClear.addEventListener(
+                        "click",
+                        resetReadySearch
+                    );
+
+                }
+
+
+
+                // =========================================
+                // GENERATED INVOICE FILTER
+                // =========================================
+
+                const invoiceSearch =
+                    document.getElementById("invoiceSearch");
+
+                const paymentStatusFilter =
+                    document.getElementById(
+                        "paymentStatusFilter"
+                    );
+
+                const invoiceRows =
+                    document.querySelectorAll(
+                        ".invoice-row"
+                    );
+
+                const invoiceVisibleCount =
+                    document.getElementById(
+                        "invoiceVisibleCount"
+                    );
+
+                const invoiceNoResults =
+                    document.getElementById(
+                        "invoiceNoResults"
+                    );
+
+                const clearInvoiceFilter =
+                    document.getElementById(
+                        "clearInvoiceFilter"
+                    );
+
+                const invoiceEmptyClear =
+                    document.getElementById(
+                        "invoiceEmptyClear"
+                    );
+
+
+                function filterInvoices() {
+
+                    if (
+                        !invoiceSearch ||
+                        !paymentStatusFilter
+                    ) {
+                        return;
+                    }
+
+
+                    const search =
+                        invoiceSearch.value
+                            .trim()
+                            .toLowerCase();
+
+                    const selectedStatus =
+                        paymentStatusFilter.value;
+
+                    let visible = 0;
+
+
+                    invoiceRows.forEach(function (row) {
+
+                        const invoice =
+                            row.dataset.invoice || "";
+
+                        const customer =
+                            row.dataset.customer || "";
+
+                        const vehicle =
+                            row.dataset.vehicle || "";
+
+                        const plate =
+                            row.dataset.plate || "";
+
+                        const status =
+                            row.dataset.status || "";
+
+
+                        const matchesSearch =
+                            search === "" ||
+                            invoice.includes(search) ||
+                            customer.includes(search) ||
+                            vehicle.includes(search) ||
+                            plate.includes(search);
+
+
+                        const matchesStatus =
+                            selectedStatus === "" ||
+                            status === selectedStatus;
+
+
+                        if (
+                            matchesSearch &&
+                            matchesStatus
+                        ) {
+
+                            row.style.display = "";
+
+                            visible++;
+
+                        }
+                        else {
+
+                            row.style.display = "none";
+
+                        }
+
+                    });
+
+
+                    if (invoiceVisibleCount) {
+
+                        invoiceVisibleCount.textContent =
+                            visible;
+
+                    }
+
+
+                    if (invoiceNoResults) {
+
+                        invoiceNoResults.style.display =
+                            visible === 0
+                                ? "block"
+                                : "none";
+
+                    }
+
+                }
+
+
+                function resetInvoiceFilters() {
+
+                    if (
+                        !invoiceSearch ||
+                        !paymentStatusFilter
+                    ) {
+                        return;
+                    }
+
+
+                    invoiceSearch.value = "";
+
+                    paymentStatusFilter.value = "";
+
+                    filterInvoices();
+
+                    invoiceSearch.focus();
+
+                }
+
+
+                if (invoiceSearch) {
+
+                    invoiceSearch.addEventListener(
+                        "input",
+                        filterInvoices
+                    );
+
+                }
+
+
+                if (paymentStatusFilter) {
+
+                    paymentStatusFilter.addEventListener(
+                        "change",
+                        filterInvoices
+                    );
+
+                }
+
+
+                if (clearInvoiceFilter) {
+
+                    clearInvoiceFilter.addEventListener(
+                        "click",
+                        resetInvoiceFilters
+                    );
+
+                }
+
+
+                if (invoiceEmptyClear) {
+
+                    invoiceEmptyClear.addEventListener(
+                        "click",
+                        resetInvoiceFilters
+                    );
+
+                }
+
+            }
+        );
+
+    </script>
+
+}

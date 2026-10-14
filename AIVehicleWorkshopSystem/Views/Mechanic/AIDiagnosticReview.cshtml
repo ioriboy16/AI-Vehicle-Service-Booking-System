@@ -1,0 +1,1712 @@
+﻿@model IEnumerable<AIVehicleWorkshopSystem.Models.AIDiagnostic>
+
+@{
+    ViewData["Title"] = "AI Diagnostic Review";
+
+    var diagnostics =
+        Model?.ToList()
+        ?? new List<AIVehicleWorkshopSystem.Models.AIDiagnostic>();
+
+    var totalCount = diagnostics.Count;
+
+    var pendingCount =
+        diagnostics.Count(
+            d => d.ReviewStatus == "Pending Review"
+        );
+
+    var reviewedCount =
+        diagnostics.Count(
+            d => d.ReviewStatus != "Pending Review"
+        );
+
+    var highPriorityCount =
+        diagnostics.Count(
+            d => d.Priority == "High"
+        );
+}
+
+
+<style>
+
+    /* =========================================
+           PAGE
+        ========================================= */
+
+    .diagnostic-page {
+        min-height: 100vh;
+        background: #f7f9fc;
+    }
+
+    .diagnostic-container {
+        max-width: 1400px;
+    }
+
+    .page-label {
+        color: #0d6efd;
+        font-size: .76rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        margin-bottom: .45rem;
+    }
+
+    .page-title {
+        color: #1f2937;
+        font-weight: 700;
+        margin-bottom: .35rem;
+    }
+
+    .page-description {
+        color: #6b7280;
+        margin-bottom: 0;
+    }
+
+
+    /* =========================================
+           SUMMARY CARDS
+        ========================================= */
+
+    .summary-card {
+        height: 100%;
+        background: #ffffff;
+        border: 1px solid #edf0f5;
+        border-radius: 14px;
+        padding: 1rem 1.2rem;
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .055);
+        }
+
+    .summary-label {
+        color: #6b7280;
+        font-size: .8rem;
+        margin-bottom: .2rem;
+    }
+
+    .summary-value {
+        color: #1f2937;
+        font-size: 1.45rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .summary-icon {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border-radius: 11px;
+        font-size: .72rem;
+        font-weight: 700;
+    }
+
+    .icon-total {
+        background: #eef4ff;
+        color: #0d6efd;
+    }
+
+    .icon-pending {
+        background: #fff7e6;
+        color: #b76e00;
+    }
+
+    .icon-reviewed {
+        background: #eaf8ef;
+        color: #198754;
+    }
+
+    .icon-high {
+        background: #fdecef;
+        color: #dc3545;
+    }
+
+
+    /* =========================================
+           MAIN CARD
+        ========================================= */
+
+    .diagnostic-card {
+        background: #ffffff;
+        border: 1px solid #edf0f5;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .035);
+    }
+
+    .diagnostic-card-header {
+        padding: 1.2rem 1.4rem;
+        background: #ffffff;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .card-title-custom {
+        color: #1f2937;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: .2rem;
+    }
+
+    .card-description {
+        color: #8b95a5;
+        font-size: .8rem;
+        margin-bottom: 0;
+    }
+
+    .diagnostic-count-badge {
+        min-width: 32px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 .65rem;
+        border-radius: 20px;
+        background: #eef4ff;
+        color: #0d6efd;
+        font-size: .78rem;
+        font-weight: 700;
+    }
+
+
+    /* =========================================
+           FILTER AREA
+        ========================================= */
+
+    .filter-area {
+        padding: 1rem 1.4rem;
+        background: #fafbfc;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .filter-label {
+        display: block;
+        color: #6b7280;
+        font-size: .73rem;
+        font-weight: 600;
+        margin-bottom: .4rem;
+    }
+
+    .search-wrapper {
+        position: relative;
+    }
+
+    .search-symbol {
+        position: absolute;
+        top: 50%;
+        left: 14px;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        font-size: .9rem;
+        pointer-events: none;
+    }
+
+    .search-input {
+        height: 44px;
+        padding-left: 40px;
+        border: 1px solid #dfe3e8;
+        border-radius: 10px;
+        font-size: .85rem;
+    }
+
+        .search-input::placeholder {
+            color: #adb5bd;
+        }
+
+    .filter-select {
+        height: 44px;
+        border: 1px solid #dfe3e8;
+        border-radius: 10px;
+        font-size: .85rem;
+    }
+
+        .search-input:focus,
+        .filter-select:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .08);
+        }
+
+    .clear-filter-btn {
+        height: 44px;
+        border-radius: 10px;
+        font-size: .8rem;
+        font-weight: 600;
+    }
+
+
+    /* =========================================
+           RESULT COUNT
+        ========================================= */
+
+    .result-area {
+        padding: .7rem 1.4rem;
+        border-bottom: 1px solid #edf0f5;
+        color: #8b95a5;
+        font-size: .76rem;
+    }
+
+        .result-area strong {
+            color: #4b5563;
+        }
+
+
+    /* =========================================
+           TABLE
+        ========================================= */
+
+    .diagnostic-table {
+        margin-bottom: 0;
+    }
+
+        .diagnostic-table thead th {
+            padding: .9rem 1rem;
+            background: #f8fafc;
+            border-bottom: 1px solid #e9ecef;
+            color: #6b7280;
+            font-size: .72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .025em;
+            white-space: nowrap;
+        }
+
+        .diagnostic-table tbody td {
+            padding: 1rem;
+            border-color: #f0f2f5;
+            color: #4b5563;
+            font-size: .85rem;
+            vertical-align: middle;
+        }
+
+        .diagnostic-table tbody tr {
+            transition: background-color .15s ease;
+        }
+
+            .diagnostic-table tbody tr:hover {
+                background: #fafcff;
+            }
+
+
+    /* =========================================
+           DIAGNOSTIC ID
+        ========================================= */
+
+    .diagnostic-id {
+        display: inline-flex;
+        align-items: center;
+        padding: .35rem .55rem;
+        border-radius: 7px;
+        background: #f3f6fb;
+        color: #374151;
+        font-size: .76rem;
+        font-weight: 700;
+    }
+
+
+    /* =========================================
+           VEHICLE
+        ========================================= */
+
+    .vehicle-name {
+        color: #374151;
+        font-weight: 600;
+        margin-bottom: .1rem;
+    }
+
+    .vehicle-plate {
+        color: #8b95a5;
+        font-size: .75rem;
+    }
+
+
+    /* =========================================
+           SYMPTOMS
+        ========================================= */
+
+    .symptom-text {
+        max-width: 300px;
+        color: #4b5563;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    /* =========================================
+           PRIORITY
+        ========================================= */
+
+    .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: .36rem .62rem;
+        border-radius: 20px;
+        font-size: .72rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .priority-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .priority-high {
+        background: #fdecef;
+        color: #dc3545;
+    }
+
+    .priority-medium {
+        background: #fff7e6;
+        color: #b76e00;
+    }
+
+    .priority-low {
+        background: #eaf8ef;
+        color: #198754;
+    }
+
+
+    /* =========================================
+           REVIEW STATUS
+        ========================================= */
+
+    .review-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: .36rem .62rem;
+        border-radius: 20px;
+        font-size: .72rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .review-pending {
+        background: #fff7e6;
+        color: #b76e00;
+    }
+
+    .review-completed {
+        background: #eaf8ef;
+        color: #198754;
+    }
+
+    .review-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+
+    /* =========================================
+           DATE
+        ========================================= */
+
+    .generated-date {
+        color: #4b5563;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .generated-time {
+        color: #8b95a5;
+        font-size: .74rem;
+        margin-top: .1rem;
+    }
+
+
+    /* =========================================
+           ACTION BUTTON
+        ========================================= */
+
+    .diagnostic-action {
+        min-width: 75px;
+        padding: .4rem .7rem;
+        border-radius: 8px;
+        font-size: .76rem;
+        font-weight: 600;
+    }
+
+
+    /* =========================================
+           EMPTY STATE
+        ========================================= */
+
+    .empty-state {
+        text-align: center;
+        padding: 3.5rem 1rem;
+    }
+
+    .empty-icon {
+        width: 55px;
+        height: 55px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+        background: #f1f5f9;
+        color: #64748b;
+        font-size: .72rem;
+        font-weight: 700;
+    }
+
+    .empty-title {
+        color: #374151;
+        font-weight: 700;
+        margin-bottom: .3rem;
+    }
+
+    .empty-text {
+        color: #8b95a5;
+        font-size: .84rem;
+        margin-bottom: 0;
+    }
+
+    .filter-empty-state {
+        display: none;
+    }
+
+
+    /* =========================================
+           DISCLAIMER
+        ========================================= */
+
+    .ai-disclaimer {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 1rem 1.15rem;
+        margin-top: 1.25rem;
+        background: #f8fafc;
+        border: 1px solid #e5e9ef;
+        border-radius: 11px;
+    }
+
+    .disclaimer-icon {
+        width: 30px;
+        height: 30px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background: #eef4ff;
+        color: #0d6efd;
+        font-size: .72rem;
+        font-weight: 700;
+    }
+
+    .disclaimer-title {
+        color: #4b5563;
+        font-size: .78rem;
+        font-weight: 700;
+        margin-bottom: .15rem;
+    }
+
+    .disclaimer-text {
+        color: #8b95a5;
+        font-size: .76rem;
+        line-height: 1.55;
+        margin-bottom: 0;
+    }
+
+
+    /* =========================================
+           DARK MODE
+        ========================================= */
+
+    [data-bs-theme="dark"] .diagnostic-page {
+        background: var(--bs-body-bg);
+    }
+
+    [data-bs-theme="dark"] .page-title,
+    [data-bs-theme="dark"] .summary-value,
+    [data-bs-theme="dark"] .card-title-custom,
+    [data-bs-theme="dark"] .vehicle-name,
+    [data-bs-theme="dark"] .generated-date,
+    [data-bs-theme="dark"] .empty-title,
+    [data-bs-theme="dark"] .disclaimer-title {
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .page-description,
+    [data-bs-theme="dark"] .summary-label,
+    [data-bs-theme="dark"] .card-description,
+    [data-bs-theme="dark"] .filter-label,
+    [data-bs-theme="dark"] .vehicle-plate,
+    [data-bs-theme="dark"] .generated-time,
+    [data-bs-theme="dark"] .empty-text,
+    [data-bs-theme="dark"] .disclaimer-text {
+        color: var(--bs-secondary-color);
+    }
+
+
+    /* CARDS */
+
+    [data-bs-theme="dark"] .summary-card,
+    [data-bs-theme="dark"] .diagnostic-card,
+    [data-bs-theme="dark"] .diagnostic-card-header {
+        background: var(--bs-body-bg);
+        border-color: var(--bs-border-color);
+    }
+
+        [data-bs-theme="dark"] .summary-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .18);
+        }
+
+    [data-bs-theme="dark"] .diagnostic-card {
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .15);
+    }
+
+
+    /* FILTER */
+
+    [data-bs-theme="dark"] .filter-area {
+        background: var(--bs-tertiary-bg);
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .search-input,
+    [data-bs-theme="dark"] .filter-select {
+        background-color: var(--bs-body-bg);
+        border-color: var(--bs-border-color);
+        color: var(--bs-body-color);
+    }
+
+        [data-bs-theme="dark"] .search-input::placeholder {
+            color: var(--bs-secondary-color);
+        }
+
+    [data-bs-theme="dark"] .search-symbol {
+        color: var(--bs-secondary-color);
+    }
+
+
+    /* RESULT */
+
+    [data-bs-theme="dark"] .result-area {
+        border-color: var(--bs-border-color);
+        color: var(--bs-secondary-color);
+    }
+
+        [data-bs-theme="dark"] .result-area strong {
+            color: var(--bs-body-color);
+        }
+
+
+    /* TABLE */
+
+    [data-bs-theme="dark"] .diagnostic-table {
+        --bs-table-bg: transparent;
+        --bs-table-color: var(--bs-body-color);
+        --bs-table-border-color: var(--bs-border-color);
+    }
+
+        [data-bs-theme="dark"] .diagnostic-table thead th {
+            background: var(--bs-tertiary-bg);
+            color: var(--bs-secondary-color);
+            border-color: var(--bs-border-color);
+        }
+
+        [data-bs-theme="dark"] .diagnostic-table tbody td {
+            color: var(--bs-body-color);
+            border-color: var(--bs-border-color);
+        }
+
+        [data-bs-theme="dark"] .diagnostic-table tbody tr:hover,
+        [data-bs-theme="dark"] .diagnostic-table tbody tr:hover > * {
+            background: var(--bs-tertiary-bg);
+        }
+
+
+    /* ID / TEXT */
+
+    [data-bs-theme="dark"] .diagnostic-id {
+        background: var(--bs-tertiary-bg);
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .symptom-text {
+        color: var(--bs-body-color);
+    }
+
+
+    /* PRIORITY */
+
+    [data-bs-theme="dark"] .priority-high {
+        background: rgba(220, 53, 69, .18);
+        color: #ea868f;
+    }
+
+    [data-bs-theme="dark"] .priority-medium {
+        background: rgba(255, 193, 7, .16);
+        color: #ffda6a;
+    }
+
+    [data-bs-theme="dark"] .priority-low {
+        background: rgba(25, 135, 84, .18);
+        color: #75b798;
+    }
+
+
+    /* REVIEW */
+
+    [data-bs-theme="dark"] .review-pending {
+        background: rgba(255, 193, 7, .16);
+        color: #ffda6a;
+    }
+
+    [data-bs-theme="dark"] .review-completed {
+        background: rgba(25, 135, 84, .18);
+        color: #75b798;
+    }
+
+
+    /* SUMMARY ICONS */
+
+    [data-bs-theme="dark"] .icon-total,
+    [data-bs-theme="dark"] .diagnostic-count-badge,
+    [data-bs-theme="dark"] .disclaimer-icon {
+        background: rgba(13, 110, 253, .18);
+        color: #6ea8fe;
+    }
+
+    [data-bs-theme="dark"] .icon-pending {
+        background: rgba(255, 193, 7, .16);
+        color: #ffda6a;
+    }
+
+    [data-bs-theme="dark"] .icon-reviewed {
+        background: rgba(25, 135, 84, .18);
+        color: #75b798;
+    }
+
+    [data-bs-theme="dark"] .icon-high {
+        background: rgba(220, 53, 69, .18);
+        color: #ea868f;
+    }
+
+
+    /* EMPTY */
+
+    [data-bs-theme="dark"] .empty-icon {
+        background: var(--bs-tertiary-bg);
+        color: var(--bs-secondary-color);
+    }
+
+
+    /* DISCLAIMER */
+
+    [data-bs-theme="dark"] .ai-disclaimer {
+        background: var(--bs-tertiary-bg);
+        border-color: var(--bs-border-color);
+    }
+
+
+    /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+    @@media (max-width: 991.98px) {
+
+        .symptom-text {
+            max-width: 220px;
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+
+        .diagnostic-card-header,
+        .filter-area,
+        .result-area {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .diagnostic-action {
+            width: 100%;
+        }
+
+        .symptom-text {
+            max-width: 180px;
+        }
+    }
+
+</style>
+
+
+<section class="diagnostic-page py-5">
+
+    <div class="container diagnostic-container">
+
+
+        <!-- =========================================
+             PAGE HEADER
+        ========================================== -->
+
+        <div class="mb-4">
+
+            <div class="page-label">
+                AI Diagnostic Assistant
+            </div>
+
+            <h1 class="page-title">
+                AI Diagnostic Review
+            </h1>
+
+            <p class="page-description">
+                Review AI-assisted diagnostic recommendations for assigned customer vehicles.
+            </p>
+
+        </div>
+
+
+        <!-- =========================================
+             SUMMARY CARDS
+        ========================================== -->
+
+        <div class="row g-3 mb-4">
+
+
+            <!-- TOTAL -->
+
+            <div class="col-6 col-lg-3">
+
+                <div class="summary-card">
+
+                    <div class="d-flex
+                                justify-content-between
+                                align-items-center">
+
+                        <div>
+
+                            <div class="summary-label">
+                                Total Diagnostics
+                            </div>
+
+                            <p class="summary-value">
+                                @totalCount
+                            </p>
+
+                        </div>
+
+                        <div class="summary-icon icon-total">
+                            AI
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- PENDING -->
+
+            <div class="col-6 col-lg-3">
+
+                <div class="summary-card">
+
+                    <div class="d-flex
+                                justify-content-between
+                                align-items-center">
+
+                        <div>
+
+                            <div class="summary-label">
+                                Pending Review
+                            </div>
+
+                            <p class="summary-value">
+                                @pendingCount
+                            </p>
+
+                        </div>
+
+                        <div class="summary-icon icon-pending">
+                            !
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- REVIEWED -->
+
+            <div class="col-6 col-lg-3">
+
+                <div class="summary-card">
+
+                    <div class="d-flex
+                                justify-content-between
+                                align-items-center">
+
+                        <div>
+
+                            <div class="summary-label">
+                                Reviewed
+                            </div>
+
+                            <p class="summary-value">
+                                @reviewedCount
+                            </p>
+
+                        </div>
+
+                        <div class="summary-icon icon-reviewed">
+                            ✓
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- HIGH PRIORITY -->
+
+            <div class="col-6 col-lg-3">
+
+                <div class="summary-card">
+
+                    <div class="d-flex
+                                justify-content-between
+                                align-items-center">
+
+                        <div>
+
+                            <div class="summary-label">
+                                High Priority
+                            </div>
+
+                            <p class="summary-value">
+                                @highPriorityCount
+                            </p>
+
+                        </div>
+
+                        <div class="summary-icon icon-high">
+                            HIGH
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             MAIN CARD
+        ========================================== -->
+
+        <div class="diagnostic-card">
+
+
+            <!-- HEADER -->
+
+            <div class="diagnostic-card-header">
+
+                <div class="d-flex
+                            justify-content-between
+                            align-items-center
+                            gap-3">
+
+                    <div>
+
+                        <h5 class="card-title-custom">
+                            Diagnostic Recommendations
+                        </h5>
+
+                        <p class="card-description">
+                            Review AI-generated suggestions before confirming a diagnosis.
+                        </p>
+
+                    </div>
+
+
+                    <span class="diagnostic-count-badge">
+                        @totalCount
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            @if (!diagnostics.Any())
+            {
+
+                <!-- =====================================
+                     EMPTY DATABASE
+                ====================================== -->
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        AI
+                    </div>
+
+                    <h5 class="empty-title">
+                        No AI Diagnostics Available
+                    </h5>
+
+                    <p class="empty-text">
+                        AI diagnostic recommendations for your assigned
+                        customer vehicles will appear here.
+                    </p>
+
+                </div>
+
+            }
+            else
+            {
+
+                <!-- =====================================
+                     SEARCH / FILTER
+                ====================================== -->
+
+                <div class="filter-area">
+
+                    <div class="row g-3 align-items-end">
+
+
+                        <!-- SEARCH -->
+
+                        <div class="col-12 col-xl-5">
+
+                            <label class="filter-label">
+                                Search Diagnostics
+                            </label>
+
+                            <div class="search-wrapper">
+
+                                <span class="search-symbol">
+                                    ⌕
+                                </span>
+
+                                <input type="search"
+                                       id="diagnosticSearch"
+                                       class="form-control search-input"
+                                       placeholder="Search ID, vehicle, plate or symptoms..."
+                                       autocomplete="off" />
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- PRIORITY -->
+
+                        <div class="col-6 col-md-4 col-xl-2">
+
+                            <label class="filter-label">
+                                Priority
+                            </label>
+
+                            <select id="priorityFilter"
+                                    class="form-select filter-select">
+
+                                <option value="">
+                                    All Priority
+                                </option>
+
+                                <option value="High">
+                                    High
+                                </option>
+
+                                <option value="Medium">
+                                    Medium
+                                </option>
+
+                                <option value="Low">
+                                    Low
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- REVIEW STATUS -->
+
+                        <div class="col-6 col-md-4 col-xl-3">
+
+                            <label class="filter-label">
+                                Review Status
+                            </label>
+
+                            <select id="reviewFilter"
+                                    class="form-select filter-select">
+
+                                <option value="">
+                                    All Status
+                                </option>
+
+                                <option value="pending">
+                                    Pending Review
+                                </option>
+
+                                <option value="reviewed">
+                                    Reviewed
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- CLEAR -->
+
+                        <div class="col-12 col-md-4 col-xl-2">
+
+                            <button type="button"
+                                    id="clearFilters"
+                                    class="btn btn-outline-secondary
+                                               clear-filter-btn w-100">
+
+                                Clear Filters
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =====================================
+                     RESULT COUNT
+                ====================================== -->
+
+                <div class="result-area">
+
+                    Showing
+
+                    <strong id="visibleDiagnosticCount">
+                        @totalCount
+                    </strong>
+
+                    of
+
+                    <strong>
+                        @totalCount
+                    </strong>
+
+                    diagnostics
+
+                </div>
+
+
+                <!-- =====================================
+                     TABLE
+                ====================================== -->
+
+                <div class="table-responsive">
+
+                    <table class="table diagnostic-table align-middle">
+
+                        <thead>
+
+                            <tr>
+
+                                <th class="ps-4">
+                                    ID
+                                </th>
+
+                                <th>
+                                    Vehicle
+                                </th>
+
+                                <th>
+                                    Symptoms
+                                </th>
+
+                                <th>
+                                    Priority
+                                </th>
+
+                                <th>
+                                    Review Status
+                                </th>
+
+                                <th>
+                                    Generated
+                                </th>
+
+                                <th class="text-end pe-4">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var diagnostic in diagnostics)
+                            {
+                                var vehicleName =
+                                diagnostic.Vehicle != null
+                                ? $"{diagnostic.Vehicle.Brand} {diagnostic.Vehicle.Model}"
+                                : "Vehicle unavailable";
+
+                                var plateNumber =
+                                diagnostic.Vehicle?.PlateNumber ?? "";
+
+                                var symptoms =
+                                diagnostic.Symptoms ?? "";
+
+                                var priority =
+                                diagnostic.Priority ?? "";
+
+                                var reviewStatus =
+                                diagnostic.ReviewStatus ?? "";
+
+                                var reviewCategory =
+                                reviewStatus == "Pending Review"
+                                ? "pending"
+                                : "reviewed";
+
+
+                                <tr class="diagnostic-row"
+                                    data-id="@diagnostic.DiagnosticId"
+                                    data-vehicle="@vehicleName.ToLowerInvariant()"
+                                    data-plate="@plateNumber.ToLowerInvariant()"
+                                    data-symptoms="@symptoms.ToLowerInvariant()"
+                                    data-priority="@priority"
+                                    data-review="@reviewCategory">
+
+
+                                    <!-- ID -->
+
+                                    <td class="ps-4">
+
+                                        <span class="diagnostic-id">
+                                            #@diagnostic.DiagnosticId
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- VEHICLE -->
+
+                                    <td>
+
+                                        @if (diagnostic.Vehicle != null)
+                                        {
+                                            <div class="vehicle-name">
+
+                                                @diagnostic.Vehicle.Brand
+                                                @diagnostic.Vehicle.Model
+
+                                            </div>
+
+                                            <div class="vehicle-plate">
+                                                @diagnostic.Vehicle.PlateNumber
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                Vehicle unavailable
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- SYMPTOMS -->
+
+                                    <td>
+
+                                        <div class="symptom-text"
+                                             title="@diagnostic.Symptoms">
+
+                                            @diagnostic.Symptoms
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- PRIORITY -->
+
+                                    <td>
+
+                                        @if (diagnostic.Priority == "High")
+                                        {
+                                            <span class="priority-badge priority-high">
+
+                                                <span class="priority-dot"></span>
+
+                                                High
+
+                                            </span>
+                                        }
+                                        else if (diagnostic.Priority == "Medium")
+                                        {
+                                            <span class="priority-badge priority-medium">
+
+                                                <span class="priority-dot"></span>
+
+                                                Medium
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="priority-badge priority-low">
+
+                                                <span class="priority-dot"></span>
+
+                                                Low
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- REVIEW STATUS -->
+
+                                    <td>
+
+                                        @if (diagnostic.ReviewStatus == "Pending Review")
+                                        {
+                                            <span class="review-badge review-pending">
+
+                                                <span class="review-dot"></span>
+
+                                                Pending Review
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="review-badge review-completed">
+
+                                                <span class="review-dot"></span>
+
+                                                @diagnostic.ReviewStatus
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- GENERATED -->
+
+                                    <td>
+                                        <div class="generated-date">
+                                            @diagnostic.CreatedAt.ToString("dd MMM yyyy")
+                                        </div>
+
+                                        <div class="generated-time">
+                                            @diagnostic.CreatedAt.ToString("hh:mm tt")
+                                        </div>
+                                    </td>
+
+
+                                    <!-- ACTION -->
+
+                                    <td class="text-end pe-4">
+
+                                        @if (diagnostic.ReviewStatus == "Pending Review")
+                                        {
+                                            <a asp-controller="Mechanic"
+                                               asp-action="AIDiagnosticDetails"
+                                               asp-route-id="@diagnostic.DiagnosticId"
+                                               class="btn btn-primary btn-sm diagnostic-action">
+
+                                                Review
+
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-controller="Mechanic"
+                                               asp-action="AIDiagnosticDetails"
+                                               asp-route-id="@diagnostic.DiagnosticId"
+                                               class="btn btn-outline-primary btn-sm diagnostic-action">
+
+                                                View
+
+                                            </a>
+                                        }
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- =====================================
+                     NO FILTER RESULT
+                ====================================== -->
+
+                <div id="noDiagnosticResults"
+                     class="empty-state filter-empty-state">
+
+                    <div class="empty-icon">
+                        ?
+                    </div>
+
+                    <h5 class="empty-title">
+                        No Matching Diagnostics
+                    </h5>
+
+                    <p class="empty-text mb-3">
+                        Try changing the search keyword or selected filters.
+                    </p>
+
+                    <button type="button"
+                            id="clearFiltersEmpty"
+                            class="btn btn-outline-primary btn-sm px-3">
+
+                        Clear Filters
+
+                    </button>
+
+                </div>
+
+            }
+
+        </div>
+
+
+        <!-- =========================================
+             DISCLAIMER
+        ========================================== -->
+
+        <div class="ai-disclaimer">
+
+            <div class="disclaimer-icon">
+                AI
+            </div>
+
+            <div>
+
+                <div class="disclaimer-title">
+                    AI Diagnostic Assistance
+                </div>
+
+                <p class="disclaimer-text">
+
+                    AI-generated recommendations are intended to assist
+                    the diagnostic process. A physical vehicle inspection
+                    should be performed before confirming any diagnosis
+                    or repair action.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+@section Scripts {
+
+    <script>
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                // =========================================
+                // ELEMENTS
+                // =========================================
+
+                const searchInput =
+                    document.getElementById(
+                        "diagnosticSearch"
+                    );
+
+                const priorityFilter =
+                    document.getElementById(
+                        "priorityFilter"
+                    );
+
+                const reviewFilter =
+                    document.getElementById(
+                        "reviewFilter"
+                    );
+
+                const clearButton =
+                    document.getElementById(
+                        "clearFilters"
+                    );
+
+                const clearEmptyButton =
+                    document.getElementById(
+                        "clearFiltersEmpty"
+                    );
+
+                const rows =
+                    document.querySelectorAll(
+                        ".diagnostic-row"
+                    );
+
+                const visibleCount =
+                    document.getElementById(
+                        "visibleDiagnosticCount"
+                    );
+
+                const noResults =
+                    document.getElementById(
+                        "noDiagnosticResults"
+                    );
+
+
+                // =========================================
+                // FILTER DIAGNOSTICS
+                // =========================================
+
+                function filterDiagnostics() {
+
+                    if (
+                        !searchInput ||
+                        !priorityFilter ||
+                        !reviewFilter
+                    ) {
+                        return;
+                    }
+
+
+                    const searchValue =
+                        searchInput.value
+                            .trim()
+                            .toLowerCase();
+
+
+                    const priorityValue =
+                        priorityFilter.value;
+
+
+                    const reviewValue =
+                        reviewFilter.value;
+
+
+                    let visibleRows = 0;
+
+
+                    rows.forEach(
+                        function (row) {
+
+                            const diagnosticId =
+                                row.dataset.id || "";
+
+                            const vehicle =
+                                row.dataset.vehicle || "";
+
+                            const plate =
+                                row.dataset.plate || "";
+
+                            const symptoms =
+                                row.dataset.symptoms || "";
+
+                            const priority =
+                                row.dataset.priority || "";
+
+                            const review =
+                                row.dataset.review || "";
+
+
+                            // SEARCH
+
+                            const matchesSearch =
+                                searchValue === "" ||
+                                diagnosticId
+                                    .toLowerCase()
+                                    .includes(searchValue) ||
+                                vehicle.includes(
+                                    searchValue
+                                ) ||
+                                plate.includes(
+                                    searchValue
+                                ) ||
+                                symptoms.includes(
+                                    searchValue
+                                );
+
+
+                            // PRIORITY
+
+                            const matchesPriority =
+                                priorityValue === "" ||
+                                priority === priorityValue;
+
+
+                            // REVIEW STATUS
+
+                            const matchesReview =
+                                reviewValue === "" ||
+                                review === reviewValue;
+
+
+                            // DISPLAY
+
+                            if (
+                                matchesSearch &&
+                                matchesPriority &&
+                                matchesReview
+                            ) {
+
+                                row.style.display = "";
+
+                                visibleRows++;
+
+                            }
+                            else {
+
+                                row.style.display = "none";
+
+                            }
+
+                        }
+                    );
+
+
+                    // =====================================
+                    // UPDATE RESULT COUNT
+                    // =====================================
+
+                    if (visibleCount) {
+
+                        visibleCount.textContent =
+                            visibleRows;
+
+                    }
+
+
+                    // =====================================
+                    // EMPTY RESULT
+                    // =====================================
+
+                    if (noResults) {
+
+                        noResults.style.display =
+                            visibleRows === 0
+                                ? "block"
+                                : "none";
+
+                    }
+
+                }
+
+
+                // =========================================
+                // CLEAR FILTERS
+                // =========================================
+
+                function clearFilters() {
+
+                    if (
+                        !searchInput ||
+                        !priorityFilter ||
+                        !reviewFilter
+                    ) {
+                        return;
+                    }
+
+
+                    searchInput.value = "";
+
+                    priorityFilter.value = "";
+
+                    reviewFilter.value = "";
+
+                    filterDiagnostics();
+
+                    searchInput.focus();
+
+                }
+
+
+                // =========================================
+                // EVENTS
+                // =========================================
+
+                if (searchInput) {
+
+                    searchInput.addEventListener(
+                        "input",
+                        filterDiagnostics
+                    );
+
+                }
+
+
+                if (priorityFilter) {
+
+                    priorityFilter.addEventListener(
+                        "change",
+                        filterDiagnostics
+                    );
+
+                }
+
+
+                if (reviewFilter) {
+
+                    reviewFilter.addEventListener(
+                        "change",
+                        filterDiagnostics
+                    );
+
+                }
+
+
+                if (clearButton) {
+
+                    clearButton.addEventListener(
+                        "click",
+                        clearFilters
+                    );
+
+                }
+
+
+                if (clearEmptyButton) {
+
+                    clearEmptyButton.addEventListener(
+                        "click",
+                        clearFilters
+                    );
+
+                }
+
+            }
+        );
+
+    </script>
+
+}

@@ -1,0 +1,990 @@
+﻿@model IEnumerable<AIVehicleWorkshopSystem.Models.Appointment>
+
+@{
+    ViewData["Title"] = "My Appointments";
+    var appointmentCount = Model?.Count() ?? 0;
+}
+
+<style>
+    /* =========================================================
+           MY APPOINTMENTS
+           ========================================================= */
+
+    .appointments-page {
+        min-height: 100%;
+        padding: 32px 28px;
+    }
+
+    .appointments-container {
+        width: 100%;
+        max-width: 1180px;
+        margin: 0 auto;
+    }
+
+    /* =========================
+           HEADER
+           ========================= */
+
+    .appointments-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 22px;
+    }
+
+    .appointments-eyebrow {
+        margin-bottom: 6px;
+        color: #3b82f6;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .6px;
+        text-transform: uppercase;
+    }
+
+    .appointments-header h1 {
+        margin: 0 0 5px;
+        font-size: clamp(28px, 3vw, 38px);
+        font-weight: 800;
+        letter-spacing: -.6px;
+    }
+
+    .appointments-header-description {
+        margin: 0;
+        color: var(--bs-secondary-color);
+        font-size: 13px;
+    }
+
+    .book-appointment-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 39px;
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* =========================
+           FILTER BAR
+           ========================= */
+
+    .appointment-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 14px;
+        padding: 12px;
+        border: 1px solid var(--bs-border-color);
+        border-radius: 12px;
+        background: var(--bs-body-bg);
+    }
+
+    .appointment-toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+    }
+
+    .appointment-search {
+        position: relative;
+        width: 100%;
+        max-width: 430px;
+    }
+
+        .appointment-search i {
+            position: absolute;
+            top: 50%;
+            left: 13px;
+            z-index: 2;
+            color: var(--bs-secondary-color);
+            font-size: 13px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .appointment-search input {
+            width: 100%;
+            height: 38px;
+            padding: 7px 36px 7px 36px;
+            border: 1px solid var(--bs-border-color);
+            border-radius: 8px;
+            background: var(--bs-body-bg);
+            color: var(--bs-body-color);
+            font-size: 12px;
+            outline: none;
+            transition: .15s ease;
+        }
+
+            .appointment-search input:focus {
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, .1);
+            }
+
+            .appointment-search input::placeholder {
+                color: var(--bs-secondary-color);
+            }
+
+    .clear-search {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        display: none;
+        padding: 2px;
+        border: 0;
+        background: transparent;
+        color: var(--bs-secondary-color);
+        font-size: 15px;
+        transform: translateY(-50%);
+    }
+
+        .clear-search.show {
+            display: block;
+        }
+
+    .appointment-status-filter {
+        width: 165px;
+        height: 38px;
+        padding: 7px 30px 7px 11px;
+        border: 1px solid var(--bs-border-color);
+        border-radius: 8px;
+        background-color: var(--bs-body-bg);
+        color: var(--bs-body-color);
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .appointment-result-count {
+        flex-shrink: 0;
+        color: var(--bs-secondary-color);
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+        .appointment-result-count strong {
+            color: var(--bs-body-color);
+        }
+
+    /* =========================
+           TABLE
+           ========================= */
+
+    .appointment-table-card {
+        overflow: hidden;
+        border: 1px solid var(--bs-border-color);
+        border-radius: 13px;
+        background: var(--bs-body-bg);
+    }
+
+    .appointment-table {
+        width: 100%;
+        margin: 0;
+    }
+
+        .appointment-table thead th {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--bs-border-color);
+            background: rgba(128, 128, 128, .035);
+            color: var(--bs-body-color);
+            font-size: 11px;
+            font-weight: 750;
+            white-space: nowrap;
+        }
+
+        .appointment-table tbody td {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--bs-border-color);
+            color: var(--bs-body-color);
+            font-size: 12px;
+            vertical-align: middle;
+        }
+
+        .appointment-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .appointment-table tbody tr {
+            transition: background .15s ease;
+        }
+
+            .appointment-table tbody tr:hover {
+                background: rgba(128, 128, 128, .035);
+            }
+
+    .appointment-id {
+        font-weight: 700;
+    }
+
+    .appointment-vehicle {
+        font-weight: 700;
+    }
+
+    .appointment-subtext {
+        display: block;
+        margin-top: 2px;
+        color: var(--bs-secondary-color);
+        font-size: 10px;
+    }
+
+    .appointment-service {
+        font-weight: 500;
+    }
+
+    /* =========================
+           STATUS BADGES
+           ========================= */
+
+    .appointment-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 9px;
+        font-weight: 750;
+    }
+
+        .appointment-badge::before {
+            content: "";
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .appointment-badge.approved {
+            background: rgba(16, 185, 129, .12);
+            color: #10b981;
+        }
+
+        .appointment-badge.pending {
+            background: rgba(245, 158, 11, .13);
+            color: #f59e0b;
+        }
+
+        .appointment-badge.rejected {
+            background: rgba(239, 68, 68, .12);
+            color: #ef4444;
+        }
+
+        .appointment-badge.cancelled {
+            background: rgba(100, 116, 139, .14);
+            color: #94a3b8;
+        }
+
+        .appointment-badge.default {
+            background: rgba(100, 116, 139, .12);
+            color: #64748b;
+        }
+
+    /* =========================
+           VIEW BUTTON
+           ========================= */
+
+    .appointment-view-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        min-height: 30px;
+        padding: 5px 11px;
+        border: 1px solid #3b82f6;
+        border-radius: 6px;
+        color: #3b82f6;
+        text-decoration: none;
+        font-size: 10px;
+        font-weight: 600;
+        transition: .15s ease;
+    }
+
+        .appointment-view-btn:hover {
+            background: #3b82f6;
+            color: #ffffff;
+        }
+
+    /* =========================
+           NO SEARCH RESULTS
+           ========================= */
+
+    .appointment-no-results {
+        display: none;
+        padding: 45px 20px;
+        text-align: center;
+    }
+
+        .appointment-no-results.show {
+            display: block;
+        }
+
+    .appointment-no-results-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+        border-radius: 12px;
+        background: rgba(100, 116, 139, .1);
+        color: var(--bs-secondary-color);
+        font-size: 19px;
+    }
+
+    .appointment-no-results h5 {
+        margin-bottom: 4px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .appointment-no-results p {
+        margin: 0;
+        color: var(--bs-secondary-color);
+        font-size: 11px;
+    }
+
+    /* =========================
+           EMPTY STATE
+           ========================= */
+
+    .appointment-empty {
+        padding: 55px 20px;
+        border: 1px solid var(--bs-border-color);
+        border-radius: 13px;
+        text-align: center;
+        background: var(--bs-body-bg);
+    }
+
+    .appointment-empty-icon {
+        width: 55px;
+        height: 55px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 13px;
+        border-radius: 14px;
+        background: rgba(59, 130, 246, .1);
+        color: #3b82f6;
+        font-size: 22px;
+    }
+
+    .appointment-empty h4 {
+        margin-bottom: 5px;
+        font-size: 16px;
+        font-weight: 750;
+    }
+
+    .appointment-empty p {
+        margin: 0 auto 16px;
+        max-width: 420px;
+        color: var(--bs-secondary-color);
+        font-size: 12px;
+    }
+
+    /* =========================
+           DARK MODE
+           ========================= */
+
+    html[data-bs-theme="dark"] .appointment-toolbar,
+    html[data-bs-theme="dark"] .appointment-table-card,
+    html[data-bs-theme="dark"] .appointment-empty {
+        border-color: #2d2d2d;
+        background: #181818;
+    }
+
+    html[data-bs-theme="dark"] .appointment-search input,
+    html[data-bs-theme="dark"] .appointment-status-filter {
+        border-color: #353535;
+        background-color: #202020;
+        color: #f1f1f1;
+    }
+
+    html[data-bs-theme="dark"] .appointment-table thead th {
+        border-color: #303030;
+        background: #1d1d1d;
+    }
+
+    html[data-bs-theme="dark"] .appointment-table tbody td {
+        border-color: #292929;
+    }
+
+    html[data-bs-theme="dark"] .appointment-table tbody tr:hover {
+        background: #1d1d1d;
+    }
+
+    /* =========================
+           RESPONSIVE
+           ========================= */
+
+    @@media (max-width: 767px) {
+
+        .appointments-page {
+            padding: 20px 14px;
+        }
+
+        .appointments-header {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .book-appointment-btn {
+            width: 100%;
+        }
+
+        .appointment-toolbar {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .appointment-toolbar-left {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .appointment-search,
+        .appointment-status-filter {
+            width: 100%;
+            max-width: none;
+        }
+
+        .appointment-result-count {
+            padding-left: 2px;
+        }
+
+        .appointment-table thead th,
+        .appointment-table tbody td {
+            padding: 12px 14px;
+        }
+    }
+</style>
+
+
+<section class="appointments-page">
+
+    <div class="appointments-container">
+
+        <!-- =====================================================
+             PAGE HEADER
+             ===================================================== -->
+        <div class="appointments-header">
+
+            <div>
+
+                <div class="appointments-eyebrow">
+                    Service Appointment
+                </div>
+
+                <h1>
+                    My Appointments
+                </h1>
+
+                <p class="appointments-header-description">
+                    View and manage your submitted service appointments.
+                </p>
+
+            </div>
+
+
+            <a asp-controller="Appointment"
+               asp-action="Create"
+               class="btn btn-primary book-appointment-btn">
+
+                <i class="bi bi-plus-lg"></i>
+                Book Appointment
+
+            </a>
+
+        </div>
+
+
+        <!-- =====================================================
+             SUCCESS MESSAGE
+             ===================================================== -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show"
+                 role="alert">
+
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Close">
+                </button>
+
+            </div>
+        }
+
+
+        @if (Model == null || !Model.Any())
+        {
+            <!-- =================================================
+                 EMPTY STATE
+                 ================================================= -->
+            <div class="appointment-empty">
+
+                <div class="appointment-empty-icon">
+                    <i class="bi bi-calendar2-plus"></i>
+                </div>
+
+                <h4>
+                    No appointments yet
+                </h4>
+
+                <p>
+                    Book your first service appointment for one of
+                    your registered vehicles.
+                </p>
+
+                <a asp-controller="Appointment"
+                   asp-action="Create"
+                   class="btn btn-primary btn-sm px-4">
+
+                    Book Appointment
+
+                </a>
+
+            </div>
+        }
+        else
+        {
+            <!-- =================================================
+                 SEARCH + FILTER
+                 ================================================= -->
+            <div class="appointment-toolbar">
+
+                <div class="appointment-toolbar-left">
+
+                    <!-- SEARCH -->
+                    <div class="appointment-search">
+
+                        <i class="bi bi-search"></i>
+
+                        <input type="text"
+                               id="appointmentSearch"
+                               placeholder="Search ID, vehicle, plate or service..."
+                               autocomplete="off" />
+
+                        <button type="button"
+                                id="clearAppointmentSearch"
+                                class="clear-search"
+                                aria-label="Clear search">
+
+                            <i class="bi bi-x-lg"></i>
+
+                        </button>
+
+                    </div>
+
+
+                    <!-- STATUS FILTER -->
+                    <select id="appointmentStatusFilter"
+                            class="appointment-status-filter">
+
+                        <option value="all">
+                            All Status
+                        </option>
+
+                        <option value="pending">
+                            Pending
+                        </option>
+
+                        <option value="approved">
+                            Approved
+                        </option>
+
+                        <option value="rejected">
+                            Rejected
+                        </option>
+
+                        <option value="cancelled">
+                            Cancelled
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="appointment-result-count">
+
+                    Showing
+                    <strong id="appointmentVisibleCount">
+                        @appointmentCount
+                    </strong>
+                    of
+                    <strong>
+                        @appointmentCount
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 TABLE
+                 ================================================= -->
+            <div class="appointment-table-card">
+
+                <div class="table-responsive"
+                     id="appointmentTableWrapper">
+
+                    <table class="table appointment-table align-middle mb-0">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>ID</th>
+
+                                <th>Vehicle</th>
+
+                                <th>Date</th>
+
+                                <th>Service</th>
+
+                                <th>Status</th>
+
+                                <th class="text-end">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="appointmentTableBody">
+
+                            @foreach (var appointment in Model)
+                            {
+                                var vehicleName =
+                                appointment.Vehicle != null
+                                ? $"{appointment.Vehicle.Brand} {appointment.Vehicle.Model}"
+                                : "Vehicle unavailable";
+
+                                var plateNumber =
+                                appointment.Vehicle?.PlateNumber ?? "";
+
+                                var status =
+                                appointment.AppointmentStatus ?? "";
+
+                                var statusCss =
+                                status.ToLower() switch
+                                {
+                                    "pending" => "pending",
+                                    "approved" => "approved",
+                                    "rejected" => "rejected",
+                                    "cancelled" => "cancelled",
+                                    _ => "default"
+                                };
+
+                                <tr class="appointment-row"
+                                    data-id="@appointment.AppointmentId"
+                                    data-vehicle="@vehicleName"
+                                    data-plate="@plateNumber"
+                                    data-service="@appointment.ServiceType"
+                                    data-status="@status.ToLower()">
+
+                                    <!-- ID -->
+                                    <td>
+
+                                        <span class="appointment-id">
+                                            #@appointment.AppointmentId
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- VEHICLE -->
+                                    <td>
+
+                                        @if (appointment.Vehicle != null)
+                                        {
+                                            <div class="appointment-vehicle">
+                                                @appointment.Vehicle.Brand
+                                                @appointment.Vehicle.Model
+                                            </div>
+
+                                            <span class="appointment-subtext">
+                                                @appointment.Vehicle.PlateNumber
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                Vehicle unavailable
+                                            </span>
+                                        }
+
+                                </td>
+
+
+                                <!-- DATE -->
+                                <td>
+
+                                    <div class="fw-semibold">
+                                        @appointment.AppointmentDate.ToString("dd MMM yyyy")
+                                    </div>
+
+                                    <span class="appointment-subtext">
+                                        @(DateTime.Today
+                                                                            .Add(appointment.AppointmentTime)
+                                                                            .ToString("hh:mm tt"))
+                                </span>
+
+                                    </td>
+
+
+                                    <!-- SERVICE -->
+                                    <td>
+
+                                        <span class="appointment-service">
+                                            @appointment.ServiceType
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- STATUS -->
+                                    <td>
+
+                                        <span class="appointment-badge @statusCss">
+                                            @status
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- ACTION -->
+                                    <td class="text-end">
+
+                                        <a asp-controller="Appointment"
+                                           asp-action="Details"
+                                           asp-route-id="@appointment.AppointmentId"
+                                           class="appointment-view-btn">
+
+                                            View Details
+
+                                            <i class="bi bi-arrow-right"></i>
+
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                                                }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- NO FILTER RESULTS -->
+                <div id="appointmentNoResults"
+                     class="appointment-no-results">
+
+                    <div class="appointment-no-results-icon">
+                        <i class="bi bi-search"></i>
+                    </div>
+
+                    <h5>
+                        No appointments found
+                    </h5>
+
+                    <p>
+                        Try changing your search or status filter.
+                    </p>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</section>
+
+
+@section Scripts {
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchInput =
+                document.getElementById("appointmentSearch");
+
+            const clearButton =
+                document.getElementById("clearAppointmentSearch");
+
+            const statusFilter =
+                document.getElementById("appointmentStatusFilter");
+
+            const rows =
+                Array.from(
+                    document.querySelectorAll(".appointment-row")
+                );
+
+            const visibleCount =
+                document.getElementById("appointmentVisibleCount");
+
+            const noResults =
+                document.getElementById("appointmentNoResults");
+
+            const tableWrapper =
+                document.getElementById("appointmentTableWrapper");
+
+
+            if (!searchInput ||
+                !statusFilter ||
+                rows.length === 0) {
+
+                return;
+            }
+
+
+            /* =============================================
+               FILTER APPOINTMENTS
+               ============================================= */
+
+            function filterAppointments() {
+
+                const searchValue =
+                    searchInput.value
+                        .trim()
+                        .toLowerCase();
+
+                const selectedStatus =
+                    statusFilter.value.toLowerCase();
+
+                let count = 0;
+
+
+                rows.forEach(function (row) {
+
+                    const searchableText = [
+                        "#" + row.dataset.id,
+                        row.dataset.id,
+                        row.dataset.vehicle,
+                        row.dataset.plate,
+                        row.dataset.service
+                    ]
+                    .join(" ")
+                    .toLowerCase();
+
+
+                    const matchesSearch =
+                        searchValue === "" ||
+                        searchableText.includes(searchValue);
+
+
+                    const matchesStatus =
+                        selectedStatus === "all" ||
+                        row.dataset.status === selectedStatus;
+
+
+                    const shouldShow =
+                        matchesSearch && matchesStatus;
+
+
+                    row.style.display =
+                        shouldShow ? "" : "none";
+
+
+                    if (shouldShow) {
+                        count++;
+                    }
+
+                });
+
+
+                if (visibleCount) {
+                    visibleCount.textContent = count;
+                }
+
+
+                if (clearButton) {
+
+                    clearButton.classList.toggle(
+                        "show",
+                        searchInput.value.length > 0
+                    );
+
+                }
+
+
+                if (count === 0) {
+
+                    if (tableWrapper) {
+                        tableWrapper.style.display = "none";
+                    }
+
+                    if (noResults) {
+                        noResults.classList.add("show");
+                    }
+
+                }
+                else {
+
+                    if (tableWrapper) {
+                        tableWrapper.style.display = "";
+                    }
+
+                    if (noResults) {
+                        noResults.classList.remove("show");
+                    }
+
+                }
+
+            }
+
+
+            /* =============================================
+               EVENTS
+               ============================================= */
+
+            searchInput.addEventListener(
+                "input",
+                filterAppointments
+            );
+
+
+            statusFilter.addEventListener(
+                "change",
+                filterAppointments
+            );
+
+
+            if (clearButton) {
+
+                clearButton.addEventListener(
+                    "click",
+                    function () {
+
+                        searchInput.value = "";
+
+                        searchInput.focus();
+
+                        filterAppointments();
+
+                    }
+                );
+
+            }
+
+
+            filterAppointments();
+
+        });
+
+    </script>
+
+}

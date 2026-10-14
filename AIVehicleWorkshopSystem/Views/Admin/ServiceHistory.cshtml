@@ -1,0 +1,623 @@
+﻿@model AIVehicleWorkshopSystem.ViewModels.ServiceHistoryViewModel
+
+@{
+    ViewData["Title"] = "Vehicle Service History";
+
+    var serviceCount = Model.ServiceHistory?.Count ?? 0;
+
+    var completedCount = Model.ServiceHistory?
+        .Count(x => x.RepairStatus == "Completed") ?? 0;
+
+    var activeCount = Model.ServiceHistory?
+        .Count(x => x.RepairStatus == "Assigned" ||
+                    x.RepairStatus == "In Progress") ?? 0;
+}
+
+<div class="service-history-page">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+    <div class="service-history-header">
+
+        <div>
+
+            <div class="service-history-eyebrow">
+                <i class="bi bi-clock-history"></i>
+                VEHICLE RECORDS
+            </div>
+
+            <h1>Vehicle Service History</h1>
+
+            <p>
+                Search a registered vehicle to review its previous
+                appointments, repairs and workshop service records.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SEARCH
+         ===================================================== -->
+    <div class="service-search-card">
+
+        <div class="service-search-heading">
+
+            <div class="service-search-icon">
+                <i class="bi bi-search"></i>
+            </div>
+
+            <div>
+                <h5>Search Vehicle</h5>
+
+                <p>
+                    Enter the registered vehicle plate number.
+                </p>
+            </div>
+
+        </div>
+
+
+        <form asp-controller="Admin"
+              asp-action="ServiceHistory"
+              method="get"
+              class="service-search-form">
+
+            <div class="service-search-input">
+
+                <i class="bi bi-car-front"></i>
+
+                <input type="text"
+                       name="plateNumber"
+                       value="@Model.SearchPlateNumber"
+                       placeholder="Enter plate number, e.g. VBC1234"
+                       autocomplete="off" />
+
+            </div>
+
+            <button type="submit"
+                    class="btn btn-primary">
+
+                <i class="bi bi-search me-1"></i>
+                Search Vehicle
+
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- =====================================================
+         NOT FOUND
+         ===================================================== -->
+    @if (Model.SearchPerformed && Model.Vehicle == null)
+    {
+        <div class="service-not-found">
+
+            <div class="service-not-found-icon">
+                <i class="bi bi-car-front-fill"></i>
+            </div>
+
+            <div>
+                <h5>Vehicle Not Found</h5>
+
+                <p>
+                    No registered vehicle was found with plate number
+                    <strong>@Model.SearchPlateNumber</strong>.
+                    Check the plate number and try again.
+                </p>
+            </div>
+
+        </div>
+    }
+
+
+    <!-- =====================================================
+         SEARCH RESULT
+         ===================================================== -->
+    @if (Model.Vehicle != null)
+    {
+        <!-- ===============================================
+             VEHICLE PROFILE
+             =============================================== -->
+        <div class="service-vehicle-card">
+
+            <div class="service-vehicle-top">
+
+                <div class="service-vehicle-identity">
+
+                    <div class="service-vehicle-icon">
+                        <i class="bi bi-car-front-fill"></i>
+                    </div>
+
+                    <div>
+
+                        <span>VEHICLE SERVICE RECORD</span>
+
+                        <h2>
+                            @Model.Vehicle.PlateNumber
+                        </h2>
+
+                        <p>
+                            @Model.Vehicle.Brand @Model.Vehicle.Model
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="service-record-count">
+
+                    <strong>@serviceCount</strong>
+
+                    <span>
+                        Service @(serviceCount == 1 ? "Record" : "Records")
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- VEHICLE DETAILS -->
+            <div class="service-vehicle-details">
+
+                <div class="service-detail-item">
+
+                    <div class="service-detail-icon">
+                        <i class="bi bi-building"></i>
+                    </div>
+
+                    <div>
+                        <span>Brand</span>
+                        <strong>@Model.Vehicle.Brand</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="service-detail-item">
+
+                    <div class="service-detail-icon">
+                        <i class="bi bi-car-front"></i>
+                    </div>
+
+                    <div>
+                        <span>Model</span>
+                        <strong>@Model.Vehicle.Model</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="service-detail-item">
+
+                    <div class="service-detail-icon">
+                        <i class="bi bi-calendar3"></i>
+                    </div>
+
+                    <div>
+                        <span>Manufacturing Year</span>
+                        <strong>@Model.Vehicle.ManufacturingYear</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="service-detail-item">
+
+                    <div class="service-detail-icon">
+                        <i class="bi bi-palette"></i>
+                    </div>
+
+                    <div>
+                        <span>Colour</span>
+
+                        <strong>
+                            @(string.IsNullOrWhiteSpace(Model.Vehicle.Colour)
+                                                    ? "-"
+                                                    : Model.Vehicle.Colour)
+                                                                       </strong>
+                                                                   </div>
+
+                </div>
+
+
+                <div class="service-detail-item">
+
+                    <div class="service-detail-icon">
+                        <i class="bi bi-speedometer2"></i>
+                    </div>
+
+                    <div>
+                        <span>Current Mileage</span>
+
+                        <strong>
+                            @(Model.Vehicle.CurrentMileage.HasValue
+                                                    ? Model.Vehicle.CurrentMileage.Value.ToString("N0") + " km"
+                                                    : "-")
+                                                      </strong>
+                                                  </div>
+
+                </div>
+
+
+                <div class="service-detail-item">
+
+                    <div class="service-detail-icon">
+                        <i class="bi bi-person"></i>
+                    </div>
+
+                    <div>
+                        <span>Vehicle Owner</span>
+
+                        <strong>
+                            @(Model.Customer?.FullName
+                                                    ?? Model.Customer?.UserName
+                                                    ?? "Unknown Customer")
+                    </strong>
+                </div>
+
+                </div>
+
+
+                <div class="service-detail-item">
+
+                    <div class="service-detail-icon">
+                        <i class="bi bi-envelope"></i>
+                    </div>
+
+                    <div>
+                        <span>Owner Email</span>
+
+                        <strong>
+                            @(Model.Customer?.Email ?? "-")
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===============================================
+             RECORD SUMMARY
+             =============================================== -->
+        <div class="service-summary-grid">
+
+            <div class="service-summary-card">
+
+                <div class="service-summary-icon total">
+                    <i class="bi bi-journal-text"></i>
+                </div>
+
+                <div>
+                    <span>Total Service Records</span>
+                    <strong>@serviceCount</strong>
+                </div>
+
+            </div>
+
+
+            <div class="service-summary-card">
+
+                <div class="service-summary-icon active">
+                    <i class="bi bi-tools"></i>
+                </div>
+
+                <div>
+                    <span>Active Repairs</span>
+                    <strong>@activeCount</strong>
+                </div>
+
+            </div>
+
+
+            <div class="service-summary-card">
+
+                <div class="service-summary-icon completed">
+                    <i class="bi bi-check2-circle"></i>
+                </div>
+
+                <div>
+                    <span>Completed Repairs</span>
+                    <strong>@completedCount</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===============================================
+             HISTORY HEADING
+             =============================================== -->
+        <div class="service-records-header">
+
+            <div>
+                <h4>Service Records</h4>
+
+                <p>
+                    Complete workshop history for
+                    <strong>@Model.Vehicle.PlateNumber</strong>.
+                </p>
+            </div>
+
+        @if (serviceCount > 0)
+            {
+                <span>
+                    <i class="bi bi-clock-history"></i>
+                    @serviceCount @(serviceCount == 1 ? "record" : "records")
+                </span>
+            }
+
+        </div>
+
+
+        <!-- ===============================================
+             NO HISTORY
+             =============================================== -->
+        @if (!Model.ServiceHistory.Any())
+        {
+            <div class="service-empty-state">
+
+                <div class="service-empty-icon">
+                    <i class="bi bi-journal-x"></i>
+                </div>
+
+                <h5>No Service History</h5>
+
+                <p>
+                    This vehicle does not have any appointment
+                    or repair records yet.
+                </p>
+
+            </div>
+        }
+        else
+        {
+            <!-- ===========================================
+                 SERVICE TIMELINE
+                 =========================================== -->
+            <div class="service-timeline">
+
+                @foreach (var item in Model.ServiceHistory)
+                {
+                    var statusText =
+                    !string.IsNullOrWhiteSpace(item.RepairStatus)
+                    ? item.RepairStatus
+                    : item.AppointmentStatus;
+
+                    var statusClass =
+                    statusText switch
+                    {
+                        "Completed" => "completed",
+                        "In Progress" => "in-progress",
+                        "Assigned" => "assigned",
+                        "Approved" => "approved",
+                        "Pending" => "pending",
+                        "Rejected" => "rejected",
+                        "Cancelled" => "cancelled",
+                        _ => "default"
+                    };
+
+
+                    <div class="service-timeline-item">
+
+                        <!-- TIMELINE -->
+                        <div class="service-timeline-marker">
+
+                            <div class="service-timeline-dot @statusClass">
+
+                                @if (statusText == "Completed")
+                                {
+                                    <i class="bi bi-check-lg"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-tools"></i>
+                                }
+
+                        </div>
+
+                        <div class="service-timeline-line"></div>
+
+                    </div>
+
+
+                    <!-- RECORD CARD -->
+                    <div class="service-record-card">
+
+                        <!-- RECORD TOP -->
+                        <div class="service-record-top">
+
+                            <div>
+
+                                <div class="service-record-type">
+                                    <i class="bi bi-wrench-adjustable"></i>
+                                    @item.ServiceType
+                                </div>
+
+                                <div class="service-record-date">
+
+                                    <i class="bi bi-calendar3"></i>
+
+                                    @item.AppointmentDate.ToString("dd MMMM yyyy")
+
+                                    <span>•</span>
+
+                                    <i class="bi bi-clock"></i>
+
+                                    @DateTime.Today
+                                    .Add(item.AppointmentTime)
+                                    .ToString("hh:mm tt")
+
+                                </div>
+
+                            </div>
+
+
+                            <span class="service-status-badge @statusClass">
+                                @statusText
+                            </span>
+
+                        </div>
+
+
+                        <!-- CUSTOMER COMPLAINT -->
+                        <div class="service-complaint">
+
+                            <div class="service-record-field-icon">
+                                <i class="bi bi-chat-left-text"></i>
+                            </div>
+
+                            <div>
+
+                                <span>Customer Complaint</span>
+
+                                <p>
+                                    @(string.IsNullOrWhiteSpace(item.CustomerComplaint)
+                                                                ? "-"
+                                                                : item.CustomerComplaint)
+                                                                                     </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- REPAIR DETAILS -->
+                        <div class="service-record-detail-grid">
+
+                            <div class="service-record-field">
+
+                                <div class="service-record-field-icon mechanic">
+                                    <i class="bi bi-person-gear"></i>
+                                </div>
+
+                                <div>
+                                    <span>Mechanic</span>
+
+                                    <strong>
+                                        @(string.IsNullOrWhiteSpace(item.MechanicName)
+                                                                        ? "-"
+                                                                        : item.MechanicName)
+                                                                                        </strong>
+                                                                                    </div>
+
+                            </div>
+
+
+                            <div class="service-record-field">
+
+                                <div class="service-record-field-icon issue">
+                                    <i class="bi bi-search"></i>
+                                </div>
+
+                                <div>
+                                    <span>Issue Found</span>
+
+                                    <strong>
+                                        @(string.IsNullOrWhiteSpace(item.IssueFound)
+                                                                        ? "Not recorded"
+                                                                        : item.IssueFound)
+                                                                                      </strong>
+                                                                                  </div>
+
+                            </div>
+
+
+                            <div class="service-record-field">
+
+                                <div class="service-record-field-icon action">
+                                    <i class="bi bi-wrench"></i>
+                                </div>
+
+                                <div>
+                                    <span>Action Taken</span>
+
+                                    <strong>
+                                        @(string.IsNullOrWhiteSpace(item.ActionTaken)
+                                                                        ? "Not recorded"
+                                                                        : item.ActionTaken)
+                            </strong>
+                        </div>
+
+                                </div>
+
+
+                    @if (item.CompletedAt.HasValue)
+                                {
+                                    <div class="service-record-field">
+
+                                        <div class="service-record-field-icon completion">
+                                            <i class="bi bi-check2-circle"></i>
+                                        </div>
+
+                                        <div>
+                                            <span>Repair Completed</span>
+
+                                            <strong>
+                                                @item.CompletedAt.Value.ToString(
+                                                "dd MMM yyyy, hh:mm tt")
+                            </strong>
+                        </div>
+
+                    </div>
+                                        }
+
+                            </div>
+
+
+                            <!-- RECORD FOOTER -->
+                            <div class="service-record-footer">
+
+                                <div class="service-record-reference">
+
+                                    <span>
+                                        Appointment #@item.AppointmentId
+                                    </span>
+
+                                    @if (item.RepairId.HasValue)
+                                    {
+                                        <span class="separator">•</span>
+
+                                        <span>
+                                            Repair #@item.RepairId
+                                        </span>
+                                    }
+
+                                </div>
+
+
+                                @if (item.RepairId.HasValue)
+                                {
+                                    <a asp-controller="Admin"
+                                       asp-action="Repairs">
+
+                                        Repair Management
+
+                                        <i class="bi bi-arrow-right"></i>
+
+                                    </a>
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+        }
+    }
+
+</div>

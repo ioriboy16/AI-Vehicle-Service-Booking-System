@@ -1,0 +1,222 @@
+﻿@page
+@model GenerateRecoveryCodesModel
+
+@{
+    ViewData["Title"] = "Generate Recovery Codes";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+
+<!-- PAGE HEADER -->
+
+<div class="account-page-header">
+
+    <div class="account-page-icon">
+        <i class="bi bi-key"></i>
+    </div>
+
+    <div>
+        <p class="account-eyebrow mb-1">
+            ACCOUNT SECURITY
+        </p>
+
+        <h2 class="fw-bold mb-1">
+            Generate Recovery Codes
+        </h2>
+
+        <p class="text-muted mb-0">
+            Create a new set of backup codes for your
+            two-factor authentication.
+        </p>
+    </div>
+
+</div>
+
+
+<!-- WARNING -->
+
+<div class="recovery-generate-warning">
+
+    <div class="recovery-generate-warning-icon">
+        <i class="bi bi-exclamation-triangle"></i>
+    </div>
+
+    <div>
+        <span class="recovery-generate-warning-label">
+            IMPORTANT
+        </span>
+
+        <h5>
+            Your existing recovery codes will be replaced
+        </h5>
+
+        <p>
+            Generating a new set will make your previous
+            recovery codes unusable. Make sure you store
+            the new codes in a safe place.
+        </p>
+    </div>
+
+</div>
+
+
+<!-- INFORMATION CARD -->
+
+<div class="recovery-generate-card">
+
+    <div class="recovery-generate-card-header">
+
+        <div>
+            <h5>
+                Before you continue
+            </h5>
+
+            <p>
+                Recovery codes provide backup access if you
+                cannot use your authenticator app.
+            </p>
+        </div>
+
+        <i class="bi bi-shield-lock"></i>
+
+    </div>
+
+
+    <div class="recovery-info-list">
+
+        <div class="recovery-info-item">
+
+            <div class="recovery-info-icon">
+                <i class="bi bi-123"></i>
+            </div>
+
+            <div>
+                <strong>
+                    10 new recovery codes
+                </strong>
+
+                <span>
+                    A new set of 10 backup recovery codes
+                    will be generated for your account.
+                </span>
+            </div>
+
+        </div>
+
+
+        <div class="recovery-info-item">
+
+            <div class="recovery-info-icon">
+                <i class="bi bi-arrow-repeat"></i>
+            </div>
+
+            <div>
+                <strong>
+                    Previous codes will be replaced
+                </strong>
+
+                <span>
+                    Any recovery codes from your previous
+                    set should no longer be used after
+                    generating a new set.
+                </span>
+            </div>
+
+        </div>
+
+
+        <div class="recovery-info-item">
+
+            <div class="recovery-info-icon">
+                <i class="bi bi-phone"></i>
+            </div>
+
+            <div>
+                <strong>
+                    Your authenticator stays connected
+                </strong>
+
+                <span>
+                    Generating recovery codes does not reset
+                    or change your current authenticator key.
+                </span>
+            </div>
+
+        </div>
+
+
+        <div class="recovery-info-item">
+
+            <div class="recovery-info-icon">
+                <i class="bi bi-lock"></i>
+            </div>
+
+            <div>
+                <strong>
+                    Keep them private
+                </strong>
+
+                <span>
+                    Store your recovery codes somewhere secure
+                    and do not share them with anyone.
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ACTIONS -->
+
+<div class="recovery-generate-actions">
+
+    <a asp-page="./TwoFactorAuthentication"
+       class="btn btn-outline-secondary">
+
+        <i class="bi bi-arrow-left me-1"></i>
+        Cancel
+
+    </a>
+
+
+    <form method="post" class="m-0">
+
+        <button type="submit"
+                class="btn btn-danger">
+
+            <i class="bi bi-arrow-repeat me-1"></i>
+            Generate New Codes
+
+        </button>
+
+    </form>
+
+</div>
+
+
+<!-- SECURITY NOTE -->
+
+<div class="recovery-generate-note">
+
+    <i class="bi bi-info-circle"></i>
+
+    <span>
+        If you want to replace the authenticator key itself,
+        use
+        <a asp-page="./ResetAuthenticator">
+            Reset Authenticator
+        </a>
+        instead.
+    </span>
+
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

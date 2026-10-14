@@ -1,0 +1,1264 @@
+﻿@model AIVehicleWorkshopSystem.Models.Appointment
+
+@{
+    ViewData["Title"] = "Appointment Details";
+}
+
+<div class="appointment-details-page">
+
+    <div class="container py-4 py-lg-5">
+
+        <div class="details-container">
+
+            <!-- =====================================================
+                 ALERTS
+                 ===================================================== -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show
+                                border-0 shadow-sm rounded-3 mb-4">
+
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    @TempData["SuccessMessage"]
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert">
+                    </button>
+
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show
+                                border-0 shadow-sm rounded-3 mb-4">
+
+                    <i class="bi bi-exclamation-circle-fill me-2"></i>
+                    @TempData["ErrorMessage"]
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert">
+                    </button>
+
+                </div>
+            }
+
+
+            <!-- =====================================================
+                 PAGE HEADER
+                 ===================================================== -->
+
+            <div class="page-header">
+
+                <div>
+
+                    <div class="page-label">
+                        <i class="bi bi-calendar-check-fill"></i>
+                        APPOINTMENT MANAGEMENT
+                    </div>
+
+                    <h2>
+                        Appointment #@Model.AppointmentId
+                    </h2>
+
+                    <p>
+                        Review customer appointment information and manage its status.
+                    </p>
+
+                </div>
+
+
+                <a asp-controller="Admin"
+                   asp-action="Appointments"
+                   class="back-button">
+
+                    <i class="bi bi-arrow-left"></i>
+                    Back to Appointments
+
+                </a>
+
+            </div>
+
+
+            <!-- =====================================================
+                 MAIN CARD
+                 ===================================================== -->
+
+            <div class="details-card">
+
+                <!-- CARD HEADER -->
+                <div class="details-card-header">
+
+                    <div class="header-left">
+
+                        <div class="header-icon">
+                            <i class="bi bi-calendar2-check"></i>
+                        </div>
+
+                        <div>
+
+                            <span class="header-caption">
+                                SERVICE APPOINTMENT
+                            </span>
+
+                            <h4>
+                                Appointment Details
+                            </h4>
+
+                            <p>
+                                Booking information submitted by the customer.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- STATUS -->
+                    @if (Model.AppointmentStatus == "Pending")
+                    {
+                        <span class="status-badge pending">
+                            <i class="bi bi-clock-fill"></i>
+                            Pending
+                        </span>
+                    }
+                    else if (Model.AppointmentStatus == "Approved")
+                    {
+                        <span class="status-badge approved">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Approved
+                        </span>
+                    }
+                    else if (Model.AppointmentStatus == "Rejected")
+                    {
+                        <span class="status-badge rejected">
+                            <i class="bi bi-x-circle-fill"></i>
+                            Rejected
+                        </span>
+                    }
+                    else if (Model.AppointmentStatus == "Cancelled")
+                    {
+                        <span class="status-badge cancelled">
+                            <i class="bi bi-dash-circle-fill"></i>
+                            Cancelled
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="status-badge cancelled">
+                            @Model.AppointmentStatus
+                        </span>
+                    }
+
+                </div>
+
+
+                <!-- =================================================
+                     INFORMATION
+                     ================================================= -->
+
+                <div class="details-content">
+
+                    <div class="info-grid">
+
+
+                        <!-- CUSTOMER -->
+                        <div class="info-card">
+
+                            <div class="info-icon customer">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+
+                            <div class="info-content">
+
+                                <span>
+                                    Customer
+                                </span>
+
+                                <strong>
+                                    @ViewBag.CustomerEmail
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- VEHICLE -->
+                        <div class="info-card">
+
+                            <div class="info-icon vehicle">
+                                <i class="bi bi-car-front-fill"></i>
+                            </div>
+
+                            <div class="info-content">
+
+                                <span>
+                                    Vehicle
+                                </span>
+
+                                @if (Model.Vehicle != null)
+                                {
+                                    <strong>
+                                        @Model.Vehicle.Brand @Model.Vehicle.Model
+                                    </strong>
+
+                                    <small>
+                                        @Model.Vehicle.PlateNumber
+                                    </small>
+                                }
+                                else
+                                {
+                                    <strong class="unavailable">
+                                        Vehicle information unavailable
+                                    </strong>
+                                }
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- DATE -->
+                        <div class="info-card">
+
+                            <div class="info-icon date">
+                                <i class="bi bi-calendar3"></i>
+                            </div>
+
+                            <div class="info-content">
+
+                                <span>
+                                    Appointment Date
+                                </span>
+
+                                <strong>
+                                    @Model.AppointmentDate.ToString("dd MMMM yyyy")
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- TIME -->
+                        <div class="info-card">
+
+                            <div class="info-icon time">
+                                <i class="bi bi-clock-fill"></i>
+                            </div>
+
+                            <div class="info-content">
+
+                                <span>
+                                    Appointment Time
+                                </span>
+
+                                <strong>
+                                    @(DateTime.Today.Add(Model.AppointmentTime).ToString("hh:mm tt"))
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- SERVICE -->
+                        <div class="info-card">
+
+                            <div class="info-icon service">
+                                <i class="bi bi-tools"></i>
+                            </div>
+
+                            <div class="info-content">
+
+                                <span>
+                                    Service Type
+                                </span>
+
+                                <strong>
+                                    @Model.ServiceType
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- SUBMITTED -->
+                        <div class="info-card">
+
+                            <div class="info-icon submitted">
+                                <i class="bi bi-send-check-fill"></i>
+                            </div>
+
+                            <div class="info-content">
+
+                                <span>
+                                    Submitted
+                                </span>
+
+                                <strong>
+                                    @Model.CreatedAt.ToString("dd MMM yyyy")
+                                </strong>
+
+                                <small>
+                                    @Model.CreatedAt.ToString("hh:mm tt")
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         CUSTOMER COMPLAINT
+                         ================================================= -->
+
+                    <div class="complaint-section">
+
+                        <div class="complaint-header">
+
+                            <div class="complaint-icon">
+                                <i class="bi bi-chat-left-text-fill"></i>
+                            </div>
+
+                            <div>
+
+                                <h5>
+                                    Customer Complaint
+                                </h5>
+
+                                <p>
+                                    Issue or symptom reported during booking.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="complaint-box">
+
+                            @if (string.IsNullOrWhiteSpace(Model.CustomerComplaint))
+                            {
+                                <span class="no-complaint">
+                                    No complaint was provided by the customer.
+                                </span>
+                            }
+                            else
+                            {
+                                @Model.CustomerComplaint
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     ACTION AREA
+                     ================================================= -->
+
+                <div class="details-actions">
+
+                    <div class="action-info">
+
+                        @if (Model.AppointmentStatus == "Pending")
+                        {
+                            <i class="bi bi-info-circle"></i>
+
+                            <span>
+                                Review this appointment before approving or rejecting it.
+                            </span>
+                        }
+                        else if (Model.AppointmentStatus == "Approved"
+                        && ViewBag.RepairExists == false)
+                        {
+                            <i class="bi bi-check-circle"></i>
+
+                            <span>
+                                This appointment has been approved and is ready for repair creation.
+                            </span>
+                        }
+                        else if (ViewBag.RepairExists == true)
+                        {
+                            <i class="bi bi-wrench-adjustable-circle"></i>
+
+                            <span>
+                                A repair record has already been created for this appointment.
+                            </span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-info-circle"></i>
+
+                            <span>
+                                This appointment is currently @Model.AppointmentStatus.ToLower().
+                            </span>
+                        }
+
+                    </div>
+
+
+                    <div class="action-buttons">
+
+
+                        <!-- PENDING -->
+                        @if (Model.AppointmentStatus == "Pending")
+                        {
+                            <form asp-controller="Admin"
+                                  asp-action="RejectAppointment"
+                                  asp-route-id="@Model.AppointmentId"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="action-button reject-button"
+                                        onclick="return confirm('Reject this appointment?');">
+
+                                    <i class="bi bi-x-lg"></i>
+                                    Reject
+
+                                </button>
+
+                            </form>
+
+
+                            <form asp-controller="Admin"
+                                  asp-action="ApproveAppointment"
+                                  asp-route-id="@Model.AppointmentId"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="action-button approve-button"
+                                        onclick="return confirm('Approve this appointment?');">
+
+                                    <i class="bi bi-check-lg"></i>
+                                    Approve
+
+                                </button>
+
+                            </form>
+                        }
+
+
+                        <!-- APPROVED BUT NO REPAIR -->
+                        @if (Model.AppointmentStatus == "Approved"
+                                                && ViewBag.RepairExists == false)
+                        {
+                            <a asp-controller="Admin"
+                               asp-action="CreateRepair"
+                               asp-route-appointmentId="@Model.AppointmentId"
+                               class="action-button repair-button">
+
+                                <i class="bi bi-wrench-adjustable"></i>
+                                Create Repair
+
+                            </a>
+                        }
+
+
+                        <!-- REPAIR EXISTS -->
+                        @if (ViewBag.RepairExists == true)
+                        {
+                            <span class="repair-created">
+
+                                <i class="bi bi-check-circle-fill"></i>
+                                Repair Created
+
+                            </span>
+
+
+                            <a asp-controller="Admin"
+                               asp-action="Repairs"
+                               class="action-button view-repair-button">
+
+                                View Repairs
+                                <i class="bi bi-arrow-right"></i>
+
+                            </a>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    /* =========================================================
+           PAGE
+           ========================================================= */
+
+    .appointment-details-page {
+        min-height: 100vh;
+        background: #f6f8fb;
+    }
+
+    .details-container {
+        max-width: 1050px;
+        margin: 0 auto;
+    }
+
+
+    /* =========================================================
+           PAGE HEADER
+           ========================================================= */
+
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 22px;
+    }
+
+    .page-label {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 6px;
+        color: #0d6efd;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .7px;
+    }
+
+    .page-header h2 {
+        margin: 0 0 5px;
+        color: #252d38;
+        font-size: 32px;
+        font-weight: 750;
+    }
+
+    .page-header p {
+        margin: 0;
+        color: #87909b;
+        font-size: 13px;
+    }
+
+
+    /* BACK BUTTON */
+
+    .back-button {
+        min-height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 9px 15px;
+        color: #5f6975;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        background: #ffffff;
+        border: 1px solid #dce1e6;
+        border-radius: 9px;
+        transition: .15s ease;
+        white-space: nowrap;
+    }
+
+        .back-button:hover {
+            color: #0d6efd;
+            background: #f8fbff;
+            border-color: #b9d3ff;
+        }
+
+
+    /* =========================================================
+           MAIN CARD
+           ========================================================= */
+
+    .details-card {
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid #e4e9ee;
+        border-radius: 17px;
+        box-shadow: 0 5px 22px rgba(0, 0, 0, .04);
+    }
+
+
+    /* =========================================================
+           CARD HEADER
+           ========================================================= */
+
+    .details-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 21px 24px;
+        background: linear-gradient( 135deg, #f8fbff, #ffffff );
+        border-bottom: 1px solid #edf0f3;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+    }
+
+    .header-icon {
+        width: 46px;
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #0d6efd;
+        font-size: 19px;
+        background: #eaf2ff;
+        border-radius: 12px;
+    }
+
+    .header-caption {
+        display: block;
+        margin-bottom: 2px;
+        color: #8d97a2;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .7px;
+    }
+
+    .details-card-header h4 {
+        margin: 0 0 2px;
+        color: #303945;
+        font-size: 17px;
+        font-weight: 750;
+    }
+
+    .details-card-header p {
+        margin: 0;
+        color: #929ba6;
+        font-size: 11px;
+    }
+
+
+    /* =========================================================
+           STATUS
+           ========================================================= */
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 7px 11px;
+        font-size: 10px;
+        font-weight: 750;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+
+        .status-badge.pending {
+            color: #856100;
+            background: #fff3cd;
+        }
+
+        .status-badge.approved {
+            color: #157347;
+            background: #e7f7ee;
+        }
+
+        .status-badge.rejected {
+            color: #b42318;
+            background: #ffeded;
+        }
+
+        .status-badge.cancelled {
+            color: #68717c;
+            background: #eef0f2;
+        }
+
+
+    /* =========================================================
+           CONTENT
+           ========================================================= */
+
+    .details-content {
+        padding: 23px 24px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+
+
+    /* =========================================================
+           INFO CARD
+           ========================================================= */
+
+    .info-card {
+        min-height: 88px;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 14px;
+        background: #fafbfc;
+        border: 1px solid #e7ebef;
+        border-radius: 11px;
+    }
+
+    .info-icon {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 14px;
+        border-radius: 9px;
+    }
+
+        .info-icon.customer {
+            color: #6554c0;
+            background: #f0edff;
+        }
+
+        .info-icon.vehicle {
+            color: #0d6efd;
+            background: #eaf2ff;
+        }
+
+        .info-icon.date {
+            color: #198754;
+            background: #eaf8f0;
+        }
+
+        .info-icon.time {
+            color: #9b7000;
+            background: #fff6d9;
+        }
+
+        .info-icon.service {
+            color: #d05b13;
+            background: #fff1e8;
+        }
+
+        .info-icon.submitted {
+            color: #087990;
+            background: #e8f7fa;
+        }
+
+    .info-content {
+        min-width: 0;
+    }
+
+        .info-content > span {
+            display: block;
+            margin-bottom: 3px;
+            color: #8a949f;
+            font-size: 10px;
+        }
+
+        .info-content strong {
+            display: block;
+            overflow: hidden;
+            color: #39434e;
+            font-size: 12px;
+            font-weight: 700;
+            text-overflow: ellipsis;
+        }
+
+        .info-content small {
+            display: block;
+            margin-top: 2px;
+            color: #8b949f;
+            font-size: 10px;
+        }
+
+        .info-content .unavailable {
+            color: #929ba6;
+            font-weight: 500;
+        }
+
+
+    /* =========================================================
+           COMPLAINT
+           ========================================================= */
+
+    .complaint-section {
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 1px solid #edf0f3;
+    }
+
+    .complaint-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .complaint-icon {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #0d6efd;
+        background: #eaf2ff;
+        border-radius: 8px;
+    }
+
+    .complaint-header h5 {
+        margin: 0 0 1px;
+        color: #3b4550;
+        font-size: 13px;
+        font-weight: 750;
+    }
+
+    .complaint-header p {
+        margin: 0;
+        color: #929ba6;
+        font-size: 10px;
+    }
+
+    .complaint-box {
+        min-height: 64px;
+        padding: 14px 16px;
+        color: #4d5762;
+        font-size: 12px;
+        line-height: 1.6;
+        background: #f8fafc;
+        border: 1px solid #e4e9ee;
+        border-radius: 10px;
+    }
+
+    .no-complaint {
+        color: #929ba6;
+        font-style: italic;
+    }
+
+
+    /* =========================================================
+           ACTION FOOTER
+           ========================================================= */
+
+    .details-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 17px 24px;
+        background: #fafbfc;
+        border-top: 1px solid #edf0f3;
+    }
+
+    .action-info {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #7c8793;
+        font-size: 10px;
+    }
+
+        .action-info i {
+            color: #0d6efd;
+            font-size: 13px;
+        }
+
+    .action-buttons {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+        .action-buttons form {
+            margin: 0;
+        }
+
+
+    /* =========================================================
+           ACTION BUTTONS
+           ========================================================= */
+
+    .action-button {
+        min-height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 15px;
+        font-size: 11px;
+        font-weight: 650;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: .15s ease;
+        white-space: nowrap;
+    }
+
+
+    /* REJECT */
+
+    .reject-button {
+        color: #dc3545;
+        background: #ffffff;
+        border: 1px solid #efb8be;
+    }
+
+        .reject-button:hover {
+            color: #ffffff;
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+
+
+    /* APPROVE */
+
+    .approve-button {
+        color: #ffffff;
+        background: #198754;
+        border: 1px solid #198754;
+    }
+
+        .approve-button:hover {
+            background: #157347;
+            border-color: #157347;
+        }
+
+
+    /* CREATE REPAIR */
+
+    .repair-button {
+        color: #ffffff;
+        background: #0d6efd;
+        border: 1px solid #0d6efd;
+    }
+
+        .repair-button:hover {
+            color: #ffffff;
+            background: #0b5ed7;
+            border-color: #0b5ed7;
+        }
+
+
+    /* VIEW REPAIR */
+
+    .view-repair-button {
+        color: #0d6efd;
+        background: #ffffff;
+        border: 1px solid #cfe0ff;
+    }
+
+        .view-repair-button:hover {
+            color: #ffffff;
+            background: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+
+    /* REPAIR CREATED */
+
+    .repair-created {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 10px;
+        color: #157347;
+        font-size: 10px;
+        font-weight: 700;
+        background: #e7f7ee;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+
+
+    /* =========================================================
+           DARK MODE
+           ========================================================= */
+
+    html[data-bs-theme="dark"] .appointment-details-page {
+        background: #101318 !important;
+        color: #e5e7eb;
+    }
+
+    html[data-bs-theme="dark"] .page-header h2 {
+        color: #f1f5f9;
+    }
+
+    html[data-bs-theme="dark"] .page-header p {
+        color: #8f9aaa;
+    }
+
+    html[data-bs-theme="dark"] .back-button {
+        color: #b7c0cc;
+        background: #181d25;
+        border-color: #333d49;
+    }
+
+        html[data-bs-theme="dark"] .back-button:hover {
+            color: #60a5fa;
+            background: #1d232c;
+            border-color: #31558a;
+        }
+
+
+    /* MAIN CARD */
+
+    html[data-bs-theme="dark"] .details-card {
+        background: #181d25;
+        border-color: #2b3440;
+        box-shadow: 0 5px 22px rgba(0, 0, 0, .2);
+    }
+
+    html[data-bs-theme="dark"] .details-card-header {
+        background: linear-gradient( 135deg, #181e27, #181d25 );
+        border-color: #303946;
+    }
+
+    html[data-bs-theme="dark"] .header-icon,
+    html[data-bs-theme="dark"] .complaint-icon {
+        color: #60a5fa;
+        background: rgba(59, 130, 246, .14);
+    }
+
+    html[data-bs-theme="dark"] .header-caption {
+        color: #7f8a99;
+    }
+
+    html[data-bs-theme="dark"] .details-card-header h4 {
+        color: #f1f5f9;
+    }
+
+    html[data-bs-theme="dark"] .details-card-header p {
+        color: #8793a3;
+    }
+
+
+    /* INFO CARDS */
+
+    html[data-bs-theme="dark"] .info-card {
+        background: #141920;
+        border-color: #303946;
+    }
+
+    html[data-bs-theme="dark"] .info-content > span {
+        color: #8793a3;
+    }
+
+    html[data-bs-theme="dark"] .info-content strong {
+        color: #e5edf6;
+    }
+
+    html[data-bs-theme="dark"] .info-content small {
+        color: #8f9aaa;
+    }
+
+    html[data-bs-theme="dark"] .info-icon.customer {
+        color: #b8a8ff;
+        background: rgba(112, 89, 255, .13);
+    }
+
+    html[data-bs-theme="dark"] .info-icon.vehicle {
+        color: #60a5fa;
+        background: rgba(59, 130, 246, .14);
+    }
+
+    html[data-bs-theme="dark"] .info-icon.date {
+        color: #65d69a;
+        background: rgba(25, 135, 84, .17);
+    }
+
+    html[data-bs-theme="dark"] .info-icon.time {
+        color: #f6cf62;
+        background: rgba(255, 193, 7, .13);
+    }
+
+    html[data-bs-theme="dark"] .info-icon.service {
+        color: #ffad70;
+        background: rgba(253, 126, 20, .13);
+    }
+
+    html[data-bs-theme="dark"] .info-icon.submitted {
+        color: #67d4e7;
+        background: rgba(13, 202, 240, .12);
+    }
+
+
+    /* COMPLAINT */
+
+    html[data-bs-theme="dark"] .complaint-section {
+        border-color: #303946;
+    }
+
+    html[data-bs-theme="dark"] .complaint-header h5 {
+        color: #e5edf6;
+    }
+
+    html[data-bs-theme="dark"] .complaint-header p {
+        color: #8793a3;
+    }
+
+    html[data-bs-theme="dark"] .complaint-box {
+        color: #cbd5e1;
+        background: #10151c;
+        border-color: #303946;
+    }
+
+
+    /* FOOTER */
+
+    html[data-bs-theme="dark"] .details-actions {
+        background: #141920;
+        border-color: #303946;
+    }
+
+    html[data-bs-theme="dark"] .action-info {
+        color: #8f9aaa;
+    }
+
+        html[data-bs-theme="dark"] .action-info i {
+            color: #60a5fa;
+        }
+
+    html[data-bs-theme="dark"] .reject-button {
+        color: #ff7d88;
+        background: #181d25;
+        border-color: #713a42;
+    }
+
+        html[data-bs-theme="dark"] .reject-button:hover {
+            color: #ffffff;
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+
+    html[data-bs-theme="dark"] .view-repair-button {
+        color: #60a5fa;
+        background: #181d25;
+        border-color: #31558a;
+    }
+
+
+    /* STATUS DARK */
+
+    html[data-bs-theme="dark"] .status-badge.pending {
+        color: #f6cf62;
+        background: rgba(255, 193, 7, .13);
+    }
+
+    html[data-bs-theme="dark"] .status-badge.approved,
+    html[data-bs-theme="dark"] .repair-created {
+        color: #65d69a;
+        background: rgba(25, 135, 84, .17);
+    }
+
+    html[data-bs-theme="dark"] .status-badge.rejected {
+        color: #ff8b96;
+        background: rgba(220, 53, 69, .15);
+    }
+
+    html[data-bs-theme="dark"] .status-badge.cancelled {
+        color: #aeb8c5;
+        background: #252c36;
+    }
+
+
+    /* =========================================================
+           RESPONSIVE
+           ========================================================= */
+
+    @@media (max-width: 991px) {
+
+        .info-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .details-actions {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .action-buttons {
+            width: 100%;
+        }
+    }
+
+
+    @@media (max-width: 767px) {
+
+        .appointment-details-page .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .page-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+            .page-header h2 {
+                font-size: 27px;
+            }
+
+        .back-button {
+            width: 100%;
+        }
+
+        .details-card-header {
+            align-items: flex-start;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+            .action-buttons form {
+                width: 100%;
+            }
+
+        .action-button {
+            width: 100%;
+        }
+    }
+
+
+    @@media (max-width: 480px) {
+
+        .details-content {
+            padding: 18px;
+        }
+
+        .details-card-header {
+            padding: 18px;
+        }
+
+        .details-actions {
+            padding: 16px 18px;
+        }
+
+        .status-badge {
+            flex-shrink: 0;
+        }
+    }
+
+</style>

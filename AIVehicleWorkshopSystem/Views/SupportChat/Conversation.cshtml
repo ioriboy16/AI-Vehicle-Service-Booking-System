@@ -1,0 +1,945 @@
+﻿@model AIVehicleWorkshopSystem.Models.SupportConversation
+@using AIVehicleWorkshopSystem.Models
+
+@{
+    ViewData["Title"] = "Support Chat";
+
+    var messages =
+        ViewBag.Messages as List<SupportMessage>
+        ?? new List<SupportMessage>();
+
+    var senders =
+        ViewBag.Senders as Dictionary<string, string>
+        ?? new Dictionary<string, string>();
+
+    var senderRoles =
+        ViewBag.SenderRoles as Dictionary<string, string>
+        ?? new Dictionary<string, string>();
+
+    var currentUserId =
+        ViewBag.CurrentUserId as string ?? string.Empty;
+
+    var isAdmin =
+        (bool)(ViewBag.IsAdmin ?? false);
+
+    var customerName =
+        Model.Customer?.FullName ?? "Customer";
+}
+
+
+<div class="support-chat-page">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="support-chat-header">
+
+        <div class="support-chat-header-left">
+
+            <div class="support-chat-avatar">
+                <i class="bi bi-headset"></i>
+            </div>
+
+            <div>
+
+                <div class="support-chat-title-row">
+
+                    <h1>
+                        @(isAdmin? customerName : "Customer Support")
+                    </h1>
+
+                    <span class="support-online-badge">
+                        <span></span>
+                        Support
+                    </span>
+
+                </div>
+
+                <p>
+                    @if (isAdmin)
+                    {
+                        <text>Support conversation with @customerName</text>
+                    }
+                    else
+                    {
+                        <text>Chat directly with the Serish AutoCare administration team.</text>
+                    }
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="support-chat-header-actions">
+
+            @if (isAdmin)
+            {
+                <a asp-controller="Admin"
+                   asp-action="CustomerMessages"
+                   class="btn btn-outline-secondary btn-sm">
+
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Messages
+
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Customer"
+                   asp-action="Dashboard"
+                   class="btn btn-outline-secondary btn-sm">
+
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Dashboard
+
+                </a>
+            }
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         CHAT
+         ===================================================== -->
+
+    <div class="support-chat-shell">
+
+        <!-- INFO BAR -->
+
+        <div class="support-chat-info">
+
+            <i class="bi bi-shield-check"></i>
+
+            <span>
+                @if (isAdmin)
+                {
+                    <text>
+                        Only administrators and this customer can access this conversation.
+                    </text>
+                }
+                else
+                {
+                    <text>
+                        This conversation is private between you and the Serish AutoCare administration team.
+                    </text>
+                }
+            </span>
+
+        </div>
+
+
+
+        <!-- MESSAGES -->
+
+        <div id="supportMessages"
+             class="support-messages">
+
+            @if (!messages.Any())
+            {
+                <div id="emptySupportChat"
+                     class="support-empty-chat">
+
+                    <div class="support-empty-icon">
+                        <i class="bi bi-chat-dots"></i>
+                    </div>
+
+                    @if (isAdmin)
+                    {
+                        <h3>No messages yet</h3>
+
+                        <p>
+                            This customer has not sent a support message yet.
+                        </p>
+                    }
+                    else
+                    {
+                        <h3>How can we help?</h3>
+
+                        <p>
+                            Send a message to the administration team about
+                            appointments, invoices or other workshop enquiries.
+                        </p>
+                    }
+
+                </div>
+            }
+
+
+            @foreach (var chatMessage in messages)
+            {
+                var isMine =
+                chatMessage.SenderId == currentUserId;
+
+                var senderName =
+                senders.ContainsKey(chatMessage.SenderId)
+                ? senders[chatMessage.SenderId]
+                : "User";
+
+                var senderRole =
+                senderRoles.ContainsKey(chatMessage.SenderId)
+                ? senderRoles[chatMessage.SenderId]
+                : "User";
+
+                <div class="support-message-row @(isMine ? "mine" : "other")"
+                     data-message-id="@chatMessage.MessageId">
+
+                    <div class="support-message">
+
+                        @if (!isMine)
+                        {
+                            <div class="support-message-sender">
+
+                                <span>
+                                    @senderName
+                                </span>
+
+                                <span class="support-role-badge @senderRole.ToLower()">
+                                    @senderRole
+                                </span>
+
+                            </div>
+                        }
+
+
+                        <div class="support-message-bubble">
+
+                            @if (!string.IsNullOrWhiteSpace(chatMessage.Message))
+                            {
+                                <div class="support-message-text">
+                                    @chatMessage.Message
+                                </div>
+                            }
+
+
+                            @if (!string.IsNullOrWhiteSpace(chatMessage.AttachmentPath))
+                            {
+                                var isImage =
+                                chatMessage.AttachmentContentType != null &&
+                                chatMessage.AttachmentContentType.StartsWith("image/");
+
+                                if (isImage)
+                                {
+                                    <a href="@chatMessage.AttachmentPath"
+                                       target="_blank"
+                                       class="support-image-link">
+
+                                        <img src="@chatMessage.AttachmentPath"
+                                             alt="Chat attachment"
+                                             class="support-chat-image" />
+
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="@chatMessage.AttachmentPath"
+                                       target="_blank"
+                                       class="support-document">
+
+                                        <div class="support-document-icon">
+                                            <i class="bi bi-file-earmark-pdf"></i>
+                                        </div>
+
+                                        <div>
+                                            <strong>
+                                                @chatMessage.AttachmentFileName
+                                            </strong>
+
+                                            <span>
+                                                PDF Document
+                                            </span>
+                                        </div>
+
+                                        <i class="bi bi-box-arrow-up-right"></i>
+
+                                    </a>
+                                }
+                            }
+
+                        </div>
+
+
+                        <div class="support-message-time">
+                            @(chatMessage.SentAt.ToString("dd MMM, h:mm tt"))
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+
+
+        <!-- ATTACHMENT PREVIEW -->
+
+        <div id="supportAttachmentPreview"
+             class="support-attachment-preview d-none">
+
+            <div class="support-selected-file">
+
+                <i class="bi bi-paperclip"></i>
+
+                <div>
+                    <strong id="supportSelectedFileName"></strong>
+                    <span id="supportSelectedFileSize"></span>
+                </div>
+
+                <button type="button"
+                        id="removeSupportAttachment"
+                        class="support-remove-file">
+
+                    <i class="bi bi-x-lg"></i>
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- COMPOSER -->
+
+        <div class="support-composer">
+
+            <form id="supportMessageForm"
+                  enctype="multipart/form-data">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       id="supportConversationId"
+                       name="conversationId"
+                       value="@Model.ConversationId" />
+
+
+                <input type="file"
+                       id="supportAttachment"
+                       name="attachment"
+                       accept=".jpg,.jpeg,.png,.webp,.pdf"
+                       hidden />
+
+
+                <button type="button"
+                        id="supportAttachmentButton"
+                        class="support-composer-button"
+                        title="Attach file">
+
+                    <i class="bi bi-paperclip"></i>
+
+                </button>
+
+
+                <textarea id="supportMessageInput"
+                          name="message"
+                          rows="1"
+                          maxlength="2000"
+                          placeholder="Type your message..."></textarea>
+
+
+                <button type="submit"
+                        id="supportSendButton"
+                        class="support-send-button">
+
+                    <i class="bi bi-send-fill"></i>
+
+                </button>
+
+            </form>
+
+
+            <div class="support-composer-note">
+                JPG, PNG, WEBP or PDF · Maximum 5 MB
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+
+    <script>
+
+        const conversationId =
+            @Model.ConversationId;
+
+        const currentUserId =
+            @Html.Raw(System.Text.Json.JsonSerializer.Serialize(currentUserId));
+
+
+        const messageContainer =
+            document.getElementById("supportMessages");
+
+        const messageForm =
+            document.getElementById("supportMessageForm");
+
+        const messageInput =
+            document.getElementById("supportMessageInput");
+
+        const attachmentInput =
+            document.getElementById("supportAttachment");
+
+        const attachmentButton =
+            document.getElementById("supportAttachmentButton");
+
+        const attachmentPreview =
+            document.getElementById("supportAttachmentPreview");
+
+        const selectedFileName =
+            document.getElementById("supportSelectedFileName");
+
+        const selectedFileSize =
+            document.getElementById("supportSelectedFileSize");
+
+        const removeAttachmentButton =
+            document.getElementById("removeSupportAttachment");
+
+        const sendButton =
+            document.getElementById("supportSendButton");
+
+
+        // =====================================================
+        // HELPERS
+        // =====================================================
+
+        function escapeHtml(value) {
+
+            if (!value) {
+                return "";
+            }
+
+            const element =
+                document.createElement("div");
+
+            element.textContent = value;
+
+            return element.innerHTML;
+        }
+
+
+        function formatFileSize(bytes) {
+
+            if (!bytes) {
+                return "";
+            }
+
+            if (bytes < 1024) {
+                return bytes + " B";
+            }
+
+            if (bytes < 1024 * 1024) {
+                return (bytes / 1024).toFixed(1) + " KB";
+            }
+
+            return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+        }
+
+
+        function formatMessageTime(dateValue) {
+
+            const date =
+                new Date(dateValue);
+
+            return date.toLocaleString(
+                undefined,
+                {
+                    day: "2-digit",
+                    month: "short",
+                    hour: "numeric",
+                    minute: "2-digit"
+                });
+        }
+
+
+        function scrollToBottom() {
+
+            messageContainer.scrollTop =
+                messageContainer.scrollHeight;
+        }
+
+
+        function removeEmptyState() {
+
+            const emptyState =
+                document.getElementById("emptySupportChat");
+
+            if (emptyState) {
+                emptyState.remove();
+            }
+        }
+
+
+        function clearAttachment() {
+
+            attachmentInput.value = "";
+
+            attachmentPreview.classList.add("d-none");
+
+            selectedFileName.textContent = "";
+
+            selectedFileSize.textContent = "";
+        }
+
+
+        // =====================================================
+        // RENDER MESSAGE
+        // =====================================================
+
+        function appendMessage(data) {
+
+            // Prevent duplicate message when the sender receives
+            // the SignalR broadcast for their own saved message.
+            const existingMessage =
+                document.querySelector(
+                    `[data-message-id="${data.messageId}"]`);
+
+            if (existingMessage) {
+                return;
+            }
+
+
+            removeEmptyState();
+
+
+            const isMine =
+                data.senderId === currentUserId;
+
+
+            const row =
+                document.createElement("div");
+
+            row.className =
+                `support-message-row ${isMine ? "mine" : "other"}`;
+
+            row.dataset.messageId =
+                data.messageId;
+
+
+            let senderHtml = "";
+
+
+            if (!isMine) {
+
+                const roleClass =
+                    (data.senderRole || "user")
+                        .toLowerCase();
+
+                senderHtml = `
+                    <div class="support-message-sender">
+
+                        <span>
+                            ${escapeHtml(data.senderName)}
+                        </span>
+
+                        <span class="support-role-badge ${escapeHtml(roleClass)}">
+                            ${escapeHtml(data.senderRole)}
+                        </span>
+
+                    </div>
+                `;
+            }
+
+
+            let textHtml = "";
+
+
+            if (data.message) {
+
+                textHtml = `
+                    <div class="support-message-text">
+                        ${escapeHtml(data.message)
+                            .replace(/\n/g, "<br>")}
+                    </div>
+                `;
+            }
+
+
+            let attachmentHtml = "";
+
+
+            if (data.attachmentPath) {
+
+                const contentType =
+                    data.attachmentContentType || "";
+
+                const isImage =
+                    contentType.startsWith("image/");
+
+
+                if (isImage) {
+
+                    attachmentHtml = `
+                        <a href="${escapeHtml(data.attachmentPath)}"
+                           target="_blank"
+                           class="support-image-link">
+
+                            <img src="${escapeHtml(data.attachmentPath)}"
+                                 alt="Chat attachment"
+                                 class="support-chat-image">
+
+                        </a>
+                    `;
+                }
+                else {
+
+                    attachmentHtml = `
+                        <a href="${escapeHtml(data.attachmentPath)}"
+                           target="_blank"
+                           class="support-document">
+
+                            <div class="support-document-icon">
+                                <i class="bi bi-file-earmark-pdf"></i>
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    ${escapeHtml(data.attachmentFileName)}
+                                </strong>
+
+                                <span>
+                                    PDF Document
+                                </span>
+
+                            </div>
+
+                            <i class="bi bi-box-arrow-up-right"></i>
+
+                        </a>
+                    `;
+                }
+            }
+
+
+            row.innerHTML = `
+                <div class="support-message">
+
+                    ${senderHtml}
+
+                    <div class="support-message-bubble">
+                        ${textHtml}
+                        ${attachmentHtml}
+                    </div>
+
+                    <div class="support-message-time">
+                        ${escapeHtml(formatMessageTime(data.sentAt))}
+                    </div>
+
+                </div>
+            `;
+
+
+            messageContainer.appendChild(row);
+
+            scrollToBottom();
+        }
+
+
+
+        // =====================================================
+        // SIGNALR
+        // =====================================================
+
+        const connection =
+            new signalR.HubConnectionBuilder()
+                .withUrl("/supportChatHub")
+                .withAutomaticReconnect()
+                .build();
+
+
+        connection.on(
+            "ReceiveSupportMessage",
+            function (data) {
+
+                appendMessage(data);
+            });
+
+
+        async function startConnection() {
+
+            try {
+
+                await connection.start();
+
+                await connection.invoke(
+                    "JoinSupportChat",
+                    conversationId);
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Support chat connection error:",
+                    error);
+
+                setTimeout(
+                    startConnection,
+                    3000);
+            }
+        }
+
+
+        connection.onreconnected(
+            async function () {
+
+                try {
+
+                    await connection.invoke(
+                        "JoinSupportChat",
+                        conversationId);
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "Unable to rejoin support chat:",
+                        error);
+                }
+            });
+
+
+        startConnection();
+
+
+
+        // =====================================================
+        // ATTACHMENT
+        // =====================================================
+
+        attachmentButton.addEventListener(
+            "click",
+            function () {
+
+                attachmentInput.click();
+            });
+
+
+        attachmentInput.addEventListener(
+            "change",
+            function () {
+
+                const file =
+                    attachmentInput.files[0];
+
+
+                if (!file) {
+
+                    clearAttachment();
+
+                    return;
+                }
+
+
+                const maxSize =
+                    5 * 1024 * 1024;
+
+
+                if (file.size > maxSize) {
+
+                    alert(
+                        "Maximum file size is 5 MB.");
+
+                    clearAttachment();
+
+                    return;
+                }
+
+
+                selectedFileName.textContent =
+                    file.name;
+
+                selectedFileSize.textContent =
+                    formatFileSize(file.size);
+
+                attachmentPreview
+                    .classList
+                    .remove("d-none");
+            });
+
+
+        removeAttachmentButton.addEventListener(
+            "click",
+            clearAttachment);
+
+
+
+        // =====================================================
+        // SEND MESSAGE
+        // =====================================================
+
+        messageForm.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+
+                const message =
+                    messageInput.value.trim();
+
+                const file =
+                    attachmentInput.files[0];
+
+
+                if (!message && !file) {
+                    return;
+                }
+
+
+                sendButton.disabled = true;
+
+
+                const formData =
+                    new FormData();
+
+                formData.append(
+                    "conversationId",
+                    conversationId);
+
+                formData.append(
+                    "message",
+                    message);
+
+
+                if (file) {
+
+                    formData.append(
+                        "attachment",
+                        file);
+                }
+
+
+                const antiForgeryToken =
+                    messageForm.querySelector(
+                        'input[name="__RequestVerificationToken"]')
+                        .value;
+
+
+                try {
+
+                        const response =
+        await fetch(
+            "/SupportChat/SendMessage",
+            {
+                method: "POST",
+
+                headers: {
+                    "X-CSRF-TOKEN":
+                        antiForgeryToken,
+
+                    "X-Requested-With":
+                        "XMLHttpRequest"
+                },
+
+                body:
+                    formData,
+
+                credentials:
+                    "same-origin"
+            });
+
+
+                    if (!response.ok) {
+
+                        let errorMessage =
+                            "Unable to send message.";
+
+
+                        try {
+
+                            const result =
+                                await response.json();
+
+                            if (result.error) {
+                                errorMessage =
+                                    result.error;
+                            }
+
+                        }
+                        catch {
+                        }
+
+
+                        alert(errorMessage);
+
+                        return;
+                    }
+
+
+                    messageInput.value = "";
+
+                    messageInput.style.height = "auto";
+
+                    clearAttachment();
+
+                }
+                catch (error) {
+
+                    console.error(error);
+
+                    alert(
+                        "Unable to send message. Please try again.");
+                }
+                finally {
+
+                    sendButton.disabled = false;
+
+                    messageInput.focus();
+                }
+            });
+
+
+
+        // =====================================================
+        // ENTER TO SEND
+        // SHIFT + ENTER FOR NEW LINE
+        // =====================================================
+
+        messageInput.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (event.key === "Enter" &&
+                    !event.shiftKey) {
+
+                    event.preventDefault();
+
+                    messageForm.requestSubmit();
+                }
+            });
+
+
+
+        // =====================================================
+        // AUTO RESIZE TEXTAREA
+        // =====================================================
+
+        messageInput.addEventListener(
+            "input",
+            function () {
+
+                this.style.height = "auto";
+
+                this.style.height =
+                    Math.min(
+                        this.scrollHeight,
+                        120)
+                    + "px";
+            });
+
+
+        scrollToBottom();
+
+    </script>
+}

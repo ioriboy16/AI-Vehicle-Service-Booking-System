@@ -1,0 +1,585 @@
+﻿@model AIVehicleWorkshopSystem.Models.Invoice
+
+@{
+    ViewData["Title"] = "Invoice Details";
+
+    var repair = Model.Repair;
+    var appointment = repair?.Appointment;
+    var vehicle = appointment?.Vehicle;
+}
+
+<div class="container py-4">
+
+    <!-- TOP ACTIONS - NOT PRINTED -->
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                Invoice Details
+            </h2>
+
+            <p class="text-muted mb-0">
+                @Model.InvoiceNumber
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a asp-controller="Admin"
+               asp-action="Invoices"
+               class="btn btn-outline-secondary">
+                Back
+            </a>
+
+            <button type="button"
+                    class="btn btn-primary"
+                    onclick="window.print()">
+                Print Invoice
+            </button>
+
+        </div>
+
+    </div>
+
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show no-print">
+            @TempData["SuccessMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show no-print">
+            @TempData["ErrorMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+        </div>
+    }
+
+
+    <!-- INVOICE -->
+    <div class="card border-0 shadow-sm invoice-card">
+
+        <div class="card-body p-4 p-md-5">
+
+
+            <!-- COMPANY HEADER -->
+            <div class="row align-items-start mb-4">
+
+                <div class="col-md-7">
+
+                    <h2 class="fw-bold mb-1">
+                        SERISH AUTOTECH SERVICES
+                    </h2>
+
+                    <div class="text-muted">
+                        Vehicle Service & Repair
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-5 text-md-end mt-3 mt-md-0">
+
+                    <h3 class="fw-bold mb-2">
+                        INVOICE
+                    </h3>
+
+                    <div>
+                        <strong>Invoice No:</strong>
+                        @Model.InvoiceNumber
+                    </div>
+
+                    <div>
+                        <strong>Date:</strong>
+                        @Model.InvoiceDate.ToString("dd MMMM yyyy")
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <hr />
+
+
+            <!-- CUSTOMER / VEHICLE -->
+            <div class="row g-4 my-3">
+
+                <div class="col-md-6">
+
+                    <h6 class="fw-bold text-uppercase mb-3">
+                        Bill To
+                    </h6>
+
+                    <div class="mb-1">
+                        <strong>@ViewBag.CustomerName</strong>
+                    </div>
+
+                    <div>
+                        @ViewBag.CustomerEmail
+                    </div>
+
+                    <div>
+                        @ViewBag.CustomerPhone
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <h6 class="fw-bold text-uppercase mb-3">
+                        Vehicle Information
+                    </h6>
+
+                    @if (vehicle != null)
+                    {
+                        <div>
+                            <strong>Vehicle:</strong>
+                            @vehicle.Brand @vehicle.Model
+                        </div>
+
+                        <div>
+                            <strong>Plate Number:</strong>
+                            @vehicle.PlateNumber
+                        </div>
+
+                        <div>
+                            <strong>Year:</strong>
+                            @vehicle.ManufacturingYear
+                        </div>
+                    }
+
+                    @if (Model.Mileage.HasValue)
+                    {
+                        <div>
+                            <strong>Mileage:</strong>
+                            @Model.Mileage.Value.ToString("N0") KM
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+
+            <hr />
+
+
+            <!-- REPAIR INFORMATION -->
+            <div class="row g-4 my-3">
+
+                <div class="col-md-6">
+
+                    <h6 class="fw-bold">
+                        Issue Found
+                    </h6>
+
+                    <p class="mb-0">
+                        @(string.IsNullOrWhiteSpace(repair?.Diagnosis)
+                                                ? "-"
+                                                : repair.Diagnosis)
+                    </p>
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <h6 class="fw-bold">
+                        Action Taken
+                    </h6>
+
+                    <p class="mb-0">
+                        @(string.IsNullOrWhiteSpace(repair?.RepairNotes)
+                                                ? "-"
+                                                : repair.RepairNotes)
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            @if (!string.IsNullOrWhiteSpace(Model.Remarks))
+            {
+                <div class="mt-4">
+
+                    <h6 class="fw-bold">
+                        Remarks / Customer Complaint
+                    </h6>
+
+                    <p class="mb-0">
+                        @Model.Remarks
+                    </p>
+
+                </div>
+            }
+
+
+            <!-- ITEMS -->
+            <div class="table-responsive mt-5">
+
+                <table class="table table-bordered align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th style="width: 50px;">
+                                No.
+                            </th>
+
+                            <th>
+                                Description
+                            </th>
+
+                            <th style="width: 120px;">
+                                Type
+                            </th>
+
+                            <th class="text-center"
+                                style="width: 90px;">
+                                Qty
+                            </th>
+
+                            <th class="text-end"
+                                style="width: 150px;">
+                                Unit Price
+                            </th>
+
+                            <th class="text-end"
+                                style="width: 150px;">
+                                Amount
+                            </th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @{
+                            var itemNumber = 1;
+                        }
+
+                        @foreach (var item in Model.InvoiceItems)
+                        {
+                            <tr>
+
+                                <td>
+                                    @itemNumber
+                                </td>
+
+                                <td>
+                                    @item.Description
+                                </td>
+
+                                <td>
+                                    @item.ItemType
+                                </td>
+
+                                <td class="text-center">
+                                    @item.Quantity.ToString("0.##")
+                                </td>
+
+                                <td class="text-end">
+                                    RM @item.UnitPrice.ToString("N2")
+                                </td>
+
+                                <td class="text-end fw-semibold">
+                                    RM @item.Amount.ToString("N2")
+                                </td>
+
+                            </tr>
+
+                            itemNumber++;
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- TOTALS -->
+            <div class="row justify-content-end mt-4">
+
+                <div class="col-md-6 col-lg-5">
+
+                    <table class="table">
+
+                        <tbody>
+
+                            <tr>
+                                <td>
+                                    Subtotal
+                                </td>
+
+                                <td class="text-end">
+                                    RM @Model.Subtotal.ToString("N2")
+                                </td>
+                            </tr>
+
+
+                            <tr class="fw-bold fs-5">
+
+                                <td>
+                                    Total
+                                </td>
+
+                                <td class="text-end">
+                                    RM @Model.TotalAmount.ToString("N2")
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td>
+                                    Payment
+                                </td>
+
+                                <td class="text-end">
+                                    RM @Model.PaidAmount.ToString("N2")
+                                </td>
+
+                            </tr>
+
+
+                            <tr class="fw-bold">
+
+                                <td>
+                                    Balance
+                                </td>
+
+                                <td class="text-end">
+                                    RM @Model.BalanceAmount.ToString("N2")
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+
+                    <div class="text-end mt-3">
+
+                        @if (Model.PaymentStatus == "Paid")
+                        {
+                            <span class="badge bg-success fs-6">
+                                PAID
+                            </span>
+                        }
+                        else if (
+                        Model.PaymentStatus ==
+                        "Partially Paid")
+                        {
+                            <span class="badge bg-warning text-dark fs-6">
+                                PARTIALLY PAID
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger fs-6">
+                                UNPAID
+                            </span>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- RECORD PAYMENT -->
+            @if (Model.PaymentStatus != "Paid" &&
+                        Model.BalanceAmount > 0)
+            {
+                <div class="mt-5 pt-4 border-top no-print">
+
+                    <div class="row">
+
+                        <div class="col-lg-6">
+
+                            <h5 class="fw-bold mb-1">
+                                Record Payment
+                            </h5>
+
+                            <p class="text-muted mb-3">
+                                Record a payment received from the customer.
+                            </p>
+
+                            <form asp-controller="Admin"
+                                  asp-action="RecordPayment"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <input type="hidden"
+                                       name="invoiceId"
+                                       value="@Model.InvoiceId" />
+
+
+                                <div class="mb-3">
+
+                                    <label class="form-label fw-semibold">
+                                        Outstanding Balance
+                                    </label>
+
+                                    <div class="form-control bg-light fw-bold">
+                                        RM @Model.BalanceAmount.ToString("N2")
+                                    </div>
+
+                                </div>
+
+
+                                <div class="mb-3">
+
+                                    <label for="paymentAmount"
+                                           class="form-label fw-semibold">
+
+                                        Payment Amount (RM)
+
+                                    </label>
+
+                                    <div class="input-group">
+
+                                        <span class="input-group-text">
+                                            RM
+                                        </span>
+
+                                        <input type="number"
+                                               id="paymentAmount"
+                                               name="paymentAmount"
+                                               class="form-control"
+                                               min="0.01"
+                                               max="@Model.BalanceAmount"
+                                               step="0.01"
+                                               placeholder="0.00"
+                                               required />
+
+                                    </div>
+
+                                    <div class="form-text">
+                                        Maximum payment:
+                                        RM @Model.BalanceAmount.ToString("N2")
+                                    </div>
+
+                                </div>
+
+
+                                <button type="submit"
+                                        class="btn btn-success">
+
+                                    Record Payment
+
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-success mt-5 no-print">
+
+                    <strong>Payment Completed</strong>
+
+                    <div>
+                        This invoice has been fully paid.
+                    </div>
+
+                </div>
+            }
+
+            <!-- PAYMENT INFORMATION -->
+            <div class="mt-5 pt-4 border-top">
+
+                <h6 class="fw-bold">
+                    Payment Information
+                </h6>
+
+                <p class="text-muted mb-1">
+                    Please contact Serish Autotech Services for
+                    available payment methods.
+                </p>
+
+            </div>
+
+
+            <!-- FOOTER -->
+            <div class="text-center text-muted mt-5 pt-4 border-top">
+
+                <small>
+                    Thank you for choosing Serish Autotech Services.
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    .invoice-card {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    @@media print {
+
+        .no-print,
+        header,
+        footer,
+        nav {
+            display: none !important;
+        }
+
+        body {
+            background: white !important;
+        }
+
+        .container {
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .invoice-card {
+            box-shadow: none !important;
+            border: none !important;
+            max-width: 100% !important;
+        }
+
+            .invoice-card .card-body {
+                padding: 0 !important;
+            }
+
+        .table {
+            font-size: 12px;
+        }
+    }
+
+</style>

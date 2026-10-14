@@ -1,0 +1,1542 @@
+﻿@model AIVehicleWorkshopSystem.Models.AIDiagnostic
+
+@{
+    ViewData["Title"] = "AI Diagnostic Review";
+
+    var vehicle = Model.Vehicle;
+
+    var statusClass =
+        Model.ReviewStatus == "Pending Review"
+            ? "review-pending"
+            : Model.ReviewStatus == "Confirmed"
+                ? "review-confirmed"
+                : "review-modified";
+
+    var priorityClass =
+        Model.Priority == "High"
+            ? "priority-high"
+            : Model.Priority == "Medium"
+                ? "priority-medium"
+                : "priority-low";
+}
+
+<style>
+
+    /* =========================================
+           PAGE
+        ========================================= */
+
+    .diagnostic-details-page {
+        min-height: 100vh;
+        background: #f7f9fc;
+    }
+
+    .diagnostic-details-container {
+        max-width: 1100px;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: #6b7280;
+        font-size: .84rem;
+        font-weight: 600;
+        text-decoration: none;
+        margin-bottom: 1.4rem;
+        transition: color .15s ease;
+    }
+
+        .back-link:hover {
+            color: #0d6efd;
+        }
+
+    .page-label {
+        color: #0d6efd;
+        font-size: .76rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        margin-bottom: .45rem;
+    }
+
+    .page-title {
+        color: #1f2937;
+        font-weight: 700;
+        margin-bottom: .35rem;
+    }
+
+    .page-description {
+        color: #6b7280;
+        margin-bottom: 0;
+    }
+
+
+    /* =========================================
+           STATUS BADGES
+        ========================================= */
+
+    .review-badge,
+    .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: .45rem .75rem;
+        border-radius: 20px;
+        font-size: .75rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .review-pending {
+        background: #fff7e6;
+        color: #b76e00;
+    }
+
+    .review-confirmed {
+        background: #eaf8ef;
+        color: #198754;
+    }
+
+    .review-modified {
+        background: #eaf2ff;
+        color: #0d6efd;
+    }
+
+    .priority-high {
+        background: #fdecef;
+        color: #dc3545;
+    }
+
+    .priority-medium {
+        background: #fff7e6;
+        color: #b76e00;
+    }
+
+    .priority-low {
+        background: #eaf8ef;
+        color: #198754;
+    }
+
+
+    /* =========================================
+           OVERVIEW
+        ========================================= */
+
+    .overview-card {
+        background: #ffffff;
+        border: 1px solid #edf0f5;
+        border-radius: 15px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .035);
+        padding: 1.4rem 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .overview-item {
+        height: 100%;
+        padding: .9rem 1rem;
+        background: #fafbfc;
+        border: 1px solid #edf0f5;
+        border-radius: 10px;
+    }
+
+    .overview-label {
+        color: #8b95a5;
+        font-size: .7rem;
+        font-weight: 600;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        margin-bottom: .35rem;
+    }
+
+    .overview-value {
+        color: #374151;
+        font-size: .88rem;
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+
+    .overview-secondary {
+        color: #8b95a5;
+        font-size: .75rem;
+        margin-top: .1rem;
+    }
+
+
+    /* =========================================
+           COMMON CARD
+        ========================================= */
+
+    .diagnostic-card {
+        background: #ffffff;
+        border: 1px solid #edf0f5;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, .035);
+        margin-bottom: 1.25rem;
+    }
+
+    .diagnostic-card-header {
+        padding: 1.2rem 1.5rem;
+        background: #ffffff;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .diagnostic-card-body {
+        padding: 1.5rem;
+    }
+
+    .section-title {
+        color: #1f2937;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: .2rem;
+    }
+
+    .section-description {
+        color: #8b95a5;
+        font-size: .8rem;
+        margin-bottom: 0;
+    }
+
+
+    /* =========================================
+           CUSTOMER SYMPTOMS
+        ========================================= */
+
+    .symptom-box {
+        position: relative;
+        padding: 1.1rem 1.2rem;
+        background: #fafbfc;
+        border: 1px solid #edf0f5;
+        border-radius: 11px;
+        color: #4b5563;
+        font-size: .88rem;
+        line-height: 1.65;
+    }
+
+        .symptom-box::before {
+            content: "";
+            position: absolute;
+            top: 12px;
+            bottom: 12px;
+            left: 0;
+            width: 3px;
+            border-radius: 5px;
+            background: #0d6efd;
+        }
+
+
+    /* =========================================
+           AI RECOMMENDATION
+        ========================================= */
+
+    .ai-heading-icon {
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 11px;
+        background: #eef4ff;
+        color: #0d6efd;
+        font-size: .72rem;
+        font-weight: 700;
+    }
+
+    .ai-generated-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: .4rem .65rem;
+        border-radius: 20px;
+        background: #eef4ff;
+        color: #0d6efd;
+        font-size: .7rem;
+        font-weight: 700;
+    }
+
+    .recommendation-label {
+        color: #6b7280;
+        font-size: .75rem;
+        font-weight: 700;
+        margin-bottom: .5rem;
+    }
+
+    .recommendation-box {
+        position: relative;
+        padding: 1rem 1.1rem;
+        background: #fafbfc;
+        border: 1px solid #edf0f5;
+        border-radius: 11px;
+        color: #4b5563;
+        font-size: .86rem;
+        line-height: 1.6;
+    }
+
+    .recommendation-number {
+        width: 29px;
+        height: 29px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background: #eef4ff;
+        color: #0d6efd;
+        font-size: .68rem;
+        font-weight: 700;
+        margin-right: .55rem;
+    }
+
+
+    /* =========================================
+           MECHANIC REVIEW
+        ========================================= */
+
+    .review-card {
+        background: #ffffff;
+        border: 1px solid #dbe5f5;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(13, 110, 253, .06);
+        margin-bottom: 1.25rem;
+    }
+
+    .review-card-header {
+        padding: 1.25rem 1.5rem;
+        background: #f8fbff;
+        border-bottom: 1px solid #e5edf8;
+    }
+
+    .review-card-body {
+        padding: 1.5rem;
+    }
+
+    .review-step {
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #0d6efd;
+        color: #ffffff;
+        font-size: .72rem;
+        font-weight: 700;
+    }
+
+
+    /* =========================================
+           FORM
+        ========================================= */
+
+    .form-label {
+        color: #374151;
+        font-size: .82rem;
+        font-weight: 600;
+        margin-bottom: .45rem;
+    }
+
+    .form-select,
+    .form-control {
+        border: 1px solid #dfe3e8;
+        border-radius: 10px;
+        font-size: .86rem;
+    }
+
+    .form-select {
+        height: 46px;
+    }
+
+    .form-control {
+        padding: .75rem .9rem;
+        resize: vertical;
+    }
+
+        .form-select:focus,
+        .form-control:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .08);
+        }
+
+    .form-text {
+        color: #9ca3af;
+        font-size: .73rem;
+    }
+
+
+    /* =========================================
+           SAFETY NOTICE
+        ========================================= */
+
+    .inspection-notice {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: .9rem 1rem;
+        background: #fffaf0;
+        border: 1px solid #f5e6bf;
+        border-radius: 10px;
+        color: #7c6227;
+        font-size: .78rem;
+        line-height: 1.55;
+        margin-bottom: 1.4rem;
+    }
+
+    .notice-icon {
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background: #fff1c7;
+        color: #b76e00;
+        font-size: .72rem;
+        font-weight: 700;
+    }
+
+
+    /* =========================================
+           COMPLETED REVIEW
+        ========================================= */
+
+    .completed-review-banner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        background: #eaf8ef;
+        border: 1px solid #ccebd8;
+        border-radius: 11px;
+    }
+
+    .completed-icon {
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #198754;
+        color: #ffffff;
+        font-weight: 700;
+    }
+
+    .completed-title {
+        color: #146c43;
+        font-size: .86rem;
+        font-weight: 700;
+        margin-bottom: .1rem;
+    }
+
+    .completed-text {
+        color: #3f7f60;
+        font-size: .76rem;
+        margin-bottom: 0;
+    }
+
+    .review-result-box {
+        padding: 1rem;
+        background: #fafbfc;
+        border: 1px solid #edf0f5;
+        border-radius: 10px;
+        color: #4b5563;
+        font-size: .86rem;
+        line-height: 1.6;
+    }
+
+    .reviewed-date {
+        color: #8b95a5;
+        font-size: .75rem;
+        margin-top: 1rem;
+    }
+
+
+    /* =========================================
+           BUTTONS
+        ========================================= */
+
+    .action-btn {
+        min-width: 120px;
+        padding: .6rem 1rem;
+        border-radius: 9px;
+        font-size: .82rem;
+        font-weight: 600;
+    }
+
+
+    /* =========================================
+           DARK MODE
+        ========================================= */
+
+    [data-bs-theme="dark"] .diagnostic-details-page {
+        background: var(--bs-body-bg);
+    }
+
+    [data-bs-theme="dark"] .page-title,
+    [data-bs-theme="dark"] .section-title,
+    [data-bs-theme="dark"] .overview-value,
+    [data-bs-theme="dark"] .form-label {
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .page-description,
+    [data-bs-theme="dark"] .section-description,
+    [data-bs-theme="dark"] .overview-label,
+    [data-bs-theme="dark"] .overview-secondary,
+    [data-bs-theme="dark"] .back-link,
+    [data-bs-theme="dark"] .reviewed-date {
+        color: var(--bs-secondary-color);
+    }
+
+
+    /* CARDS */
+
+    [data-bs-theme="dark"] .overview-card,
+    [data-bs-theme="dark"] .diagnostic-card,
+    [data-bs-theme="dark"] .diagnostic-card-header,
+    [data-bs-theme="dark"] .review-card {
+        background: var(--bs-body-bg);
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .review-card-header {
+        background: var(--bs-tertiary-bg);
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .overview-item,
+    [data-bs-theme="dark"] .symptom-box,
+    [data-bs-theme="dark"] .recommendation-box,
+    [data-bs-theme="dark"] .review-result-box {
+        background: var(--bs-tertiary-bg);
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .symptom-box,
+    [data-bs-theme="dark"] .recommendation-box,
+    [data-bs-theme="dark"] .review-result-box {
+        color: var(--bs-body-color);
+    }
+
+
+    /* AI */
+
+    [data-bs-theme="dark"] .ai-heading-icon,
+    [data-bs-theme="dark"] .ai-generated-badge,
+    [data-bs-theme="dark"] .recommendation-number {
+        background: rgba(13, 110, 253, .18);
+        color: #6ea8fe;
+    }
+
+    [data-bs-theme="dark"] .recommendation-label {
+        color: var(--bs-secondary-color);
+    }
+
+
+    /* FORM */
+
+    [data-bs-theme="dark"] .form-select,
+    [data-bs-theme="dark"] .form-control {
+        background-color: var(--bs-body-bg);
+        border-color: var(--bs-border-color);
+        color: var(--bs-body-color);
+    }
+
+        [data-bs-theme="dark"] .form-control::placeholder {
+            color: var(--bs-secondary-color);
+        }
+
+    [data-bs-theme="dark"] .form-text {
+        color: var(--bs-secondary-color);
+    }
+
+
+    /* NOTICE */
+
+    [data-bs-theme="dark"] .inspection-notice {
+        background: rgba(255, 193, 7, .08);
+        border-color: rgba(255, 193, 7, .25);
+        color: #ffda6a;
+    }
+
+    [data-bs-theme="dark"] .notice-icon {
+        background: rgba(255, 193, 7, .16);
+        color: #ffda6a;
+    }
+
+
+    /* COMPLETED */
+
+    [data-bs-theme="dark"] .completed-review-banner {
+        background: rgba(25, 135, 84, .15);
+        border-color: rgba(25, 135, 84, .3);
+    }
+
+    [data-bs-theme="dark"] .completed-title {
+        color: #75b798;
+    }
+
+    [data-bs-theme="dark"] .completed-text {
+        color: #a3cfbb;
+    }
+
+
+    /* BADGES */
+
+    [data-bs-theme="dark"] .review-pending,
+    [data-bs-theme="dark"] .priority-medium {
+        background: rgba(255, 193, 7, .16);
+        color: #ffda6a;
+    }
+
+    [data-bs-theme="dark"] .review-confirmed,
+    [data-bs-theme="dark"] .priority-low {
+        background: rgba(25, 135, 84, .18);
+        color: #75b798;
+    }
+
+    [data-bs-theme="dark"] .review-modified {
+        background: rgba(13, 110, 253, .18);
+        color: #6ea8fe;
+    }
+
+    [data-bs-theme="dark"] .priority-high {
+        background: rgba(220, 53, 69, .18);
+        color: #ea868f;
+    }
+
+
+    /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+    @@media (max-width: 767.98px) {
+
+        .diagnostic-card-header,
+        .diagnostic-card-body,
+        .review-card-header,
+        .review-card-body {
+            padding: 1.2rem;
+        }
+
+        .overview-card {
+            padding: 1.2rem;
+        }
+
+        .page-header-area {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+
+        .review-actions {
+            flex-direction: column-reverse;
+        }
+
+            .review-actions .btn {
+                width: 100%;
+            }
+    }
+
+</style>
+
+
+<section class="diagnostic-details-page py-5">
+
+    <div class="container diagnostic-details-container">
+
+
+        <!-- =========================================
+             BACK
+        ========================================== -->
+
+        <a asp-controller="Mechanic"
+           asp-action="AIDiagnosticReview"
+           class="back-link">
+
+            <span>←</span>
+            Back to AI Diagnostic Review
+
+        </a>
+
+
+        <!-- =========================================
+             HEADER
+        ========================================== -->
+
+        <div class="page-header-area
+                    d-flex
+                    justify-content-between
+                    align-items-start
+                    gap-3
+                    mb-4">
+
+            <div>
+
+                <div class="page-label">
+                    AI Diagnostic Assistant
+                </div>
+
+                <h1 class="page-title">
+                    Diagnostic #@Model.DiagnosticId
+                </h1>
+
+                @if (vehicle != null)
+                {
+                    <p class="page-description">
+
+                        @vehicle.Brand @vehicle.Model
+                        &nbsp;•&nbsp;
+                        @vehicle.PlateNumber
+
+                    </p>
+                }
+
+            </div>
+
+
+            <div>
+
+                @if (Model.ReviewStatus == "Pending Review")
+                {
+                    <span class="review-badge review-pending">
+
+                        <span class="status-dot"></span>
+
+                        Pending Review
+
+                    </span>
+                }
+                else if (Model.ReviewStatus == "Confirmed")
+                {
+                    <span class="review-badge review-confirmed">
+
+                        <span class="status-dot"></span>
+
+                        Confirmed
+
+                    </span>
+                }
+                else
+                {
+                    <span class="review-badge review-modified">
+
+                        <span class="status-dot"></span>
+
+                        @Model.ReviewStatus
+
+                    </span>
+                }
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             SUCCESS / ERROR
+        ========================================== -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success
+                            alert-dismissible fade show
+                            border-0 shadow-sm rounded-3"
+                 role="alert">
+
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+
+            </div>
+        }
+
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger
+                            alert-dismissible fade show
+                            border-0 shadow-sm rounded-3"
+                 role="alert">
+
+                @TempData["ErrorMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+
+            </div>
+        }
+
+
+        <!-- =========================================
+             QUICK OVERVIEW
+        ========================================== -->
+
+        <div class="overview-card">
+
+            <div class="row g-3">
+
+
+                <!-- VEHICLE -->
+
+                <div class="col-md-4">
+
+                    <div class="overview-item">
+
+                        <div class="overview-label">
+                            Vehicle
+                        </div>
+
+                        @if (vehicle != null)
+                        {
+                            <div class="overview-value">
+                                @vehicle.Brand @vehicle.Model
+                            </div>
+
+                            <div class="overview-secondary">
+                                @vehicle.PlateNumber
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="overview-value">
+                                Vehicle unavailable
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+
+
+                <!-- PRIORITY -->
+
+                <div class="col-md-4">
+
+                    <div class="overview-item">
+
+                        <div class="overview-label">
+                            Diagnostic Priority
+                        </div>
+
+                        <span class="priority-badge @priorityClass">
+
+                            <span class="status-dot"></span>
+
+                            @Model.Priority
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- REVIEW -->
+
+                <div class="col-md-4">
+
+                    <div class="overview-item">
+
+                        <div class="overview-label">
+                            Review Status
+                        </div>
+
+                        @if (Model.ReviewStatus == "Pending Review")
+                        {
+                            <span class="review-badge review-pending">
+
+                                <span class="status-dot"></span>
+
+                                Pending Review
+
+                            </span>
+                        }
+                        else if (Model.ReviewStatus == "Confirmed")
+                        {
+                            <span class="review-badge review-confirmed">
+
+                                <span class="status-dot"></span>
+
+                                Confirmed
+
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="review-badge review-modified">
+
+                                <span class="status-dot"></span>
+
+                                @Model.ReviewStatus
+
+                            </span>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             CUSTOMER SYMPTOMS
+        ========================================== -->
+
+        <div class="diagnostic-card">
+
+            <div class="diagnostic-card-header">
+
+                <h5 class="section-title">
+                    Customer-Reported Symptoms
+                </h5>
+
+                <p class="section-description">
+                    Symptoms provided by the customer before AI analysis.
+                </p>
+
+            </div>
+
+
+            <div class="diagnostic-card-body">
+
+                <div class="symptom-box">
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Symptoms))
+                    {
+                        @Model.Symptoms
+                    }
+                    else
+                    {
+                        <span class="text-muted">
+                            No symptoms were provided.
+                        </span>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             AI RECOMMENDATION
+        ========================================== -->
+
+        <div class="diagnostic-card">
+
+            <div class="diagnostic-card-header">
+
+                <div class="d-flex
+                            justify-content-between
+                            align-items-center
+                            gap-3
+                            flex-wrap">
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="ai-heading-icon">
+                            AI
+                        </div>
+
+                        <div>
+
+                            <h5 class="section-title">
+                                AI-Assisted Recommendation
+                            </h5>
+
+                            <p class="section-description">
+                                AI-generated guidance based on the reported symptoms.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <span class="ai-generated-badge">
+                        AI Generated
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="diagnostic-card-body">
+
+
+                <!-- PRIORITY -->
+
+                <div class="mb-4">
+
+                    <div class="recommendation-label">
+                        Priority
+                    </div>
+
+                    <span class="priority-badge @priorityClass">
+
+                        <span class="status-dot"></span>
+
+                        @Model.Priority
+
+                    </span>
+
+                </div>
+
+
+                <!-- POSSIBLE ISSUE -->
+
+                <div class="mb-4">
+
+                    <div class="recommendation-label">
+
+                        <span class="recommendation-number">
+                            01
+                        </span>
+
+                        Possible Issue
+
+                    </div>
+
+                    <div class="recommendation-box">
+
+                        @if (!string.IsNullOrWhiteSpace(Model.PossibleIssue))
+                        {
+                            @Model.PossibleIssue
+                        }
+                        else
+                        {
+                            <span class="text-muted">
+                                No possible issue generated.
+                            </span>
+                        }
+
+                    </div>
+
+                </div>
+
+
+                <!-- INSPECTION -->
+
+                <div class="mb-4">
+
+                    <div class="recommendation-label">
+
+                        <span class="recommendation-number">
+                            02
+                        </span>
+
+                        Recommended Inspection
+
+                    </div>
+
+                    <div class="recommendation-box">
+
+                        @if (!string.IsNullOrWhiteSpace(
+                                                Model.RecommendedInspection))
+                        {
+                            @Model.RecommendedInspection
+                        }
+                        else
+                        {
+                            <span class="text-muted">
+                                No inspection recommendation generated.
+                            </span>
+                        }
+
+                    </div>
+
+                </div>
+
+
+                <!-- MAINTENANCE -->
+
+                <div>
+
+                    <div class="recommendation-label">
+
+                        <span class="recommendation-number">
+                            03
+                        </span>
+
+                        Maintenance Suggestion
+
+                    </div>
+
+                    <div class="recommendation-box">
+
+                        @if (!string.IsNullOrWhiteSpace(
+                                                Model.MaintenanceSuggestion))
+                        {
+                            @Model.MaintenanceSuggestion
+                        }
+                        else
+                        {
+                            <span class="text-muted">
+                                No maintenance suggestion generated.
+                            </span>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             PENDING MECHANIC REVIEW
+        ========================================== -->
+        @if (Model.ReviewStatus == "Pending Review")
+        {
+            <div class="review-card">
+
+                <div class="review-card-header">
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="review-step">
+                            04
+                        </div>
+
+                        <div>
+
+                            <h5 class="section-title">
+                                Mechanic Review
+                            </h5>
+
+                            <p class="section-description">
+                                Confirm or modify the AI recommendation after physically inspecting the vehicle.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="review-card-body">
+
+                    <form asp-controller="Mechanic"
+                          asp-action="SubmitAIDiagnosticReview"
+                          method="post"
+                          id="diagnosticReviewForm">
+
+                        @Html.AntiForgeryToken()
+
+
+                        <input type="hidden"
+                               name="id"
+                               value="@Model.DiagnosticId" />
+
+
+                        <!-- DECISION -->
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Review Decision
+                            </label>
+
+                            <select name="reviewDecision"
+                                    id="reviewDecision"
+                                    class="form-select"
+                                    required>
+
+                                <option value="">
+                                    Select a review decision
+                                </option>
+
+                                <option value="Confirmed">
+                                    Confirm AI Recommendation
+                                </option>
+
+                                <option value="Modified">
+                                    Modify AI Recommendation
+                                </option>
+
+                            </select>
+
+                            <div class="form-text">
+                                Select the result based on your physical vehicle inspection.
+                            </div>
+
+                        </div>
+
+
+                        <!-- COMMENTS -->
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Mechanic Comments
+                            </label>
+
+                            <textarea name="mechanicComments"
+                                  id="mechanicComments"
+                                  class="form-control"
+                                  rows="5"
+                                  maxlength="2000"
+                                  placeholder="Enter physical inspection findings or corrections to the AI recommendation..."></textarea>
+
+                            <div class="form-text"
+                                 id="commentsHelp">
+
+                                Required when modifying the AI recommendation.
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- DISCLAIMER -->
+
+                        <div class="inspection-notice">
+
+                            <div class="notice-icon">
+                                !
+                            </div>
+
+                            <div>
+
+                                Confirm the recommendation only after
+                                performing an appropriate physical vehicle
+                                inspection. AI-generated recommendations
+                                should be used as diagnostic assistance only.
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ACTIONS -->
+
+                        <div class="review-actions
+                                        d-flex
+                                        justify-content-end
+                                        gap-2">
+
+                            <a asp-controller="Mechanic"
+                               asp-action="AIDiagnosticReview"
+                               class="btn btn-outline-secondary action-btn">
+
+                                Cancel
+
+                            </a>
+
+
+                            <button type="submit"
+                                    class="btn btn-primary action-btn">
+
+                                Submit Review
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+        }
+        else
+        {
+
+            <!-- =====================================
+                 COMPLETED REVIEW
+            ====================================== -->
+
+            <div class="diagnostic-card">
+
+                <div class="diagnostic-card-header">
+
+                    <h5 class="section-title">
+                        Mechanic Review
+                    </h5>
+
+                    <p class="section-description">
+                        Final mechanic assessment of the AI recommendation.
+                    </p>
+
+                </div>
+
+
+                <div class="diagnostic-card-body">
+
+
+                    <!-- COMPLETED BANNER -->
+
+                    <div class="completed-review-banner">
+
+                        <div class="completed-icon">
+                            ✓
+                        </div>
+
+                        <div>
+
+                            <div class="completed-title">
+                                Review Completed
+                            </div>
+
+                            <p class="completed-text">
+                                This AI diagnostic recommendation has been reviewed by a mechanic.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- DECISION -->
+
+                    <div class="mb-4">
+
+                        <div class="recommendation-label">
+                            Review Decision
+                        </div>
+
+                        @if (Model.ReviewStatus == "Confirmed")
+                        {
+                            <span class="review-badge review-confirmed">
+
+                                <span class="status-dot"></span>
+
+                                Confirmed
+
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="review-badge review-modified">
+
+                                <span class="status-dot"></span>
+
+                                @Model.ReviewStatus
+
+                            </span>
+                        }
+
+                    </div>
+
+
+                    <!-- COMMENTS -->
+
+                    <div>
+
+                        <div class="recommendation-label">
+                            Mechanic Comments
+                        </div>
+
+                        <div class="review-result-box">
+
+                            @if (!string.IsNullOrWhiteSpace(
+                                                    Model.MechanicComments))
+                            {
+                                @Model.MechanicComments
+                            }
+                            else
+                            {
+                                <span class="text-muted">
+                                    No additional comments provided.
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- REVIEW DATE -->
+                    @if (Model.ReviewedAt.HasValue)
+                    {
+                        <div class="reviewed-date">
+
+                            Reviewed on
+
+                            <strong>
+                                @Model.ReviewedAt.Value.ToString("dd MMMM yyyy, hh:mm tt")
+                            </strong>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+        }
+
+
+        <!-- =========================================
+             FOOTER
+        ========================================== -->
+
+        <div class="mt-4">
+
+            <a asp-controller="Mechanic"
+               asp-action="AIDiagnosticReview"
+               class="btn btn-outline-secondary action-btn">
+
+                ← Back to Diagnostics
+
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+@section Scripts {
+
+    <script>
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                const reviewDecision =
+                    document.getElementById(
+                        "reviewDecision"
+                    );
+
+                const comments =
+                    document.getElementById(
+                        "mechanicComments"
+                    );
+
+                const commentsHelp =
+                    document.getElementById(
+                        "commentsHelp"
+                    );
+
+                const reviewForm =
+                    document.getElementById(
+                        "diagnosticReviewForm"
+                    );
+
+
+                // =========================================
+                // DECISION CHANGE
+                // =========================================
+
+                function updateCommentRequirement() {
+
+                    if (
+                        !reviewDecision ||
+                        !comments
+                    ) {
+                        return;
+                    }
+
+
+                    if (
+                        reviewDecision.value ===
+                        "Modified"
+                    ) {
+
+                        comments.required = true;
+
+                        if (commentsHelp) {
+
+                            commentsHelp.textContent =
+                                "Mechanic comments are required when modifying the AI recommendation.";
+
+                        }
+
+                    }
+                    else {
+
+                        comments.required = false;
+
+                        if (commentsHelp) {
+
+                            commentsHelp.textContent =
+                                "Required when modifying the AI recommendation.";
+
+                        }
+
+                    }
+
+                }
+
+
+                if (reviewDecision) {
+
+                    reviewDecision.addEventListener(
+                        "change",
+                        updateCommentRequirement
+                    );
+
+                    updateCommentRequirement();
+
+                }
+
+
+                // =========================================
+                // PREVENT DOUBLE SUBMISSION
+                // =========================================
+
+                if (reviewForm) {
+
+                    reviewForm.addEventListener(
+                        "submit",
+                        function () {
+
+                            if (!reviewForm.checkValidity()) {
+                                return;
+                            }
+
+
+                            const submitButton =
+                                reviewForm.querySelector(
+                                    'button[type="submit"]'
+                                );
+
+
+                            if (submitButton) {
+
+                                submitButton.disabled = true;
+
+                                submitButton.textContent =
+                                    "Submitting...";
+
+                            }
+
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+    </script>
+
+}

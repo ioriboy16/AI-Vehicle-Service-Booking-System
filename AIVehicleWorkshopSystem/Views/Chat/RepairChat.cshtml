@@ -1,0 +1,1599 @@
+﻿@using AIVehicleWorkshopSystem.Models
+
+@{
+    ViewData["Title"] = "Repair Chat";
+
+    var repair =
+        ViewBag.Repair as Repair;
+
+    var messages =
+        ViewBag.Messages as List<ChatMessage>
+        ?? new List<ChatMessage>();
+
+    var senderNames =
+        ViewBag.SenderNames as Dictionary<string, string>
+        ?? new Dictionary<string, string>();
+
+    var senderRoles =
+        ViewBag.SenderRoles as Dictionary<string, string>
+        ?? new Dictionary<string, string>();
+
+    var currentUserId =
+        ViewBag.CurrentUserId as string
+        ?? string.Empty;
+
+    var mechanicName =
+        ViewBag.MechanicName as string
+        ?? "Unknown Mechanic";
+
+    var customerName =
+        ViewBag.CustomerName as string
+        ?? "Unknown Customer";
+}
+
+<style>
+    /* =====================================================
+           REPAIR CHAT - DARK MODE
+           ===================================================== */
+
+    /* Whole page */
+    html[data-bs-theme="dark"] section.bg-light {
+        background-color: #111315 !important;
+    }
+
+    /* Participant card + main chat card */
+    html[data-bs-theme="dark"] .card {
+        background-color: #181b20 !important;
+        color: #f1f5f9 !important;
+    }
+
+    /* Muted text */
+    html[data-bs-theme="dark"] .text-muted {
+        color: #929cab !important;
+    }
+
+    /* =====================================================
+           CHAT MESSAGE AREA
+           ===================================================== */
+
+    html[data-bs-theme="dark"] #chatMessages {
+        background-color: #101318 !important;
+        color: #e5e7eb !important;
+    }
+
+        /* Other user's message bubble */
+        html[data-bs-theme="dark"] #chatMessages .bg-white {
+            background-color: #20242b !important;
+            color: #f1f5f9 !important;
+            border-color: #343b46 !important;
+        }
+
+        /* Current user's blue bubble stays blue */
+        html[data-bs-theme="dark"] #chatMessages .bg-primary {
+            background-color: #0d6efd !important;
+            color: #ffffff !important;
+        }
+
+        /* Sender + timestamp */
+        html[data-bs-theme="dark"] #chatMessages .text-muted {
+            color: #8e99a8 !important;
+        }
+
+    /* =====================================================
+           MESSAGE INPUT AREA
+           ===================================================== */
+
+    html[data-bs-theme="dark"] #chatForm {
+        color: #e5e7eb;
+    }
+
+        html[data-bs-theme="dark"] #chatForm .form-control {
+            background-color: #101318 !important;
+            color: #f1f5f9 !important;
+            border-color: #343b46 !important;
+        }
+
+            html[data-bs-theme="dark"] #chatForm .form-control::placeholder {
+                color: #717b89 !important;
+            }
+
+            html[data-bs-theme="dark"] #chatForm .form-control:focus {
+                background-color: #101318 !important;
+                color: #ffffff !important;
+                border-color: #3b82f6 !important;
+                box-shadow: 0 0 0 .2rem rgba(59, 130, 246, .12) !important;
+            }
+
+    /* The bg-white wrapper containing the form */
+    html[data-bs-theme="dark"] .card-body > .border-top.bg-white {
+        background-color: #181b20 !important;
+        border-color: #303640 !important;
+    }
+
+    /* Attachment button */
+    html[data-bs-theme="dark"] #attachmentButton {
+        color: #cbd5e1 !important;
+        border-color: #475569 !important;
+        background-color: #171b21 !important;
+    }
+
+        html[data-bs-theme="dark"] #attachmentButton:hover {
+            background-color: #252b34 !important;
+            color: #ffffff !important;
+        }
+
+    /* Attachment preview */
+    html[data-bs-theme="dark"] #attachmentPreview .bg-light {
+        background-color: #20242b !important;
+        border-color: #343b46 !important;
+        color: #f1f5f9 !important;
+    }
+
+    /* PDF/file attachment shown inside chat */
+    html[data-bs-theme="dark"] #chatMessages a .bg-white {
+        background-color: #292e36 !important;
+        color: #f1f5f9 !important;
+        border-color: #3b424e !important;
+    }
+
+    html[data-bs-theme="dark"] #chatMessages a .text-dark {
+        color: #f1f5f9 !important;
+    }
+
+    /* =====================================================
+           SCROLLBAR
+           ===================================================== */
+
+    html[data-bs-theme="dark"] #chatMessages {
+        scrollbar-color: #5b6470 #171b20;
+    }
+
+        html[data-bs-theme="dark"] #chatMessages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        html[data-bs-theme="dark"] #chatMessages::-webkit-scrollbar-track {
+            background: #171b20;
+        }
+
+        html[data-bs-theme="dark"] #chatMessages::-webkit-scrollbar-thumb {
+            background: #5b6470;
+            border-radius: 10px;
+        }
+
+    /* Back button */
+    html[data-bs-theme="dark"] .btn-outline-secondary {
+        color: #cbd5e1;
+        border-color: #475569;
+    }
+
+        html[data-bs-theme="dark"] .btn-outline-secondary:hover {
+            background-color: #29313b;
+            border-color: #64748b;
+            color: #ffffff;
+        }
+</style>
+
+<section class="py-5 bg-light min-vh-100">
+
+    <div class="container">
+
+        <div class="row justify-content-center">
+
+            <div class="col-lg-9">
+
+                <!-- HEADER -->
+                <div class="mb-4">
+
+                    <p class="text-primary fw-bold small mb-2">
+                        SECURE COMMUNICATION
+                    </p>
+
+                    <h1 class="fw-bold mb-2">
+                        Repair Chat
+                    </h1>
+
+                    @if (repair != null)
+                    {
+                        <p class="text-muted mb-0">
+                            Repair #@repair.RepairId
+                            • @repair.Appointment?.Vehicle?.PlateNumber
+                        </p>
+                    }
+
+                </div>
+
+
+                <!-- PARTICIPANTS -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                    <div class="card-body p-4">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <small class="text-muted d-block">
+                                    Customer
+                                </small>
+
+                                <span class="fw-semibold">
+                                    @customerName
+                                </span>
+
+                                <span class="badge bg-secondary ms-1">
+                                    Customer
+                                </span>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <small class="text-muted d-block">
+                                    Assigned Mechanic
+                                </small>
+
+                                <span class="fw-semibold">
+                                    @mechanicName
+                                </span>
+
+                                <span class="badge bg-warning text-dark ms-1">
+                                    Mechanic
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SIGNALR STATUS -->
+                <div id="connectionStatus"
+                     class="alert alert-secondary py-2">
+
+                    Connecting to real-time chat...
+
+                </div>
+
+
+                <!-- CHAT CARD -->
+                <div class="card border-0 shadow-sm rounded-4">
+
+                    <div class="card-body p-0">
+
+
+                        <!-- MESSAGES -->
+                        <div id="chatMessages"
+                             class="p-4"
+                             style="
+                                height: 500px;
+                                overflow-y: auto;
+                                background-color: #f8f9fa;">
+
+                            @if (!messages.Any())
+                            {
+                                <div id="noMessages"
+                                     class="text-center text-muted py-5">
+
+                                    <h5 class="fw-bold">
+                                        No messages yet
+                                    </h5>
+
+                                    <p class="mb-0">
+                                        Start a conversation about this repair.
+                                    </p>
+
+                                </div>
+                            }
+                            else
+                            {
+                                @foreach (var message in messages)
+                                {
+                                    var isCurrentUser =
+                                    message.SenderId ==
+                                    currentUserId;
+
+                                    var senderName =
+                                    senderNames.ContainsKey(
+                                    message.SenderId)
+                                    ? senderNames[
+                                    message.SenderId]
+                                    : "User";
+
+                                    var senderRole =
+                                    senderRoles.ContainsKey(
+                                    message.SenderId)
+                                    ? senderRoles[
+                                    message.SenderId]
+                                    : "User";
+
+
+                                    <div class="chat-message d-flex mb-3
+                                                        @(isCurrentUser
+                                                                                             ? "justify-content-end"
+                                                                                             : "justify-content-start")"
+                                                                                                                       data-message-id="@message.MessageId">
+
+                                        <div style="max-width: 75%;">
+
+
+                                            <!-- SENDER -->
+                                            <div class="small text-muted mb-1
+                                                                @(isCurrentUser
+                                                                                                             ? "text-end"
+                                                                                                             : "")">
+
+                                        <span class="fw-semibold">
+                                            @senderName
+                                        </span>
+
+
+                                        @if (senderRole == "Admin")
+                                                {
+                                                    <span class="badge bg-danger ms-1">
+                                                        Admin
+                                                    </span>
+                                                }
+                                                else if (senderRole == "Mechanic")
+                                                {
+                                                    <span class="badge bg-warning text-dark ms-1">
+                                                        Mechanic
+                                                    </span>
+                                                }
+                                                else if (senderRole == "Customer")
+                                                {
+                                                    <span class="badge bg-secondary ms-1">
+                                                        Customer
+                                                    </span>
+                                                }
+
+                                        </div>
+
+
+                                        <!-- MESSAGE -->
+                                        <div class="p-3 rounded-4
+                @(isCurrentUser
+                                                             ? "bg-primary text-white"
+                                                             : "bg-white border")">
+
+                                        <!-- TEXT -->
+                                        @if (!string.IsNullOrWhiteSpace(message.Message))
+                                                {
+                                                    <div style="white-space: pre-wrap;
+                                overflow-wrap: anywhere;">
+                                                        @message.Message
+                                                    </div>
+                                                }
+
+
+                                                <!-- ATTACHMENT -->
+                                                @if (!string.IsNullOrWhiteSpace(
+                                                                                        message.AttachmentPath))
+                                                {
+                                                    var isImage =
+                                                    message.AttachmentContentType != null &&
+                                                    message.AttachmentContentType
+                                                    .StartsWith("image/");
+
+                                                    <div class="@(!string.IsNullOrWhiteSpace(message.Message)
+                                                                                 ? "mt-2"
+                                                                                 : "")">
+
+                                            @if (isImage)
+                                                        {
+                                                            <a href="@message.AttachmentPath"
+                                                               target="_blank"
+                                                               rel="noopener noreferrer">
+
+                                                                <img src="@message.AttachmentPath"
+                                                                     alt="@message.AttachmentFileName"
+                                                                     class="img-fluid rounded-3"
+                                                                     style="
+                                            max-width: 320px;
+                                            max-height: 300px;
+                                            object-fit: cover;" />
+
+                                                            </a>
+
+                                                            <div class="small mt-1 text-break">
+                                                                @message.AttachmentFileName
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <a href="@message.AttachmentPath"
+                                                               target="_blank"
+                                                               rel="noopener noreferrer"
+                                                               class="text-decoration-none">
+
+                                                                <div class="
+                                        border
+                                        rounded-3
+                                        p-2
+                                        bg-white
+                                        text-dark
+                                        d-flex
+                                        align-items-center
+                                        gap-2">
+
+                                                                    <span style="font-size: 1.5rem;">
+                                                                        📄
+                                                                    </span>
+
+                                                                    <div style="min-width: 0;">
+
+                                                                        <div class="fw-semibold text-break">
+                                                                            @message.AttachmentFileName
+                                                                        </div>
+
+                                                                        <small class="text-muted">
+                                                                            PDF Document
+                                                                        </small>
+
+                                                                    </div>
+
+                                                                </div>
+
+                                                            </a>
+                                                        }
+
+                                                    </div>
+                                                }
+
+                                        </div>
+
+
+                                        <!-- TIME -->
+                                        <div class="small text-muted mt-1
+                                                            @(isCurrentUser
+                                                                                                         ? "text-end"
+                                                                                                         : "")">
+
+                                            @(message.SentAt.ToString(
+                                                                                    "dd MMM yyyy, hh:mm tt"))
+
+                                    </div>
+
+                                        </div>
+
+                                    </div>
+                                                        }
+                            }
+
+                        </div>
+
+
+                        <!-- MESSAGE FORM -->
+                        @if (repair != null)
+                        {
+                            <div class="border-top p-3 bg-white">
+
+                                <form id="chatForm"
+                                      asp-controller="Chat"
+                                      asp-action="SendMessage"
+                                      method="post"
+                                      enctype="multipart/form-data">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden"
+                                           id="repairId"
+                                           name="repairId"
+                                           value="@repair.RepairId" />
+
+
+                                    <!-- SELECTED ATTACHMENT -->
+                                    <div id="attachmentPreview"
+                                         class="d-none mb-2">
+
+                                        <div class="border rounded-3 p-2
+                                d-flex align-items-center
+                                justify-content-between
+                                bg-light">
+
+                                            <div class="d-flex align-items-center gap-2"
+                                                 style="min-width: 0;">
+
+                                                <span style="font-size: 1.3rem;">
+                                                    📎
+                                                </span>
+
+                                                <div style="min-width: 0;">
+
+                                                    <div id="attachmentName"
+                                                         class="fw-semibold text-truncate">
+                                                    </div>
+
+                                                    <small id="attachmentSize"
+                                                           class="text-muted">
+                                                    </small>
+
+                                                </div>
+
+                                            </div>
+
+                                            <button type="button"
+                                                    id="removeAttachment"
+                                                    class="btn btn-sm btn-outline-danger ms-2">
+                                                Remove
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="input-group">
+
+                                        <!-- ATTACHMENT BUTTON -->
+<button type="button"
+        id="attachmentButton"
+        class="btn btn-outline-secondary"
+        title="Attach photo or PDF">
+
+    📎
+
+</button>
+
+
+<!--
+    SINGLE NATIVE FILE INPUT
+
+    Important for iPhone/Safari/PWA:
+    - One input only
+    - No separate camera input
+    - No DataTransfer
+    - No JavaScript FileList manipulation
+
+    On iPhone, tapping this input can offer:
+    Photo Library / Take Photo / Choose File
+-->
+<input type="file"
+       id="attachmentInput"
+       name="attachment"
+       class="d-none"
+       accept="image/*,.pdf,application/pdf" />
+
+
+                                        <!-- MESSAGE -->
+                                        <textarea id="messageInput"
+                                              name="message"
+                                              class="form-control"
+                                              rows="2"
+                                              maxlength="2000"
+                                              placeholder="Type your message..."></textarea>
+
+
+                                        <!-- SEND -->
+                                        <button id="sendButton"
+                                                type="submit"
+                                                class="btn btn-primary px-4">
+
+                                            Send
+
+                                        </button>
+
+                                    </div>
+
+
+                                    <div class="form-text">
+                                        Attach JPG, PNG, WEBP or PDF up to 5 MB.
+                                        Press Enter to send. Shift + Enter for a new line.
+                                    </div>
+
+
+                                    <div id="chatError"
+                                         class="text-danger small mt-2">
+                                    </div>
+
+                                </form>
+
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+
+
+                <!-- BACK BUTTON -->
+                <div class="mt-4">
+
+                    @if (User.IsInRole("Customer"))
+                    {
+                        <a asp-controller="Customer"
+                           asp-action="RepairDetails"
+                           asp-route-id="@repair?.RepairId"
+                           class="btn btn-outline-secondary">
+
+                            Back to Repair Details
+
+                        </a>
+                    }
+                    else if (User.IsInRole("Mechanic"))
+                    {
+                        <a asp-controller="Mechanic"
+                           asp-action="RepairDetails"
+                           asp-route-id="@repair?.RepairId"
+                           class="btn btn-outline-secondary">
+
+                            Back to Repair Details
+
+                        </a>
+                    }
+                    else if (User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Admin"
+                           asp-action="Repairs"
+                           class="btn btn-outline-secondary">
+
+                            Back to Repair Management
+
+                        </a>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+@section Scripts {
+
+    <!-- SIGNALR CLIENT -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+
+    <script>
+
+        // =========================================
+        // PAGE DATA
+        // =========================================
+
+        const repairId =
+            @repair?.RepairId;
+
+        const currentUserId =
+            @Html.Raw(
+                System.Text.Json.JsonSerializer.Serialize(
+                    currentUserId));
+
+
+        // =========================================
+        // ELEMENTS
+        // =========================================
+
+        const chatBox =
+            document.getElementById("chatMessages");
+
+        const chatForm =
+            document.getElementById("chatForm");
+
+        const messageInput =
+            document.getElementById("messageInput");
+
+        const sendButton =
+            document.getElementById("sendButton");
+
+        const connectionStatus =
+            document.getElementById("connectionStatus");
+
+        const chatError =
+            document.getElementById("chatError");
+
+        const attachmentInput =
+            document.getElementById("attachmentInput");
+
+        const attachmentButton =
+            document.getElementById("attachmentButton");
+
+        const attachmentPreview =
+            document.getElementById("attachmentPreview");
+
+        const attachmentName =
+            document.getElementById("attachmentName");
+
+        const attachmentSize =
+            document.getElementById("attachmentSize");
+
+        const removeAttachment =
+            document.getElementById("removeAttachment");
+
+       
+
+
+    
+
+
+        // =========================================
+        // SCROLL
+        // =========================================
+
+        function scrollToBottom() {
+
+            if (chatBox) {
+
+                chatBox.scrollTop =
+                    chatBox.scrollHeight;
+            }
+        }
+
+        scrollToBottom();
+
+
+        // =========================================
+        // HTML ENCODING
+        // =========================================
+
+        function escapeHtml(value) {
+
+            const div =
+                document.createElement("div");
+
+            div.textContent =
+                value ?? "";
+
+            return div.innerHTML;
+        }
+
+
+        // =========================================
+        // FILE SIZE
+        // =========================================
+
+        function formatFileSize(bytes) {
+
+            if (!bytes) {
+                return "";
+            }
+
+            if (bytes < 1024) {
+                return `${bytes} B`;
+            }
+
+            if (bytes < 1024 * 1024) {
+
+                return `${(
+                    bytes / 1024
+                ).toFixed(1)} KB`;
+            }
+
+            return `${(
+                bytes / (1024 * 1024)
+            ).toFixed(1)} MB`;
+        }
+
+
+        // =========================================
+        // SHOW ATTACHMENT
+        // =========================================
+
+        function showAttachment(file) {
+
+          
+
+            if (attachmentName) {
+
+                attachmentName.textContent =
+                    file.name || "Camera Photo";
+            }
+
+            if (attachmentSize) {
+
+                attachmentSize.textContent =
+                    formatFileSize(file.size);
+            }
+
+            if (attachmentPreview) {
+
+                attachmentPreview
+                    .classList.remove("d-none");
+            }
+        }
+
+
+        // =========================================
+        // CLEAR ATTACHMENT
+        // =========================================
+
+        function clearAttachment() {
+
+            
+
+            if (attachmentInput) {
+                attachmentInput.value = "";
+            }
+
+          
+
+            if (attachmentPreview) {
+
+                attachmentPreview
+                    .classList.add("d-none");
+            }
+
+            if (attachmentName) {
+                attachmentName.textContent = "";
+            }
+
+            if (attachmentSize) {
+                attachmentSize.textContent = "";
+            }
+        }
+
+
+        // =========================================
+        // VALIDATE ATTACHMENT
+        // =========================================
+
+        function validateAttachment(file) {
+
+            if (!file) {
+                return false;
+            }
+
+            const maxFileSize =
+                5 * 1024 * 1024;
+
+            if (file.size > maxFileSize) {
+
+                chatError.textContent =
+                    "Attachment cannot exceed 5 MB.";
+
+                return false;
+            }
+
+            const allowedExtensions = [
+                ".jpg",
+                ".jpeg",
+                ".png",
+                ".webp",
+                ".heic",
+                ".heif",
+                ".pdf"
+            ];
+
+            const fileName =
+                (file.name || "").toLowerCase();
+
+            const validExtension =
+                allowedExtensions.some(
+                    extension =>
+                        fileName.endsWith(extension)
+                );
+
+            if (!validExtension) {
+
+                chatError.textContent =
+                    "Only JPG, JPEG, PNG, WEBP, HEIC, HEIF and PDF files are allowed.";
+
+                return false;
+            }
+
+            return true;
+        }
+
+
+        // =========================================
+        // ATTACHMENT BUTTON
+        // =========================================
+
+        if (attachmentButton &&
+            attachmentInput) {
+
+            attachmentButton.addEventListener(
+                "click",
+                function () {
+
+                    attachmentInput.click();
+                }
+            );
+        }
+
+
+        // =========================================
+        // FILE SELECTED
+        // =========================================
+
+        if (attachmentInput) {
+
+            attachmentInput.addEventListener(
+                "change",
+                function () {
+
+                    chatError.textContent = "";
+
+                    const file =
+                        attachmentInput.files?.[0];
+
+                    if (!file) {
+
+                        clearAttachment();
+                        return;
+                    }
+
+                    if (!validateAttachment(file)) {
+
+                        clearAttachment();
+                        return;
+                    }
+
+                    showAttachment(file);
+                }
+            );
+        }
+
+
+        // =========================================
+        // REMOVE ATTACHMENT
+        // =========================================
+
+        if (removeAttachment) {
+
+            removeAttachment.addEventListener(
+                "click",
+                function () {
+
+                    clearAttachment();
+
+                    chatError.textContent = "";
+                }
+            );
+        }
+
+
+       
+        // =========================================
+        // ROLE BADGE
+        // =========================================
+
+        function getRoleBadge(role) {
+
+            if (role === "Admin") {
+
+                return `
+                    <span class="badge bg-danger ms-1">
+                        Admin
+                    </span>
+                `;
+            }
+
+            if (role === "Mechanic") {
+
+                return `
+                    <span class="badge bg-warning text-dark ms-1">
+                        Mechanic
+                    </span>
+                `;
+            }
+
+            if (role === "Customer") {
+
+                return `
+                    <span class="badge bg-secondary ms-1">
+                        Customer
+                    </span>
+                `;
+            }
+
+            return "";
+        }
+
+
+        // =========================================
+        // DISPLAY REAL-TIME MESSAGE
+        // =========================================
+
+        function displayMessage(data) {
+
+            if (!chatBox) {
+                return;
+            }
+
+            const existingMessage =
+                document.querySelector(
+                    `[data-message-id="${data.messageId}"]`
+                );
+
+            if (existingMessage) {
+                return;
+            }
+
+            const noMessages =
+                document.getElementById("noMessages");
+
+            if (noMessages) {
+                noMessages.remove();
+            }
+
+            const isCurrentUser =
+                data.senderId === currentUserId;
+
+            const alignmentClass =
+                isCurrentUser
+                    ? "justify-content-end"
+                    : "justify-content-start";
+
+            const textAlignmentClass =
+                isCurrentUser
+                    ? "text-end"
+                    : "";
+
+            const bubbleClass =
+                isCurrentUser
+                    ? "bg-primary text-white"
+                    : "bg-white border";
+
+            const roleBadge =
+                getRoleBadge(
+                    data.senderRole
+                );
+
+            let messageContent = "";
+
+            if (data.message) {
+
+                messageContent += `
+                    <div style="
+                        white-space: pre-wrap;
+                        overflow-wrap: anywhere;">
+                        ${escapeHtml(data.message)}
+                    </div>
+                `;
+            }
+
+            if (data.attachmentPath) {
+
+                const safePath =
+                    escapeHtml(
+                        data.attachmentPath
+                    );
+
+                const safeFileName =
+                    escapeHtml(
+                        data.attachmentFileName ??
+                        "Attachment"
+                    );
+
+                const attachmentContentType =
+                    data.attachmentContentType ?? "";
+
+                const attachmentMargin =
+                    data.message
+                        ? "mt-2"
+                        : "";
+
+                if (
+                    attachmentContentType
+                        .startsWith("image/")
+                ) {
+
+                    messageContent += `
+                        <div class="${attachmentMargin}">
+
+                            <a href="${safePath}"
+                               target="_blank"
+                               rel="noopener noreferrer">
+
+                                <img src="${safePath}"
+                                     alt="${safeFileName}"
+                                     class="img-fluid rounded-3"
+                                     style="
+                                        max-width: 320px;
+                                        max-height: 300px;
+                                        object-fit: cover;" />
+
+                            </a>
+
+                            <div class="small mt-1 text-break">
+                                ${safeFileName}
+                            </div>
+
+                        </div>
+                    `;
+                }
+                else {
+
+                    messageContent += `
+                        <div class="${attachmentMargin}">
+
+                            <a href="${safePath}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="text-decoration-none">
+
+                                <div class="
+                                    border
+                                    rounded-3
+                                    p-2
+                                    bg-white
+                                    text-dark
+                                    d-flex
+                                    align-items-center
+                                    gap-2">
+
+                                    <span style="font-size: 1.5rem;">
+                                        📄
+                                    </span>
+
+                                    <div style="min-width: 0;">
+
+                                        <div class="
+                                            fw-semibold
+                                            text-break">
+                                            ${safeFileName}
+                                        </div>
+
+                                        <small class="text-muted">
+                                            Attachment
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+                            </a>
+
+                        </div>
+                    `;
+                }
+            }
+
+            const messageElement =
+                document.createElement("div");
+
+            messageElement.className =
+                `chat-message d-flex mb-3 ${alignmentClass}`;
+
+            messageElement.setAttribute(
+                "data-message-id",
+                data.messageId
+            );
+
+            messageElement.innerHTML = `
+
+                <div style="max-width: 75%;">
+
+                    <div class="
+                        small
+                        text-muted
+                        mb-1
+                        ${textAlignmentClass}">
+
+                        <span class="fw-semibold">
+                            ${escapeHtml(data.senderName)}
+                        </span>
+
+                        ${roleBadge}
+
+                    </div>
+
+                    <div class="
+                        p-3
+                        rounded-4
+                        ${bubbleClass}">
+
+                        ${messageContent}
+
+                    </div>
+
+                    <div class="
+                        small
+                        text-muted
+                        mt-1
+                        ${textAlignmentClass}">
+
+                        ${escapeHtml(data.sentAt)}
+
+                    </div>
+
+                </div>
+            `;
+
+            chatBox.appendChild(
+                messageElement
+            );
+
+            scrollToBottom();
+        }
+
+
+        // =========================================
+        // SIGNALR
+        // =========================================
+
+        const connection =
+            new signalR.HubConnectionBuilder()
+                .withUrl("/chatHub")
+                .withAutomaticReconnect()
+                .build();
+
+
+        connection.on(
+            "ReceiveMessage",
+            function (data) {
+
+                displayMessage(data);
+            }
+        );
+
+
+        connection.onreconnecting(
+            function () {
+
+                connectionStatus.className =
+                    "alert alert-warning py-2";
+
+                connectionStatus.textContent =
+                    "Reconnecting to real-time chat...";
+            }
+        );
+
+
+        connection.onreconnected(
+            async function () {
+
+                connectionStatus.className =
+                    "alert alert-success py-2";
+
+                connectionStatus.textContent =
+                    "Real-time chat connected.";
+
+                try {
+
+                    await connection.invoke(
+                        "JoinRepairChat",
+                        repairId
+                    );
+                }
+                catch (error) {
+
+                    console.error(error);
+                }
+            }
+        );
+
+
+        connection.onclose(
+            function () {
+
+                connectionStatus.className =
+                    "alert alert-danger py-2";
+
+                connectionStatus.textContent =
+                    "Real-time chat disconnected.";
+            }
+        );
+
+
+        // =========================================
+        // START CONNECTION
+        // =========================================
+
+        async function startConnection() {
+
+            try {
+
+                await connection.start();
+
+                await connection.invoke(
+                    "JoinRepairChat",
+                    repairId
+                );
+
+                connectionStatus.className =
+                    "alert alert-success py-2";
+
+                connectionStatus.textContent =
+                    "Real-time chat connected.";
+            }
+            catch (error) {
+
+                console.error(error);
+
+                connectionStatus.className =
+                    "alert alert-danger py-2";
+
+                connectionStatus.textContent =
+                    "Unable to connect to real-time chat.";
+            }
+        }
+
+        startConnection();
+
+
+         // =========================================
+// SEND MESSAGE
+// =========================================
+
+if (chatForm) {
+
+    chatForm.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+            const message =
+                messageInput.value.trim();
+
+            const attachment =
+                attachmentInput?.files?.[0] ?? null;
+
+
+            // =========================================
+            // VALIDATION
+            // =========================================
+
+            if (!message &&
+                !attachment) {
+
+                chatError.textContent =
+                    "Please enter a message or attach a file.";
+
+                return;
+            }
+
+
+            if (message.length > 2000) {
+
+                chatError.textContent =
+                    "Message cannot exceed 2000 characters.";
+
+                return;
+            }
+
+
+            if (attachment &&
+                !validateAttachment(attachment)) {
+
+                return;
+            }
+
+
+            chatError.textContent = "";
+
+
+            // =========================================
+            // ATTACHMENT = NATIVE FORM SUBMISSION
+            // =========================================
+            //
+            // IMPORTANT:
+            // Do not use fetch() for attachment uploads.
+            //
+            // Let Safari / iPhone PWA submit the real
+            // multipart HTML form directly.
+
+          if (attachment) {
+
+    sendButton.disabled = true;
+
+    const antiForgeryToken =
+        chatForm.querySelector(
+            'input[name="__RequestVerificationToken"]'
+        )?.value;
+
+    const repairIdInput =
+        chatForm.querySelector(
+            'input[name="repairId"]'
+        );
+
+    const actualRepairId =
+        repairIdInput?.value;
+
+    if (!antiForgeryToken) {
+
+        sendButton.disabled = false;
+
+        chatError.textContent =
+            "Security token could not be found. Please refresh the page and try again.";
+
+        return;
+    }
+
+    if (!actualRepairId ||
+        actualRepairId === "0") {
+
+        sendButton.disabled = false;
+
+        chatError.textContent =
+            "Repair ID could not be found. Please refresh the page and try again.";
+
+        return;
+    }
+
+    const uploadData =
+        new FormData();
+
+    uploadData.append(
+        "__RequestVerificationToken",
+        antiForgeryToken
+    );
+
+    uploadData.append(
+        "repairId",
+        actualRepairId
+    );
+
+    if (message) {
+
+        uploadData.append(
+            "message",
+            message
+        );
+    }
+
+    uploadData.append(
+        "attachment",
+        attachment,
+        attachment.name
+    );
+
+    try {
+
+        const response =
+            await fetch(
+                chatForm.action,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "X-CSRF-TOKEN":
+                            antiForgeryToken
+                    },
+
+                    body:
+                        uploadData,
+
+                    credentials:
+                        "same-origin"
+                }
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Unable to upload attachment. Server returned ${response.status}.`
+            );
+        }
+
+        window.location.href =
+            `/Chat/RepairChat?repairId=${encodeURIComponent(actualRepairId)}`;
+    }
+    catch (error) {
+
+        console.error(
+            "Attachment upload error:",
+            error
+        );
+
+        chatError.textContent =
+            error?.message ||
+            "Unable to upload attachment. Please try again.";
+
+        sendButton.disabled = false;
+    }
+
+    return;
+}
+
+
+            // =========================================
+            // TEXT ONLY = AJAX
+            // =========================================
+
+            sendButton.disabled = true;
+
+
+            try {
+
+                const formData =
+                    new FormData(chatForm);
+
+
+                const antiForgeryToken =
+                    chatForm.querySelector(
+                        'input[name="__RequestVerificationToken"]'
+                    )?.value;
+
+
+                if (!antiForgeryToken) {
+
+                    throw new Error(
+                        "Security token could not be found. Please refresh the page and try again."
+                    );
+                }
+
+
+                const response =
+                    await fetch(
+                        chatForm.action,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "X-CSRF-TOKEN":
+                                    antiForgeryToken,
+
+                                "X-Requested-With":
+                                    "XMLHttpRequest"
+                            },
+
+                            body: formData,
+
+                            credentials:
+                                "same-origin"
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        `Unable to send message. Server returned ${response.status}.`
+                    );
+                }
+
+
+                // Controller redirects after success.
+                // fetch follows the redirect automatically.
+                // SignalR will display the new message.
+
+                messageInput.value = "";
+
+                messageInput.focus();
+            }
+            catch (error) {
+
+                console.error(
+                    "Chat send error:",
+                    error
+                );
+
+                chatError.textContent =
+                    error?.message ||
+                    "Unable to send message. Please try again.";
+            }
+            finally {
+
+                sendButton.disabled = false;
+            }
+        }
+    );
+}
+
+
+        // =========================================
+        // ENTER = SEND
+        // SHIFT + ENTER = NEW LINE
+        // =========================================
+
+        if (messageInput &&
+            chatForm) {
+
+            messageInput.addEventListener(
+                "keydown",
+                function (event) {
+
+                    if (
+                        event.key === "Enter" &&
+                        !event.shiftKey
+                    ) {
+
+                        event.preventDefault();
+
+                        chatForm.requestSubmit();
+                    }
+                }
+            );
+        }
+
+    </script>
+}

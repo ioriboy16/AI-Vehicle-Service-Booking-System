@@ -1,0 +1,227 @@
+﻿@page
+@model Disable2faModel
+
+@{
+    ViewData["Title"] = "Disable Two-Factor Authentication";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+
+<!-- PAGE HEADER -->
+
+<div class="account-page-header">
+
+    <div class="account-page-icon account-page-icon-danger">
+        <i class="bi bi-shield-x"></i>
+    </div>
+
+    <div>
+        <p class="account-eyebrow mb-1">
+            ACCOUNT SECURITY
+        </p>
+
+        <h2 class="fw-bold mb-1">
+            Disable Two-Factor Authentication
+        </h2>
+
+        <p class="text-muted mb-0">
+            Remove the additional verification step from your
+            Serish AutoCare account.
+        </p>
+    </div>
+
+</div>
+
+
+<!-- SECURITY WARNING -->
+
+<div class="disable-2fa-warning">
+
+    <div class="disable-2fa-warning-icon">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+    </div>
+
+    <div>
+
+        <span class="disable-2fa-warning-label">
+            SECURITY WARNING
+        </span>
+
+        <h5>
+            Your account will have less sign-in protection
+        </h5>
+
+        <p>
+            After disabling two-factor authentication, your
+            authenticator code will no longer be required
+            during sign in.
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- INFORMATION CARD -->
+
+<div class="disable-2fa-card">
+
+    <div class="disable-2fa-card-header">
+
+        <div>
+            <h5>
+                Before you disable 2FA
+            </h5>
+
+            <p>
+                Review what will change on your account.
+            </p>
+        </div>
+
+        <i class="bi bi-shield-exclamation"></i>
+
+    </div>
+
+
+    <div class="disable-2fa-list">
+
+
+        <!-- ITEM 1 -->
+
+        <div class="disable-2fa-item">
+
+            <div class="disable-2fa-item-icon danger">
+                <i class="bi bi-shield-x"></i>
+            </div>
+
+            <div>
+
+                <strong>
+                    Two-factor verification will be disabled
+                </strong>
+
+                <span>
+                    You will no longer be asked for an authenticator
+                    code as an additional sign-in step.
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- ITEM 2 -->
+
+        <div class="disable-2fa-item">
+
+            <div class="disable-2fa-item-icon">
+                <i class="bi bi-key"></i>
+            </div>
+
+            <div>
+
+                <strong>
+                    Your authenticator key is not reset
+                </strong>
+
+                <span>
+                    This action only disables 2FA. It does not
+                    replace the authenticator key associated
+                    with your account.
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- ITEM 3 -->
+
+        <div class="disable-2fa-item">
+
+            <div class="disable-2fa-item-icon">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </div>
+
+            <div>
+
+                <strong>
+                    You can enable 2FA again
+                </strong>
+
+                <span>
+                    Two-factor authentication can be configured
+                    again later from your account security settings.
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- RESET KEY NOTE -->
+
+<div class="disable-2fa-reset-note">
+
+    <div class="disable-2fa-reset-icon">
+        <i class="bi bi-arrow-repeat"></i>
+    </div>
+
+    <div>
+
+        <strong>
+            Want to replace your authenticator key instead?
+        </strong>
+
+        <p>
+            If your goal is to configure a new authenticator
+            key, use Reset Authenticator instead of disabling 2FA.
+        </p>
+
+        <a asp-page="./ResetAuthenticator">
+            Reset Authenticator
+            <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- ACTIONS -->
+
+<div class="disable-2fa-actions">
+
+    <a asp-page="./TwoFactorAuthentication"
+       class="btn btn-outline-secondary">
+
+        <i class="bi bi-arrow-left me-1"></i>
+        Keep 2FA Enabled
+
+    </a>
+
+
+    <form method="post" class="m-0">
+
+        <button class="btn btn-danger"
+                type="submit">
+
+            <i class="bi bi-shield-x me-1"></i>
+            Disable 2FA
+
+        </button>
+
+    </form>
+
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

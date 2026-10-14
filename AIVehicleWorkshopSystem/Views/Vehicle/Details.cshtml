@@ -1,0 +1,964 @@
+﻿@model AIVehicleWorkshopSystem.Models.Vehicle
+
+@{
+    ViewData["Title"] = "Vehicle Details";
+}
+
+<div class="vehicle-details-page">
+    <div class="container py-4 py-lg-5">
+
+        <div class="vehicle-details-container">
+
+            <!-- TOP NAVIGATION -->
+            <div class="page-topbar">
+
+                <div>
+                    <div class="page-label">
+                        <i class="bi bi-car-front-fill"></i>
+                        VEHICLE MANAGEMENT
+                    </div>
+
+                    <h2>Vehicle Details</h2>
+
+                    <p>
+                        View and manage your registered vehicle information.
+                    </p>
+                </div>
+
+                <a asp-controller="Vehicle"
+                   asp-action="Index"
+                   class="back-button">
+
+                    <i class="bi bi-arrow-left"></i>
+                    My Vehicles
+
+                </a>
+
+            </div>
+
+
+            <!-- MAIN CARD -->
+            <div class="vehicle-details-card">
+
+                <!-- VEHICLE HEADER -->
+                <div class="vehicle-hero">
+
+                    <div class="vehicle-identity">
+
+                        <div class="vehicle-icon">
+                            <i class="bi bi-car-front-fill"></i>
+                        </div>
+
+                        <div>
+                            <span class="vehicle-caption">
+                                REGISTERED VEHICLE
+                            </span>
+
+                            <h3>
+                                @Model.Brand @Model.Model
+                            </h3>
+
+                            <div class="vehicle-subtitle">
+                                <i class="bi bi-check-circle-fill"></i>
+                                Vehicle registered in Serish AutoCare
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="plate-number">
+                        <span>PLATE NUMBER</span>
+                        <strong>@Model.PlateNumber</strong>
+                    </div>
+
+                </div>
+
+
+                <!-- INFORMATION -->
+                <div class="vehicle-information">
+
+                    <div class="section-heading">
+
+                        <div class="section-icon">
+                            <i class="bi bi-info-circle"></i>
+                        </div>
+
+                        <div>
+                            <h5>Vehicle Information</h5>
+                            <p>Basic information about this vehicle.</p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="vehicle-info-grid">
+
+                        <!-- PLATE -->
+                        <div class="info-item">
+
+                            <div class="info-icon">
+                                <i class="bi bi-credit-card-2-front"></i>
+                            </div>
+
+                            <div>
+                                <span>Plate Number</span>
+
+                                <strong>
+                                    @Model.PlateNumber
+                                </strong>
+                            </div>
+
+                        </div>
+
+
+                        <!-- BRAND -->
+                        <div class="info-item">
+
+                            <div class="info-icon">
+                                <i class="bi bi-building"></i>
+                            </div>
+
+                            <div>
+                                <span>Brand</span>
+
+                                <strong>
+                                    @Model.Brand
+                                </strong>
+                            </div>
+
+                        </div>
+
+
+                        <!-- MODEL -->
+                        <div class="info-item">
+
+                            <div class="info-icon">
+                                <i class="bi bi-car-front"></i>
+                            </div>
+
+                            <div>
+                                <span>Model</span>
+
+                                <strong>
+                                    @Model.Model
+                                </strong>
+                            </div>
+
+                        </div>
+
+
+                        <!-- YEAR -->
+                        <div class="info-item">
+
+                            <div class="info-icon">
+                                <i class="bi bi-calendar3"></i>
+                            </div>
+
+                            <div>
+                                <span>Manufacturing Year</span>
+
+                                <strong>
+                                    @Model.ManufacturingYear
+                                </strong>
+                            </div>
+
+                        </div>
+
+
+                        <!-- COLOUR -->
+                        <div class="info-item">
+
+                            <div class="info-icon">
+                                <i class="bi bi-palette"></i>
+                            </div>
+
+                            <div>
+                                <span>Colour</span>
+
+                                <strong>
+                                    @(string.IsNullOrWhiteSpace(Model.Colour)
+                                                                        ? "-"
+                                                                        : Model.Colour)
+                                </strong>
+                            </div>
+
+                        </div>
+
+
+                        <!-- MILEAGE -->
+                        <div class="info-item">
+
+                            <div class="info-icon">
+                                <i class="bi bi-speedometer2"></i>
+                            </div>
+
+                            <div>
+                                <span>Current Mileage</span>
+
+                                <strong>
+                                    @(Model.CurrentMileage.HasValue
+                                                                        ? Model.CurrentMileage.Value.ToString("N0") + " KM"
+                                                                        : "-")
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- REGISTRATION -->
+                <div class="registration-info">
+
+                    <div class="registration-left">
+
+                        <div class="registration-icon">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+
+                        <div>
+                            <span>Registered On</span>
+
+                            <strong>
+                                @Model.CreatedAt.ToString("dd MMMM yyyy")
+                            </strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="registration-time">
+
+                        <i class="bi bi-clock"></i>
+
+                        @Model.CreatedAt.ToString("hh:mm tt")
+
+                    </div>
+
+                </div>
+
+
+                <!-- ACTIONS -->
+                <div class="vehicle-actions">
+
+                    <a asp-controller="Vehicle"
+                       asp-action="Index"
+                       class="action-back">
+
+                        <i class="bi bi-arrow-left"></i>
+                        Back
+
+                    </a>
+
+
+                    <div class="action-buttons">
+
+                        <a asp-controller="Vehicle"
+                           asp-action="Edit"
+                           asp-route-id="@Model.VehicleId"
+                           class="edit-vehicle-button">
+
+                            <i class="bi bi-pencil-square"></i>
+                            Edit Vehicle
+
+                        </a>
+
+
+                        <form asp-controller="Vehicle"
+                              asp-action="Delete"
+                              asp-route-id="@Model.VehicleId"
+                              method="post"
+                              class="m-0">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="delete-vehicle-button"
+                                    onclick="return confirm('Are you sure you want to delete this vehicle?');">
+
+                                <i class="bi bi-trash3"></i>
+                                Delete
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<style>
+
+    /* =========================================================
+           PAGE
+           ========================================================= */
+
+    .vehicle-details-page {
+        min-height: 100vh;
+        background: #f6f8fb;
+    }
+
+    .vehicle-details-container {
+        max-width: 1050px;
+        margin: 0 auto;
+    }
+
+
+    /* =========================================================
+           TOP BAR
+           ========================================================= */
+
+    .page-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 22px;
+    }
+
+    .page-label {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 6px;
+        color: #0d6efd;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .7px;
+    }
+
+    .page-topbar h2 {
+        margin: 0 0 5px;
+        color: #252d38;
+        font-size: 27px;
+        font-weight: 750;
+    }
+
+    .page-topbar p {
+        margin: 0;
+        color: #87909b;
+        font-size: 12px;
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 14px;
+        color: #56606c;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        background: #ffffff;
+        border: 1px solid #dde2e7;
+        border-radius: 9px;
+        transition: .15s ease;
+        white-space: nowrap;
+    }
+
+        .back-button:hover {
+            color: #0d6efd;
+            background: #f8fbff;
+            border-color: #b9d3ff;
+        }
+
+
+    /* =========================================================
+           MAIN CARD
+           ========================================================= */
+
+    .vehicle-details-card {
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid #e7ebef;
+        border-radius: 18px;
+        box-shadow: 0 5px 22px rgba(0, 0, 0, .04);
+    }
+
+
+    /* =========================================================
+           VEHICLE HERO
+           ========================================================= */
+
+    .vehicle-hero {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 25px;
+        padding: 27px 30px;
+        background: linear-gradient( 135deg, #f8fbff 0%, #ffffff 65% );
+        border-bottom: 1px solid #edf0f3;
+    }
+
+    .vehicle-identity {
+        display: flex;
+        align-items: center;
+        gap: 17px;
+    }
+
+    .vehicle-icon {
+        width: 62px;
+        height: 62px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #0d6efd;
+        font-size: 26px;
+        background: #eaf2ff;
+        border-radius: 17px;
+    }
+
+    .vehicle-caption {
+        display: block;
+        margin-bottom: 3px;
+        color: #929ba6;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .8px;
+    }
+
+    .vehicle-identity h3 {
+        margin: 0 0 5px;
+        color: #28313c;
+        font-size: 22px;
+        font-weight: 750;
+    }
+
+    .vehicle-subtitle {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #7f8995;
+        font-size: 10px;
+    }
+
+        .vehicle-subtitle i {
+            color: #198754;
+        }
+
+
+    /* =========================================================
+           PLATE
+           ========================================================= */
+
+    .plate-number {
+        min-width: 160px;
+        padding: 12px 20px;
+        text-align: center;
+        background: #ffffff;
+        border: 1px solid #dce3eb;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .025);
+    }
+
+        .plate-number span {
+            display: block;
+            margin-bottom: 3px;
+            color: #929ba6;
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: .7px;
+        }
+
+        .plate-number strong {
+            display: block;
+            color: #202833;
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+
+    /* =========================================================
+           INFORMATION
+           ========================================================= */
+
+    .vehicle-information {
+        padding: 25px 30px;
+    }
+
+    .section-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .section-icon {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0d6efd;
+        background: #edf4ff;
+        border-radius: 9px;
+    }
+
+    .section-heading h5 {
+        margin: 0 0 2px;
+        color: #303945;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .section-heading p {
+        margin: 0;
+        color: #929ba6;
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+           INFO GRID
+           ========================================================= */
+
+    .vehicle-info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 11px;
+    }
+
+    .info-item {
+        min-height: 78px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px;
+        background: #fafbfc;
+        border: 1px solid #e9edf1;
+        border-radius: 11px;
+        transition: .15s ease;
+    }
+
+        .info-item:hover {
+            background: #f8fbff;
+            border-color: #d4e4ff;
+        }
+
+    .info-icon {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #6b7683;
+        font-size: 14px;
+        background: #ffffff;
+        border: 1px solid #e7ebef;
+        border-radius: 9px;
+    }
+
+    .info-item span {
+        display: block;
+        margin-bottom: 3px;
+        color: #929ba6;
+        font-size: 9px;
+    }
+
+    .info-item strong {
+        display: block;
+        color: #37414c;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+
+    /* =========================================================
+           REGISTRATION
+           ========================================================= */
+
+    .registration-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin: 0 30px 25px;
+        padding: 13px 15px;
+        background: #f7f9fb;
+        border: 1px solid #e9edf1;
+        border-radius: 11px;
+    }
+
+    .registration-left {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+    }
+
+    .registration-icon {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0d6efd;
+        background: #eaf2ff;
+        border-radius: 8px;
+    }
+
+    .registration-left span {
+        display: block;
+        margin-bottom: 1px;
+        color: #929ba6;
+        font-size: 9px;
+    }
+
+    .registration-left strong {
+        display: block;
+        color: #3d4651;
+        font-size: 11px;
+    }
+
+    .registration-time {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #7d8793;
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+           ACTIONS
+           ========================================================= */
+
+    .vehicle-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 18px 30px;
+        background: #fafbfc;
+        border-top: 1px solid #edf0f3;
+    }
+
+    .action-buttons {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .action-back,
+    .edit-vehicle-button,
+    .delete-vehicle-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 36px;
+        padding: 8px 14px;
+        font-size: 10px;
+        font-weight: 650;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: .15s ease;
+    }
+
+    .action-back {
+        color: #68727e;
+        background: #ffffff;
+        border: 1px solid #dce1e6;
+    }
+
+        .action-back:hover {
+            color: #333d48;
+            background: #f4f6f8;
+        }
+
+    .edit-vehicle-button {
+        color: #ffffff;
+        background: #0d6efd;
+        border: 1px solid #0d6efd;
+    }
+
+        .edit-vehicle-button:hover {
+            color: #ffffff;
+            background: #0b5ed7;
+            border-color: #0b5ed7;
+        }
+
+    .delete-vehicle-button {
+        color: #dc3545;
+        background: transparent;
+        border: 1px solid #efb9be;
+    }
+
+        .delete-vehicle-button:hover {
+            color: #ffffff;
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+
+
+    /* =========================================================
+           DARK MODE
+           ========================================================= */
+
+    html[data-bs-theme="dark"] .vehicle-details-page {
+        background: #101318 !important;
+        color: #e5e7eb;
+    }
+
+    html[data-bs-theme="dark"] .page-topbar h2 {
+        color: #f1f5f9 !important;
+    }
+
+    html[data-bs-theme="dark"] .page-topbar p {
+        color: #8f9aaa !important;
+    }
+
+    html[data-bs-theme="dark"] .back-button {
+        color: #b7c0cc;
+        background: #181d25;
+        border-color: #333d49;
+    }
+
+        html[data-bs-theme="dark"] .back-button:hover {
+            color: #60a5fa;
+            background: #1d232c;
+            border-color: #31558a;
+        }
+
+    html[data-bs-theme="dark"] .vehicle-details-card {
+        background: #181d25 !important;
+        border-color: #2b3440 !important;
+        box-shadow: 0 5px 22px rgba(0, 0, 0, .2);
+    }
+
+    html[data-bs-theme="dark"] .vehicle-hero {
+        background: linear-gradient( 135deg, #181e27 0%, #181d25 65% ) !important;
+        border-color: #303946 !important;
+    }
+
+    html[data-bs-theme="dark"] .vehicle-icon {
+        color: #60a5fa;
+        background: rgba(59, 130, 246, .14);
+    }
+
+    html[data-bs-theme="dark"] .vehicle-caption {
+        color: #7f8a99;
+    }
+
+    html[data-bs-theme="dark"] .vehicle-identity h3 {
+        color: #f1f5f9 !important;
+    }
+
+    html[data-bs-theme="dark"] .vehicle-subtitle {
+        color: #8f9aaa;
+    }
+
+    html[data-bs-theme="dark"] .plate-number {
+        background: #11161d;
+        border-color: #36404d;
+        box-shadow: none;
+    }
+
+        html[data-bs-theme="dark"] .plate-number span {
+            color: #7f8a99;
+        }
+
+        html[data-bs-theme="dark"] .plate-number strong {
+            color: #f1f5f9;
+        }
+
+    html[data-bs-theme="dark"] .section-icon {
+        color: #60a5fa;
+        background: rgba(59, 130, 246, .12);
+    }
+
+    html[data-bs-theme="dark"] .section-heading h5 {
+        color: #e5edf6;
+    }
+
+    html[data-bs-theme="dark"] .section-heading p {
+        color: #7f8a99;
+    }
+
+    html[data-bs-theme="dark"] .info-item {
+        background: #141920;
+        border-color: #303946;
+    }
+
+        html[data-bs-theme="dark"] .info-item:hover {
+            background: #1b212a;
+            border-color: #3b4b60;
+        }
+
+    html[data-bs-theme="dark"] .info-icon {
+        color: #9aa6b5;
+        background: #1e252e;
+        border-color: #333d49;
+    }
+
+    html[data-bs-theme="dark"] .info-item span {
+        color: #7f8a99;
+    }
+
+    html[data-bs-theme="dark"] .info-item strong {
+        color: #e5edf6;
+    }
+
+    html[data-bs-theme="dark"] .registration-info {
+        background: #141920;
+        border-color: #303946;
+    }
+
+    html[data-bs-theme="dark"] .registration-icon {
+        color: #60a5fa;
+        background: rgba(59, 130, 246, .12);
+    }
+
+    html[data-bs-theme="dark"] .registration-left span {
+        color: #7f8a99;
+    }
+
+    html[data-bs-theme="dark"] .registration-left strong {
+        color: #e5edf6;
+    }
+
+    html[data-bs-theme="dark"] .registration-time {
+        color: #8f9aaa;
+    }
+
+    html[data-bs-theme="dark"] .vehicle-actions {
+        background: #141920;
+        border-color: #303946;
+    }
+
+    html[data-bs-theme="dark"] .action-back {
+        color: #aeb8c5;
+        background: #1d232c;
+        border-color: #36404d;
+    }
+
+        html[data-bs-theme="dark"] .action-back:hover {
+            color: #ffffff;
+            background: #252c36;
+        }
+
+    html[data-bs-theme="dark"] .delete-vehicle-button {
+        color: #ff7d88;
+        border-color: #713a42;
+    }
+
+        html[data-bs-theme="dark"] .delete-vehicle-button:hover {
+            color: #ffffff;
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+
+
+    /* =========================================================
+           RESPONSIVE
+           IMPORTANT: Razor requires @@media
+           ========================================================= */
+
+    @@media (max-width: 767px) {
+
+        .vehicle-details-page .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .page-topbar {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .back-button {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .vehicle-hero {
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 22px;
+        }
+
+        .plate-number {
+            width: 100%;
+        }
+
+        .vehicle-information {
+            padding: 22px;
+        }
+
+        .vehicle-info-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .registration-info {
+            margin: 0 22px 22px;
+        }
+
+        .vehicle-actions {
+            padding: 17px 22px;
+        }
+    }
+
+
+    @@media (max-width: 520px) {
+
+        .page-topbar h2 {
+            font-size: 23px;
+        }
+
+        .vehicle-icon {
+            width: 52px;
+            height: 52px;
+            font-size: 22px;
+        }
+
+        .vehicle-identity h3 {
+            font-size: 19px;
+        }
+
+        .vehicle-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .registration-info {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .vehicle-actions {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .action-back {
+            width: 100%;
+        }
+
+        .action-buttons {
+            width: 100%;
+        }
+
+            .action-buttons > a,
+            .action-buttons > form {
+                flex: 1;
+            }
+
+        .edit-vehicle-button,
+        .delete-vehicle-button {
+            width: 100%;
+        }
+    }
+
+</style>
